@@ -1,0 +1,50 @@
+[
+  {
+    "_id": { "$oid": "66d1f0a3f1a1c2d001" },
+    "name": "Shreya Singh",
+    "email": "shreya.singh@example.com",
+    "phone": "+91 9876543210",
+    "skills": ["Python", "Machine Learning", "SQL", "Data Visualization"],
+    "experience": [
+      {
+        "company": "TCS",
+        "role": "Data Analyst",
+        "years": 2,
+        "description": "Worked on SQL databases, dashboards, and predictive analytics."
+      }
+    ],
+    "education": [
+      {
+        "degree": "B.Tech CSE",
+        "institute": "IIT Delhi",
+        "year": 2022
+      }
+    ],
+    "projects": ["Customer Churn Prediction", "HR Analytics Dashboard"],
+    "resume_score": 78
+  },
+  {
+    "_id": { "$oid": "66d1f0a3f1a1c2d002" },
+    "name": "Raghvendra Kumar",
+    "email": "raghav.kumar@example.com",
+    "phone": "+91 9123456789",
+    "skills": ["React", "Node.js", "MongoDB", "REST API"],
+    "experience": [
+      {
+        "company": "Infosys",
+        "role": "Full Stack Developer",
+        "years": 3,
+        "description": "Built scalable MERN applications and APIs."
+      }
+    ],
+    "education": [
+      {
+        "degree": "B.Sc. Computer Science",
+        "institute": "Lucknow University",
+        "year": 2021
+      }
+    ],
+    "projects": ["E-commerce Platform", "Chat App"],
+    "resume_score": 85
+  }
+]
