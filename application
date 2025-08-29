@@ -1,0 +1,16 @@
+[
+  {
+    "_id": { "$oid": "66d1f2d5f1a1c2d201" },
+    "job_id": { "$oid": "66d1f1b2f1a1c2d101" },
+    "candidate_id": { "$oid": "66d1f0a3f1a1c2d001" },
+    "status": "shortlisted",
+    "match_score": 82
+  },
+  {
+    "_id": { "$oid": "66d1f2d5f1a1c2d202" },
+    "job_id": { "$oid": "66d1f1b2f1a1c2d102" },
+    "candidate_id": { "$oid": "66d1f0a3f1a1c2d002" },
+    "status": "interview",
+    "match_score": 91
+  }
+]
