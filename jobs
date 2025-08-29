@@ -1,0 +1,22 @@
+[
+  {
+    "_id": { "$oid": "66d1f1b2f1a1c2d101" },
+    "title": "Data Scientist",
+    "company": "Flipkart",
+    "location": "Bengaluru",
+    "skills_required": ["Python", "Machine Learning", "SQL", "TensorFlow"],
+    "experience_required": 2,
+    "education_required": "Bachelor's in Computer Science or related field",
+    "job_description": "Looking for a Data Scientist to work on recommendation systems and predictive analytics."
+  },
+  {
+    "_id": { "$oid": "66d1f1b2f1a1c2d102" },
+    "title": "Full Stack Developer",
+    "company": "Paytm",
+    "location": "Noida",
+    "skills_required": ["React", "Node.js", "MongoDB", "Express.js"],
+    "experience_required": 2,
+    "education_required": "Bachelor's in Computer Science",
+    "job_description": "Work on scalable payment solutions and microservices."
+  }
+]
