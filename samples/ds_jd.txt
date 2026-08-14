@@ -1,0 +1,19 @@
+Position: Lead Machine Learning & Data Scientist
+Company: AI Visionaries
+Location: Remote / Boston, MA
+
+Job Overview:
+We are looking for a Data Scientist / Machine Learning Engineer to drive core ML models for predictive analytics, NLP, and user behavior modeling.
+
+Responsibilities:
+- Build, evaluate, and fine-tune machine learning and deep learning models using Python, PyTorch, and Scikit-Learn.
+- Develop NLP models (Transformers, BERT, spaCy) for text classification, sentiment extraction, and summarization.
+- Build automated ETL data pipelines in Apache Spark and SQL to process large datasets.
+- Design, execute, and analyze rigorous A/B testing experiments and hypothesis tests.
+- Deploy ML models into production via Dockerized FastAPI microservices on AWS.
+
+Requirements:
+- Master's degree or equivalent experience in Data Science, Computer Science, or Statistics.
+- Proficiency in Python, SQL, PyTorch/TensorFlow, Pandas, NumPy, Scikit-Learn.
+- Proven experience with MLOps (Docker, MLflow, AWS SageMaker).
+- Strong foundation in statistical analysis, regression modeling, and feature engineering.

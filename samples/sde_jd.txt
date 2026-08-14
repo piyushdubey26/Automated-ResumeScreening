@@ -1,0 +1,22 @@
+Position: Senior Full Stack Engineer (SDE II)
+Company: TechScale Innovations
+Location: San Francisco, CA (Hybrid)
+
+About the Role:
+We are seeking an experienced Full Stack Engineer to architect and build next-generation distributed SaaS applications. You will collaborate with cross-functional product teams to build high-performance microservices, REST APIs, and responsive frontend applications.
+
+Key Responsibilities:
+- Design, build, and maintain scalable microservices using Node.js, Express, and TypeScript.
+- Develop interactive, high-speed frontend applications in React, Next.js, and Tailwind CSS.
+- Optimize database schemas and queries in PostgreSQL, MongoDB, and Redis caching layers.
+- Implement containerized deployments using Docker, Kubernetes, and AWS cloud infrastructure.
+- Lead unit and end-to-end automated testing with Jest/Cypress to ensure high code quality.
+- Participate in system design reviews, code reviews, and CI/CD automation.
+
+Qualifications & Skills Required:
+- 3+ years of experience in full-stack software development.
+- Strong proficiency in TypeScript, JavaScript, Data Structures, Algorithms, and Object-Oriented Design.
+- Expertise with REST APIs, GraphQL, and microservice architectures.
+- Experience with Cloud Platforms (AWS, GCP), Docker containers, and CI/CD pipelines.
+- Deep understanding of database design (SQL/PostgreSQL/MongoDB) and caching strategies (Redis).
+- Passion for performance optimization, security best practices, and automated testing.

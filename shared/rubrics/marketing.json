@@ -1,0 +1,47 @@
+{
+  "role": "marketing",
+  "title": "Growth & Digital Marketer",
+  "weights": {
+    "structure": 0.20,
+    "clarity": 0.20,
+    "impact": 0.30,
+    "skills": 0.15,
+    "projects": 0.10,
+    "ats": 0.05
+  },
+  "keywords": [
+    "search engine optimization",
+    "seo",
+    "sem",
+    "google analytics",
+    "content strategy",
+    "conversion rate optimization",
+    "cro",
+    "email marketing",
+    "copywriting",
+    "customer acquisition cost",
+    "cac",
+    "lifetime value",
+    "ltv",
+    "social media ads",
+    "hubspot",
+    "figma",
+    "funnel optimization"
+  ],
+  "actionVerbs": [
+    "scaled",
+    "launched",
+    "increased",
+    "optimized",
+    "generated",
+    "produced",
+    "spearheaded",
+    "authored",
+    "boosted",
+    "managed"
+  ],
+  "penalties": {
+    "missingROI": 10,
+    "excessPages": 10
+  }
+}

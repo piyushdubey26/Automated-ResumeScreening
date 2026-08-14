@@ -1,0 +1,48 @@
+{
+  "role": "data-science",
+  "title": "Data Scientist / ML Engineer",
+  "weights": {
+    "structure": 0.20,
+    "clarity": 0.15,
+    "impact": 0.25,
+    "skills": 0.25,
+    "projects": 0.10,
+    "ats": 0.05
+  },
+  "keywords": [
+    "machine learning",
+    "deep learning",
+    "python",
+    "pytorch",
+    "tensorflow",
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "sql",
+    "a/b testing",
+    "data visualization",
+    "nlp",
+    "computer vision",
+    "feature engineering",
+    "model deployment",
+    "spark",
+    "xgboost",
+    "hypothesis testing"
+  ],
+  "actionVerbs": [
+    "trained",
+    "evaluated",
+    "predicted",
+    "modeled",
+    "extracted",
+    "visualized",
+    "fine-tuned",
+    "analyzed",
+    "cleansed",
+    "deployed"
+  ],
+  "penalties": {
+    "missingMetrics": 8,
+    "excessPages": 10
+  }
+}

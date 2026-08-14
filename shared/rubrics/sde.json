@@ -1,0 +1,54 @@
+{
+  "role": "sde",
+  "title": "Software Development Engineer",
+  "weights": {
+    "structure": 0.20,
+    "clarity": 0.15,
+    "impact": 0.25,
+    "skills": 0.20,
+    "projects": 0.10,
+    "ats": 0.10
+  },
+  "keywords": [
+    "data structures",
+    "algorithms",
+    "object-oriented programming",
+    "system design",
+    "rest api",
+    "graphql",
+    "docker",
+    "kubernetes",
+    "aws",
+    "ci/cd",
+    "git",
+    "unit testing",
+    "microservices",
+    "sql",
+    "postgresql",
+    "mongodb",
+    "node.js",
+    "express",
+    "react",
+    "typescript",
+    "python",
+    "java"
+  ],
+  "actionVerbs": [
+    "architected",
+    "developed",
+    "engineered",
+    "optimized",
+    "deployed",
+    "refactored",
+    "scaled",
+    "implemented",
+    "automated",
+    "integrated"
+  ],
+  "penalties": {
+    "tables": 5,
+    "images": 5,
+    "excessPages": 10,
+    "passiveVoice": 3
+  }
+}

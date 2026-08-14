@@ -1,0 +1,35 @@
+Priya Sharma
+Email: priya.sharma@example.com | Kaggle: kaggle.com/psharma | GitHub: github.com/priyads | LinkedIn: linkedin.com/in/priya-sharma-ds
+
+SUMMARY
+Data Scientist with 2+ years of hands-on experience in predictive modeling, natural language processing (NLP), machine learning model deployment, and statistical analysis. Specialized in turning complex datasets into actionable business metrics.
+
+SKILLS
+- Machine Learning & Deep Learning: PyTorch, TensorFlow, Scikit-Learn, XGBoost, Transformers, NLP, Computer Vision
+- Languages & Libraries: Python, R, SQL, Pandas, NumPy, SciPy, Matplotlib, Seaborn
+- Big Data & MLOps: Apache Spark, Docker, MLflow, AWS SageMaker, Snowflake, PostgreSQL
+- Math & Stats: Hypothesis Testing, A/B Testing, Bayesian Inference, Linear Algebra, Regression Analysis
+
+EXPERIENCE
+Associate Data Scientist | Analytics Intelligence Inc.
+Boston, MA | Aug 2023 - Present
+- Fine-tuned BERT-based NLP model for customer churn sentiment analysis, boosting classification F1-score from 0.74 to 0.91.
+- Engineered automated ETL data pipelines in Python and Apache Spark, processing 50GB+ daily user logs with zero data drop.
+- Designed and conducted A/B testing campaigns for recommendation algorithm changes, increasing user session length by 18%.
+- Deployed real-time predictive ML models as Dockerized FastAPI microservices on AWS EC2 with continuous telemetry monitoring.
+
+Data Science Research Assistant | Harvard Data Lab
+Cambridge, MA | Sep 2022 - Jul 2023
+- Modeled epidemiological trend predictions using PyTorch time-series neural networks, publishing research paper at IEEE conference.
+- Built interactive Streamlit dashboard for visualizing high-dimensional cluster analysis of genome sequencing data.
+
+PROJECTS
+Customer Lifetime Value Predictor
+- Trained XGBoost regression ensemble to forecast 12-month customer LTV with 92% R-squared accuracy score.
+
+NLP Sentiment & Keyword Extraction Tool
+- Implemented spaCy-based keyword extraction and topic modeling (LDA) pipeline for un-structured customer feedback text.
+
+EDUCATION
+M.S. in Data Science & Machine Learning | Northeastern University (2023)
+B.S. in Statistics | Boston University (2021)

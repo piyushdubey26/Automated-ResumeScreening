@@ -1,0 +1,45 @@
+{
+  "role": "product-management",
+  "title": "Product Manager",
+  "weights": {
+    "structure": 0.20,
+    "clarity": 0.20,
+    "impact": 0.25,
+    "skills": 0.20,
+    "projects": 0.10,
+    "ats": 0.05
+  },
+  "keywords": [
+    "product roadmap",
+    "prd",
+    "user research",
+    "agile",
+    "scrum",
+    "wireframing",
+    "okrs",
+    "kpi tracking",
+    "jira",
+    "mixpanel",
+    "cross-functional leadership",
+    "go-to-market",
+    "gtm",
+    "feature prioritization",
+    "user stories"
+  ],
+  "actionVerbs": [
+    "spearheaded",
+    "defined",
+    "prioritized",
+    "launched",
+    "orchestrated",
+    "validating",
+    "conducted",
+    "increased",
+    "aligned",
+    "transformed"
+  ],
+  "penalties": {
+    "missingMetrics": 8,
+    "excessPages": 10
+  }
+}

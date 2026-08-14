@@ -1,0 +1,34 @@
+Jordan Lee
+Email: jordan.lee@example.com | Portfolio: jordanleemarketing.com | LinkedIn: linkedin.com/in/jordan-lee-growth
+
+SUMMARY
+Performance & Growth Marketer with 4+ years of experience scaling customer acquisition, driving conversion rate optimization (CRO), and managing multi-channel paid media budgets. Proven track record of lowering CAC while boosting customer lifetime value (LTV).
+
+SKILLS
+- Digital Marketing: SEO, SEM, Paid Social (Meta, LinkedIn Ads, TikTok Ads), Email Marketing, Content Strategy
+- Analytics & Optimization: Google Analytics 4, Mixpanel, HubSpot, A/B Testing, Conversion Funnel Analysis, Hotjar
+- Tools & Creative: Figma, Canva, WordPress, Mailchimp, Zapier, HTML/CSS basics
+
+EXPERIENCE
+Senior Growth Marketing Specialist | SaaSify Global
+New York, NY | Jan 2023 - Present
+- Scaled monthly organic SEO traffic by 140% through targeted keyword strategy, content clustering, and technical site audits.
+- Managed $85K monthly paid acquisition budget across Meta & LinkedIn ads, achieving a 3.4x ROAS and reducing CAC by 28%.
+- Optimized email onboarding funnels using automated HubSpot workflows, increasing signup-to-paid conversion rate by 19%.
+- Spearheaded quarterly product launch campaigns resulting in 12,000+ new user signups within 30 days.
+
+Digital Marketing Associate | BrandPulse Agency
+New York, NY | Jun 2021 - Dec 2022
+- Conducted copy A/B tests on high-intent landing pages, elevating lead generation conversion rate from 3.2% to 5.8%.
+- Produced weekly multi-channel analytics reports for executive leadership, tracking CAC, LTV, and customer retention metrics.
+
+PROJECTS
+E-Commerce Conversion Rate Audit
+- Audited top-tier direct-to-consumer store, implementing checkout flow optimization that yielded an extra $120K annual revenue.
+
+Growth Copywriting Playbook
+- Authored 35-page guide on high-converting B2B SaaS ad copy techniques downloaded by 2,500+ growth marketers.
+
+EDUCATION
+B.A. in Strategic Communications & Marketing | New York University (2021)
+Certifications: Google Analytics Professional Certified, HubSpot Content Marketing Certified

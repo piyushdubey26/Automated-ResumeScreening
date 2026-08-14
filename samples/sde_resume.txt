@@ -1,0 +1,38 @@
+Alex Rivera
+Email: alex.rivera@example.com | Phone: (555) 234-5678 | GitHub: github.com/arivera | LinkedIn: linkedin.com/in/alex-rivera-dev
+
+SUMMARY
+Results-driven Software Engineer with 3+ years of experience building high-throughput microservices, REST APIs, and scalable web applications. Passionate about system design, clean architecture, and automated testing.
+
+SKILLS
+- Languages: TypeScript, JavaScript, Python, SQL, HTML/CSS
+- Frontend: React, Redux, Next.js, Tailwind CSS
+- Backend: Node.js, Express, REST APIs, GraphQL, PostgreSQL, MongoDB, Redis
+- DevOps & Tools: Docker, Kubernetes, AWS (S3, EC2), Git, CI/CD pipelines, Jest, Cypress
+
+WORK EXPERIENCE
+Full Stack Engineer | CloudTech Solutions
+San Francisco, CA | Jan 2024 - Present
+- Architected and built a microservice-based notification system in Node.js & TypeScript, handling 2M+ daily active requests with 99.98% uptime.
+- Optimized PostgreSQL database queries and added Redis caching, reducing average API latency by 42% (from 350ms to 20ms).
+- Refactored legacy monolithic backend into decoupled RESTful services with Docker containers deployed on AWS EKS.
+- Led CI/CD automation using GitHub Actions, cutting release deployment time by 60%.
+
+Software Engineering Intern | DataFlow Systems
+Austin, TX | Jun 2023 - Dec 2023
+- Implemented responsive admin dashboard components in React and Tailwind CSS, increasing internal team productivity by 25%.
+- Integrated Third-Party OAuth2 authentication and JWT token handling, securing system endpoints.
+- Authored comprehensive unit and integration test suites achieving 88% test coverage across core services.
+
+PROJECTS
+ResumeAI - Automated Resume Screening & Matching Platform
+- Developed a full-stack platform using React, Express, and spaCy NLP algorithms to parse resumes and score them against role rubrics.
+- Features include JD match percentage calculation, AI bullet rewriter, and recruiter bulk screening tools.
+
+Distributed Key-Value Store
+- Built a fault-tolerant in-memory key-value database in Go with Raft consensus protocol, supporting replication and log compaction.
+
+EDUCATION
+B.S. in Computer Science | University of California, Berkeley
+Graduated: May 2023 | GPA: 3.8/4.0
+Honors: Dean's Honor List, Hackathon 1st Place Winner
