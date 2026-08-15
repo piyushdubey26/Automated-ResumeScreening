@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="font-semibold text-white mb-3">Community & Credits</h4>
             <p className="text-xs text-slate-400 mb-3">
-              Built by Piyush Dubey, Shubham Singh, Sakshi Kumari, and Anisha.
+              Built by Piyush Dubey.
             </p>
             <div className="flex items-center space-x-3">
               <a href="https://github.com" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors" title="GitHub">

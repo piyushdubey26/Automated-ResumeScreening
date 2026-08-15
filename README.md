@@ -119,7 +119,7 @@ Application will run on `http://localhost:5173`.
 
 ## 🙌 Credits
 
-Built by **Piyush Dubey**, **Shubham Singh**, **Sakshi Kumari**, and **Anisha**.
+Built by **Piyush Dubey**.
 PRs welcome!
 
 ---
