@@ -110,3 +110,187 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+/* ===== LIGHT MODE OVERRIDES =====
+   Remap hardcoded dark Tailwind classes to light equivalents
+   when .dark is NOT on the root element.
+   This allows the theme toggle to work without editing every component. */
+
+html:not(.dark) .bg-slate-950 {
+  background-color: #f8fafc !important; /* slate-50 */
+}
+
+html:not(.dark) .bg-slate-900 {
+  background-color: #f1f5f9 !important; /* slate-100 */
+}
+
+html:not(.dark) .bg-slate-900\/90 {
+  background-color: rgba(241, 245, 249, 0.9) !important;
+}
+
+html:not(.dark) .bg-slate-900\/80 {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+}
+
+html:not(.dark) .bg-slate-900\/60 {
+  background-color: rgba(241, 245, 249, 0.6) !important;
+}
+
+html:not(.dark) .bg-slate-950\/60 {
+  background-color: rgba(248, 250, 252, 0.6) !important;
+}
+
+html:not(.dark) .bg-slate-950\/50 {
+  background-color: rgba(248, 250, 252, 0.5) !important;
+}
+
+/* Text colors */
+html:not(.dark) .text-slate-100 {
+  color: #0f172a !important; /* slate-900 */
+}
+
+/* text-white: only override on slate/neutral backgrounds, NOT on colored buttons */
+html:not(.dark) .text-white:not(.bg-indigo-600):not(.bg-purple-600):not(.bg-gradient-to-r):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-pink"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-gradient"]) {
+  color: #0f172a !important; /* slate-900 */
+}
+
+html:not(.dark) .text-slate-300 {
+  color: #334155 !important; /* slate-700 */
+}
+
+html:not(.dark) .text-slate-400 {
+  color: #475569 !important; /* slate-600 */
+}
+
+html:not(.dark) .text-slate-500 {
+  color: #64748b !important; /* slate-500 */
+}
+
+html:not(.dark) .text-slate-200 {
+  color: #1e293b !important; /* slate-800 */
+}
+
+/* Border colors */
+html:not(.dark) .border-slate-800 {
+  border-color: #e2e8f0 !important; /* slate-200 */
+}
+
+html:not(.dark) .border-slate-800\/80 {
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+html:not(.dark) .border-slate-800\/40 {
+  border-color: rgba(226, 232, 240, 0.4) !important;
+}
+
+html:not(.dark) .border-slate-900 {
+  border-color: #e2e8f0 !important; /* slate-200 */
+}
+
+/* Card and container backgrounds */
+html:not(.dark) .bg-slate-800 {
+  background-color: #e2e8f0 !important; /* slate-200 */
+}
+
+html:not(.dark) .bg-slate-800\/60 {
+  background-color: rgba(226, 232, 240, 0.6) !important;
+}
+
+/* Gradient text - keep visible on light */
+html:not(.dark) .bg-clip-text.text-transparent {
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shadow adjustments for light mode */
+html:not(.dark) .shadow-xl,
+html:not(.dark) .shadow-2xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Footer specific */
+html:not(.dark) footer {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+/* Navbar backdrop in light mode */
+html:not(.dark) header {
+  background-color: rgba(248, 250, 252, 0.92) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Keep gradient buttons and accents readable */
+html:not(.dark) .bg-gradient-to-r.from-indigo-600,
+html:not(.dark) .bg-gradient-to-r.from-indigo-500,
+html:not(.dark) .bg-indigo-600 {
+  color: #ffffff !important;
+}
+
+/* Input/textarea backgrounds */
+html:not(.dark) textarea,
+html:not(.dark) input[type="text"],
+html:not(.dark) input[type="email"],
+html:not(.dark) input[type="password"],
+html:not(.dark) select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important; /* slate-300 */
+  color: #0f172a !important;
+}
+
+/* Glow overlays should be subtle in light mode */
+html:not(.dark) .blur-3xl {
+  opacity: 0.3;
+}
+
+/* Score circle and special elements */
+html:not(.dark) .bg-indigo-950\/80,
+html:not(.dark) .bg-purple-950\/80 {
+  background-color: rgba(238, 242, 255, 0.8) !important;
+}
+
+html:not(.dark) .border-indigo-800\/60 {
+  border-color: rgba(165, 180, 252, 0.6) !important;
+}
+
+html:not(.dark) .border-purple-800\/60 {
+  border-color: rgba(192, 132, 252, 0.6) !important;
+}
+
+/* Logo gradient: swap to dark-on-light */
+html:not(.dark) .from-white.via-slate-100.to-indigo-300 {
+  --tw-gradient-from: #1e293b !important;
+  --tw-gradient-via: #334155 !important;
+  --tw-gradient-to: #6366f1 !important;
+}
+
+/* Nav active link (bg-indigo-600) must keep white text */
+html:not(.dark) .bg-indigo-600 {
+  color: #ffffff !important;
+}
+
+/* Demo button dark backgrounds → light */
+html:not(.dark) .bg-indigo-900,
+html:not(.dark) .hover\:bg-indigo-900:hover {
+  background-color: #e0e7ff !important; /* indigo-100 */
+}
+
+html:not(.dark) .bg-purple-900,
+html:not(.dark) .hover\:bg-purple-900:hover {
+  background-color: #f3e8ff !important; /* purple-100 */
+}
+
+/* Hover state for logout */
+html:not(.dark) .hover\:bg-rose-950\/30:hover {
+  background-color: rgba(255, 228, 230, 0.5) !important; /* rose-100/50 */
+}
+
+/* Indigo 500/30 border → softer in light */
+html:not(.dark) .border-indigo-500\/30 {
+  border-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Smooth transition on theme change */
+* {
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease;
+}
+
