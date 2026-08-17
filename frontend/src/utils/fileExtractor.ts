@@ -1,14 +1,20 @@
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Use the bundled worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-
 /**
- * Extract text from a PDF file
+ * Extract text from a PDF file using pdfjs-dist
+ * Configured for Vite bundler compatibility
  */
 export async function extractTextFromPDF(file: File): Promise<string> {
+  const pdfjsLib = await import('pdfjs-dist');
+  
+  // Set worker source - use CDN for reliable loading in Vite
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+  
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const uint8Array = new Uint8Array(arrayBuffer);
+  
+  const pdf = await pdfjsLib.getDocument({
+    data: uint8Array,
+    useSystemFonts: true,
+  }).promise;
   
   const textParts: string[] = [];
   
@@ -16,31 +22,43 @@ export async function extractTextFromPDF(file: File): Promise<string> {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     const pageText = content.items
+      .filter((item: any) => 'str' in item)
       .map((item: any) => item.str)
       .join(' ');
     textParts.push(pageText);
   }
   
-  return textParts.join('\n\n');
+  return textParts.join('\n\n').trim();
 }
 
 /**
  * Extract text from an image file (JPG/PNG) using Tesseract.js OCR
  */
 export async function extractTextFromImage(file: File): Promise<string> {
-  const { createWorker } = await import('tesseract.js');
-  
-  const worker = await createWorker('eng');
+  const Tesseract = await import('tesseract.js');
   
   const imageUrl = URL.createObjectURL(file);
   
   try {
-    const { data: { text } } = await worker.recognize(imageUrl);
-    return text;
+    const result = await Tesseract.recognize(imageUrl, 'eng', {
+      logger: () => {}, // suppress logs
+    });
+    return result.data.text;
   } finally {
-    await worker.terminate();
     URL.revokeObjectURL(imageUrl);
   }
+}
+
+/**
+ * Read plain text file
+ */
+async function readTextFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('Failed to read text file'));
+    reader.readAsText(file);
+  });
 }
 
 /**
@@ -59,8 +77,8 @@ export async function extractTextFromFile(file: File): Promise<string> {
   }
   
   if (ext === 'txt' || mimeType.startsWith('text/')) {
-    return file.text();
+    return readTextFile(file);
   }
   
-  throw new Error(`Unsupported file type: ${ext || mimeType}`);
+  throw new Error(`Unsupported file type: ${ext || mimeType}. Please upload PDF, JPG, PNG, or TXT.`);
 }
