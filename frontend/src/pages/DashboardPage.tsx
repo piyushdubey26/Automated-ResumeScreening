@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { sampleResumesText, sampleJDsText, resumeApi, jobApi } from '../services/api';
+import { FileUpload } from '../components/upload/FileUpload';
 import type {
   ResumeRecord,
   JDMatchResult,
@@ -231,12 +232,26 @@ export const DashboardPage: React.FC = () => {
               </select>
             </div>
 
+            {/* File Upload Zone */}
+            <FileUpload
+              onTextExtracted={(text) => setResumeInput(text)}
+              label="Upload Resume (PDF / JPG / PNG)"
+              accept=".pdf,.jpg,.jpeg,.png,.txt"
+              helpText="Drag & drop or click — PDF, JPG, PNG, TXT (max 10MB)"
+            />
+
+            <div className="flex items-center space-x-3 text-[10px] text-slate-500">
+              <div className="flex-1 h-px bg-slate-800"></div>
+              <span className="font-bold uppercase tracking-wider">or paste text manually</span>
+              <div className="flex-1 h-px bg-slate-800"></div>
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1">Resume Document Text</label>
               <textarea
                 value={resumeInput}
                 onChange={(e) => setResumeInput(e.target.value)}
-                rows={12}
+                rows={8}
                 placeholder="Paste your resume text here..."
                 className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
               />
@@ -375,10 +390,24 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
 
+            {/* File Upload Zone for JD */}
+            <FileUpload
+              onTextExtracted={(text) => setJdInput(text)}
+              label="Upload Job Description (PDF / JPG / PNG)"
+              accept=".pdf,.jpg,.jpeg,.png,.txt"
+              helpText="Upload JD as PDF, image, or text file"
+            />
+
+            <div className="flex items-center space-x-3 text-[10px] text-slate-500">
+              <div className="flex-1 h-px bg-slate-800"></div>
+              <span className="font-bold uppercase tracking-wider">or paste JD text</span>
+              <div className="flex-1 h-px bg-slate-800"></div>
+            </div>
+
             <textarea
               value={jdInput}
               onChange={(e) => setJdInput(e.target.value)}
-              rows={14}
+              rows={8}
               placeholder="Paste Job Description text here..."
               className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
             />
@@ -439,17 +468,52 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Recommendations */}
-              <div className="pt-3 border-t border-slate-800 space-y-2">
-                <h4 className="font-bold text-white">Actionable Recommendations:</h4>
-                <ul className="space-y-1.5 text-slate-300 list-disc list-inside">
+              {/* Missing Keywords Detail */}
+              <div>
+                <h4 className="font-bold text-amber-400 mb-2 flex items-center space-x-1">
+                  <Info className="w-4 h-4" />
+                  <span>All Missing Keywords ({jdMatchResult ? jdMatchResult.missingKeywords.length : 3})</span>
+                </h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {(jdMatchResult ? jdMatchResult.missingKeywords : ['GraphQL', 'Kubernetes', 'CI/CD']).map((kw, i) => (
+                    <span key={i} className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30 font-semibold">
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Actionable Recommendations */}
+              <div className="pt-3 border-t border-slate-800 space-y-3">
+                <h4 className="font-bold text-white flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-indigo-400" />
+                  <span>How to Improve Your Resume for This JD:</span>
+                </h4>
+                <div className="space-y-2">
                   {(jdMatchResult ? jdMatchResult.recommendations : [
                     'Explicitly incorporate missing target skills: GraphQL, Kubernetes into your Skills or Experience section.',
                     'Align your resume summary headline directly with the Senior Full Stack Engineer title.'
                   ]).map((rec, idx) => (
-                    <li key={idx} className="leading-relaxed">{rec}</li>
+                    <div key={idx} className="flex items-start space-x-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                      <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span className="text-xs text-slate-300 leading-relaxed">{rec}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
+                {/* Additional JD-specific suggestions */}
+                <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 space-y-2">
+                  <h5 className="text-xs font-bold text-indigo-300 flex items-center space-x-1">
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Quick Wins to Boost Your Match %</span>
+                  </h5>
+                  <ul className="space-y-1 text-[11px] text-slate-400">
+                    <li>• Add missing keywords from above directly to your <strong className="text-slate-300">Skills</strong> section</li>
+                    <li>• Mirror the job title in your resume <strong className="text-slate-300">headline/summary</strong></li>
+                    <li>• Quantify achievements using metrics relevant to the JD requirements</li>
+                    <li>• Use the <strong className="text-indigo-300">AI Bullet Rewriter</strong> tab to strengthen weak bullet points</li>
+                  </ul>
+                </div>
               </div>
             </div>
 
