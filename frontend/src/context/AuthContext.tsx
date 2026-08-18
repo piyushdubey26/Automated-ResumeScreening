@@ -20,6 +20,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem('resumeai_token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const formatUser = (u: User | null): User | null => {
+    if (!u) return null;
+    const name = u.name
+      ? u.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+      : '';
+    return { ...u, name };
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       if (token) {
@@ -27,15 +35,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const res = await authApi.getMe();
           // If backend returns a user, update it
           if (res.user && res.user.name !== 'Alex Rivera') {
-            setUser(res.user);
-            localStorage.setItem('resumeai_user', JSON.stringify(res.user));
+            const formatted = formatUser(res.user);
+            setUser(formatted);
+            if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
           } else {
             // Otherwise, see if we have a locally saved user
             const savedUser = localStorage.getItem('resumeai_user');
             if (savedUser) {
               setUser(JSON.parse(savedUser));
             } else {
-              setUser(res.user);
+              setUser(formatUser(res.user));
             }
           }
         } catch {
@@ -57,10 +66,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const data = await authApi.login(email, password);
+      const formatted = formatUser(data.user);
       localStorage.setItem('resumeai_token', data.token);
-      localStorage.setItem('resumeai_user', JSON.stringify(data.user));
+      if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
       setToken(data.token);
-      setUser(data.user);
+      setUser(formatted);
     } finally {
       setIsLoading(false);
     }
@@ -70,10 +80,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const data = await authApi.signup(name, email, rolePreference, userType);
+      const formatted = formatUser(data.user);
       localStorage.setItem('resumeai_token', data.token);
-      localStorage.setItem('resumeai_user', JSON.stringify(data.user));
+      if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
       setToken(data.token);
-      setUser(data.user);
+      setUser(formatted);
     } finally {
       setIsLoading(false);
     }

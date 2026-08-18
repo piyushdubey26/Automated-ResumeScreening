@@ -1,3 +1,27 @@
+// Polyfill for older Safari browsers where ReadableStream does not support async iteration or .values()
+if (typeof ReadableStream !== 'undefined') {
+  if (!ReadableStream.prototype.values) {
+    ReadableStream.prototype.values = function () {
+      const reader = this.getReader();
+      return {
+        async next() {
+          return reader.read();
+        },
+        async return() {
+          reader.releaseLock();
+          return { done: true, value: undefined };
+        },
+        [Symbol.asyncIterator]() {
+          return this;
+        },
+      } as any;
+    };
+  }
+  if (!ReadableStream.prototype[Symbol.asyncIterator]) {
+    ReadableStream.prototype[Symbol.asyncIterator] = ReadableStream.prototype.values;
+  }
+}
+
 /**
  * Extract text from a PDF file using pdfjs-dist
  * Configured for Vite bundler compatibility
