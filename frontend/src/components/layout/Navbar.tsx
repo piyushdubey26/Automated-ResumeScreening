@@ -89,33 +89,39 @@ export const Navbar: React.FC = () => {
           </Link>
           {isAuthenticated && (
             <>
-              <Link
-                to="/dashboard"
-                className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
-                  isCurrent('/dashboard') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-              >
-                <FileSearch className="w-4 h-4 text-indigo-400" />
-                <span>Seeker Dashboard</span>
-              </Link>
-              <Link
-                to="/recruiter"
-                className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
-                  isCurrent('/recruiter') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-              >
-                <Users className="w-4 h-4 text-purple-400" />
-                <span>Recruiter Hub</span>
-              </Link>
-              <Link
-                to="/admin"
-                className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
-                  isCurrent('/admin') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                }`}
-              >
-                <Shield className="w-4 h-4 text-amber-400" />
-                <span>Admin</span>
-              </Link>
+              {user?.userType === 'seeker' && (
+                <Link
+                  to="/dashboard"
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
+                    isCurrent('/dashboard') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <FileSearch className="w-4 h-4 text-indigo-400" />
+                  <span>Seeker Dashboard</span>
+                </Link>
+              )}
+              {user?.userType === 'recruiter' && (
+                <Link
+                  to="/recruiter"
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
+                    isCurrent('/recruiter') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Users className="w-4 h-4 text-purple-400" />
+                  <span>Recruiter Hub</span>
+                </Link>
+              )}
+              {user?.userType === 'admin' && (
+                <Link
+                  to="/admin"
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
+                    isCurrent('/admin') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Shield className="w-4 h-4 text-amber-400" />
+                  <span>Admin</span>
+                </Link>
+              )}
             </>
           )}
         </nav>

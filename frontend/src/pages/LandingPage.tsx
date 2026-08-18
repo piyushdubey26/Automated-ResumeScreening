@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { demoLogin } = useAuth();
+  const { user, isAuthenticated, demoLogin } = useAuth();
   const navigate = useNavigate();
 
   // Interactive Live Scorer Demo state on Landing Page
@@ -47,10 +47,17 @@ export const LandingPage: React.FC = () => {
         {/* HERO SECTION */}
         <section className="relative pt-12 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
           
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 text-xs font-semibold text-indigo-300 mb-6 shadow-inner">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-            <span>Role-Aware Resume Screening & Career Ecosystem</span>
-          </div>
+          {isAuthenticated ? (
+            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-300 mb-6 shadow-inner">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Welcome back, <strong className="text-white">{user?.name}</strong>! Go to your dashboard or explore tools below.</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 text-xs font-semibold text-indigo-300 mb-6 shadow-inner">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
+              <span>Role-Aware Resume Screening & Career Ecosystem</span>
+            </div>
+          )}
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
             Stop Guessing. Land Interviews with <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">Role-Aware AI Feedback.</span>
