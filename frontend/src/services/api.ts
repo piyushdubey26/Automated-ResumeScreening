@@ -6,8 +6,18 @@ import type {
   RewriteResult,
   InterviewQuestion,
   RecruiterCandidate,
-  LeaderboardEntry
+  LeaderboardEntry,
+  FeedbackCard
 } from '../types';
+
+const SKILLS_BY_ROLE = {
+  sde: ['typescript', 'javascript', 'node.js', 'node', 'express', 'react', 'postgresql', 'postgres', 'docker', 'aws', 'redis', 'rest api', 'git', 'graphql', 'kubernetes', 'python', 'java', 'c++', 'go', 'sql', 'html', 'css'],
+  'data-science': ['python', 'pytorch', 'tensorflow', 'scikit-learn', 'pandas', 'numpy', 'sql', 'a/b testing', 'docker', 'aws', 'sagemaker', 'machine learning', 'deep learning', 'nlp', 'statistics', 'spark', 'etl'],
+  marketing: ['seo', 'sem', 'paid social', 'google analytics', 'ga4', 'hubspot', 'a/b testing', 'figma', 'copywriting', 'cac', 'ltv', 'roas', 'ads', 'social media', 'email marketing'],
+  'product-management': ['agile', 'scrum', 'roadmap', 'product strategy', 'jira', 'user stories', 'prd', 'wireframes', 'metrics', 'analytics', 'market research', 'product launch']
+};
+
+const ACTION_VERBS = ['achieved', 'analyzed', 'architected', 'built', 'created', 'designed', 'developed', 'engineered', 'formulated', 'implemented', 'improved', 'increased', 'led', 'managed', 'optimized', 'reduced', 'scaled'];
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
 
@@ -164,6 +174,145 @@ export const resumeApi = {
       const res = await api.post('/resumes/upload', { text, filename, targetRole });
       return res.data;
     } catch {
+      const lowerText = text.toLowerCase();
+      
+      // 1. Extract contact info via regex
+      const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      const githubMatch = text.match(/(github\.com\/[a-zA-Z0-9_-]+)/i);
+      const linkedinMatch = text.match(/(linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
+      
+      // Get display name: use first line of text or fallback
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      const derivedName = lines[0] && lines[0].length < 40 ? lines[0] : 'Uploaded Candidate';
+
+      // 2. Identify skills present
+      const roleSkills = SKILLS_BY_ROLE[targetRole as keyof typeof SKILLS_BY_ROLE] || SKILLS_BY_ROLE.sde;
+      const foundSkills: string[] = [];
+      roleSkills.forEach(skill => {
+        const escaped = skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+        if (regex.test(lowerText)) {
+          foundSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+        }
+      });
+      
+      const missingSkills = roleSkills
+        .filter(skill => !foundSkills.map(s => s.toLowerCase()).includes(skill))
+        .map(skill => skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+
+      // 3. Score calculation
+      let scoreBreakdown = {
+        structure: 75,
+        clarity: 70,
+        impact: 60,
+        skills: 50,
+        projects: 70,
+        ats: 80
+      };
+
+      const feedback: FeedbackCard[] = [];
+
+      // Structure check
+      if (emailMatch) scoreBreakdown.structure += 15;
+      if (githubMatch || linkedinMatch) scoreBreakdown.structure += 10;
+      if (scoreBreakdown.structure > 100) scoreBreakdown.structure = 100;
+      
+      if (!emailMatch) {
+        feedback.push({
+          id: 'fb-struct-1',
+          category: 'Structure',
+          severity: 'high',
+          title: 'Missing Email Address',
+          description: 'No valid email address was detected in your resume.',
+          suggestion: 'Add a professional email address at the very top of your resume.'
+        });
+      }
+      if (!githubMatch && !linkedinMatch) {
+        feedback.push({
+          id: 'fb-struct-2',
+          category: 'Structure',
+          severity: 'medium',
+          title: 'Missing Professional Links',
+          description: 'No LinkedIn or GitHub links were detected.',
+          suggestion: 'Include your LinkedIn profile and GitHub (for technical roles) to build trust.'
+        });
+      }
+
+      // Skills score
+      const skillRatio = roleSkills.length > 0 ? foundSkills.length / roleSkills.length : 1;
+      scoreBreakdown.skills = Math.round(50 + skillRatio * 50);
+
+      if (missingSkills.length > 0) {
+        feedback.push({
+          id: 'fb-skills-1',
+          category: 'Skills',
+          severity: missingSkills.length > 4 ? 'high' : 'medium',
+          title: `Missing ${targetRole.toUpperCase()} Core Skills`,
+          description: `Your resume is missing important keywords: ${missingSkills.slice(0, 4).join(', ')}.`,
+          suggestion: `Explicitly add missing skills like: ${missingSkills.slice(0, 3).join(', ')} to your Skills section.`
+        });
+      } else {
+        feedback.push({
+          id: 'fb-skills-2',
+          category: 'Skills',
+          severity: 'success',
+          title: 'Excellent Core Skill Coverage',
+          description: 'Your resume contains all major core skills requested for this role.',
+          suggestion: 'Excellent alignment. Keep these skills updated with active project references.'
+        });
+      }
+
+      // Metrics & action verbs check (Impact & Clarity)
+      const metricsMatches = lowerText.match(/\d+%/g) || lowerText.match(/\d+\s*%/g) || lowerText.match(/\$\d+/g) || lowerText.match(/\b\d+\+\b/g);
+      if (metricsMatches && metricsMatches.length >= 3) {
+        scoreBreakdown.impact = 90;
+        feedback.push({
+          id: 'fb-impact-1',
+          category: 'Impact',
+          severity: 'success',
+          title: 'Strong Metric Quantifiers',
+          description: `Detected several metrics (${metricsMatches.slice(0, 3).join(', ')}) showing quantified achievements.`,
+          suggestion: 'Keep highlighting ROI and quantifiable benchmarks.'
+        });
+      } else {
+        scoreBreakdown.impact = 55;
+        feedback.push({
+          id: 'fb-impact-2',
+          category: 'Impact',
+          severity: 'high',
+          title: 'Weak Metric Quantifiers',
+          description: 'Very few metrics (percentages, dollar values, user counts) were detected in your resume bullet points.',
+          suggestion: 'Quantify your impact. For example: "built API" -> "built API handling 10k+ requests, reducing latency by 20%".'
+        });
+      }
+
+      // Action verbs check
+      const verbsFound = ACTION_VERBS.filter(verb => new RegExp(`\\b${verb}\\b`, 'i').test(lowerText));
+      scoreBreakdown.clarity = Math.round(60 + (verbsFound.length / 10) * 40);
+      if (scoreBreakdown.clarity > 100) scoreBreakdown.clarity = 100;
+
+      if (verbsFound.length < 5) {
+        feedback.push({
+          id: 'fb-clarity-1',
+          category: 'Clarity',
+          severity: 'medium',
+          title: 'Weak Action Verbs',
+          description: 'Your bullet points use passive verbs or repetitive wording.',
+          suggestion: 'Start bullet points with strong action verbs like: Architected, Led, Optimized, or Engineered.'
+        });
+      }
+
+      // Overall Score
+      const score = Math.round(
+        (scoreBreakdown.structure +
+          scoreBreakdown.clarity +
+          scoreBreakdown.impact +
+          scoreBreakdown.skills +
+          scoreBreakdown.projects +
+          scoreBreakdown.ats) /
+          6
+      );
+
       const mockRecord: ResumeRecord = {
         id: `resume-${Date.now()}`,
         userId: 'user-seeker-1',
@@ -171,41 +320,23 @@ export const resumeApi = {
         targetRole,
         rawText: text,
         parsedSections: {
-          contact: { name: 'Alex Rivera', email: 'alex.rivera@example.com', github: 'github.com/arivera' },
-          skills: ['TypeScript', 'Node.js', 'Express', 'React', 'PostgreSQL', 'Docker', 'AWS', 'Redis'],
-          experience: ['Architected microservices handling 2M+ requests', 'Optimized database queries reducing latency by 42%'],
-          projects: ['ResumeAI Platform', 'Distributed Key-Value Store'],
-          education: ['B.S. in Computer Science | UC Berkeley']
-        },
-        score: targetRole === 'sde' ? 88 : 82,
-        scoreBreakdown: {
-          structure: 90,
-          clarity: 88,
-          impact: 92,
-          skills: 85,
-          projects: 80,
-          ats: 84
-        },
-        feedback: [
-          {
-            id: 'fb-1',
-            category: 'Impact',
-            severity: 'success',
-            title: 'Strong Metric Quantifiers',
-            description: 'Contains excellent metric figures (2M+ requests, 42% latency reduction).',
-            suggestion: 'Keep highlighting ROI and quantifiable backend benchmarks.'
+          contact: {
+            name: derivedName,
+            email: emailMatch ? emailMatch[0] : undefined,
+            github: githubMatch ? githubMatch[0] : undefined,
+            linkedin: linkedinMatch ? linkedinMatch[0] : undefined
           },
-          {
-            id: 'fb-2',
-            category: 'Skills',
-            severity: 'medium',
-            title: 'Missing Microservice Keywords',
-            description: 'Target roles look for GraphQL or CI/CD explicitly.',
-            suggestion: 'Include container orchestration or GraphQL explicitly in the skills section.'
-          }
-        ],
+          skills: foundSkills,
+          experience: lines.filter(l => l.toLowerCase().includes('respons') || l.toLowerCase().includes('build') || l.toLowerCase().includes('develop') || l.toLowerCase().includes('manag')),
+          projects: lines.filter(l => l.toLowerCase().includes('project') || l.toLowerCase().includes('resumeai')),
+          education: lines.filter(l => l.toLowerCase().includes('university') || l.toLowerCase().includes('college') || l.toLowerCase().includes('degree') || l.toLowerCase().includes('b.s.') || l.toLowerCase().includes('btech'))
+        },
+        score,
+        scoreBreakdown,
+        feedback,
         createdAt: new Date().toISOString()
       };
+
       return { resume: mockRecord };
     }
   },
@@ -259,18 +390,49 @@ export const jobApi = {
       const res = await api.post('/jobs/match', { resumeText, jdText, targetRole });
       return res.data;
     } catch {
+      const lowerResume = resumeText.toLowerCase();
+      const lowerJD = jdText.toLowerCase();
+
+      // Find skills in JD
+      const allSkills = [...SKILLS_BY_ROLE.sde, ...SKILLS_BY_ROLE['data-science'], ...SKILLS_BY_ROLE.marketing, ...SKILLS_BY_ROLE['product-management']];
+      
+      const jdSkills: string[] = [];
+      allSkills.forEach(skill => {
+        const regex = new RegExp(`\\b${skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
+        if (regex.test(lowerJD) && !jdSkills.includes(skill)) {
+          jdSkills.push(skill);
+        }
+      });
+
+      // Find which of these are in the resume
+      const matched: string[] = [];
+      const missing: string[] = [];
+      jdSkills.forEach(skill => {
+        const regex = new RegExp(`\\b${skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
+        if (regex.test(lowerResume)) {
+          matched.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+        } else {
+          missing.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+        }
+      });
+
+      const totalJD = jdSkills.length || 5;
+      const matchPct = Math.round((matched.length / totalJD) * 100);
+      
+      const recommendations = [
+        ...missing.map(skill => `Explicitly incorporate the missing keyword: "${skill}" in your Skills or Experience section.`),
+        `Highlight experience where you worked with ${matched.slice(0, 3).join(', ') || 'relevant technologies'}.`
+      ];
+
       return {
-        matchPct: 86,
-        keywordScore: 84,
-        embeddingScore: 88,
-        matchedKeywords: ['TypeScript', 'Node.js', 'React', 'PostgreSQL', 'Docker', 'AWS', 'Redis'],
-        missingKeywords: ['GraphQL', 'Kubernetes', 'CI/CD'],
-        missingCoreSkills: ['GraphQL', 'Kubernetes'],
-        impactGapScore: 88,
-        recommendations: [
-          'Explicitly incorporate missing target skills: GraphQL, Kubernetes into your Skills or Experience section.',
-          'Align your resume summary headline directly with the Senior Full Stack Engineer title.'
-        ]
+        matchPct,
+        keywordScore: matchPct,
+        embeddingScore: Math.round(matchPct * 0.95),
+        matchedKeywords: matched,
+        missingKeywords: missing,
+        missingCoreSkills: missing.slice(0, 3),
+        impactGapScore: 100 - matchPct,
+        recommendations
       };
     }
   }
