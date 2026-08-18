@@ -10,7 +10,8 @@ import {
   Moon,
   LogOut,
   Zap,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -106,6 +107,15 @@ export const Navbar: React.FC = () => {
                 <Users className="w-4 h-4 text-purple-400" />
                 <span>Recruiter Hub</span>
               </Link>
+              <Link
+                to="/admin"
+                className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
+                  isCurrent('/admin') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <Shield className="w-4 h-4 text-amber-400" />
+                <span>Admin</span>
+              </Link>
             </>
           )}
         </nav>
@@ -156,6 +166,13 @@ export const Navbar: React.FC = () => {
               >
                 <Users className="w-3.5 h-3.5 text-purple-400" />
                 <span>Demo Recruiter</span>
+              </button>
+              <button
+                onClick={async () => { await demoLogin('admin'); navigate('/admin'); }}
+                className="hidden sm:inline-flex items-center space-x-1 px-3 py-2 text-xs font-semibold text-amber-300 bg-amber-950/80 border border-amber-800/60 rounded-xl hover:bg-amber-900 transition-all"
+              >
+                <Shield className="w-3.5 h-3.5 text-amber-400" />
+                <span>Demo Admin</span>
               </button>
               <Link
                 to="/login"

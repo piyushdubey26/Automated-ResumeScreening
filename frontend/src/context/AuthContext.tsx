@@ -10,7 +10,7 @@ interface AuthContextType {
   login: (email: string, password?: string) => Promise<void>;
   signup: (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter') => Promise<void>;
   logout: () => void;
-  demoLogin: (role: 'seeker' | 'recruiter') => Promise<void>;
+  demoLogin: (role: 'seeker' | 'recruiter' | 'admin') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,8 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const demoLogin = async (role: 'seeker' | 'recruiter') => {
-    const demoEmail = role === 'recruiter' ? 'recruiter@techscale.com' : 'alex.rivera@example.com';
+  const demoLogin = async (role: 'seeker' | 'recruiter' | 'admin') => {
+    const demoEmail = role === 'admin' ? 'admin@resumeai.com' : role === 'recruiter' ? 'recruiter@techscale.com' : 'alex.rivera@example.com';
     await login(demoEmail);
   };
 

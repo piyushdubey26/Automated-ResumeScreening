@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import RecruiterDashboardPage from './pages/RecruiterDashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,7 @@ export const App: React.FC = () => {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/recruiter" element={<RecruiterDashboardPage />} />
+                  <Route path="/admin" element={<AdminDashboardPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </div>

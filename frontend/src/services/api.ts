@@ -111,11 +111,20 @@ export const authApi = {
       return res.data;
     } catch {
       const isRecruiter = email.includes('recruiter');
+      const isAdmin = email.includes('admin');
+      // Derive display name from email: piyush.dubey@gmail.com → Piyush Dubey
+      const rawName = email.split('@')[0].replace(/[._-]/g, ' ');
+      const displayName = isAdmin
+        ? 'Platform Admin'
+        : isRecruiter
+        ? 'Recruiter Admin'
+        : rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+      const userType = isAdmin ? 'admin' : isRecruiter ? 'recruiter' : 'seeker';
       const user: User = {
         ...fallbackUser,
         email,
-        name: isRecruiter ? 'Sarah Jenkins (Recruiter)' : email.split('@')[0],
-        userType: isRecruiter ? 'recruiter' : 'seeker'
+        name: displayName,
+        userType: userType as User['userType']
       };
       return { token: 'mock-jwt-token', user };
     }

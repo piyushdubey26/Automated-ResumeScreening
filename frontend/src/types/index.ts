@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   rolePreference: 'sde' | 'data-science' | 'marketing' | 'product-management';
-  userType: 'seeker' | 'recruiter';
+  userType: 'seeker' | 'recruiter' | 'admin';
   badges: string[];
   points: number;
   avatar?: string;
