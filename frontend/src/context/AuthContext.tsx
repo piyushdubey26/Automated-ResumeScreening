@@ -25,10 +25,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         try {
           const res = await authApi.getMe();
-          setUser(res.user);
+          // If backend returns a user, update it
+          if (res.user && res.user.name !== 'Alex Rivera') {
+            setUser(res.user);
+            localStorage.setItem('resumeai_user', JSON.stringify(res.user));
+          } else {
+            // Otherwise, see if we have a locally saved user
+            const savedUser = localStorage.getItem('resumeai_user');
+            if (savedUser) {
+              setUser(JSON.parse(savedUser));
+            } else {
+              setUser(res.user);
+            }
+          }
         } catch {
-          localStorage.removeItem('resumeai_token');
-          setToken(null);
+          const savedUser = localStorage.getItem('resumeai_user');
+          if (savedUser) {
+            setUser(JSON.parse(savedUser));
+          } else {
+            localStorage.removeItem('resumeai_token');
+            setToken(null);
+          }
         }
       }
       setIsLoading(false);
@@ -41,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = await authApi.login(email, password);
       localStorage.setItem('resumeai_token', data.token);
+      localStorage.setItem('resumeai_user', JSON.stringify(data.user));
       setToken(data.token);
       setUser(data.user);
     } finally {
@@ -53,6 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = await authApi.signup(name, email, rolePreference, userType);
       localStorage.setItem('resumeai_token', data.token);
+      localStorage.setItem('resumeai_user', JSON.stringify(data.user));
       setToken(data.token);
       setUser(data.user);
     } finally {
@@ -67,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('resumeai_token');
+    localStorage.removeItem('resumeai_user');
     setToken(null);
     setUser(null);
   };

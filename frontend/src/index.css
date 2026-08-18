@@ -303,6 +303,80 @@ html:not(.dark) .border-indigo-500\/30 {
   border-color: rgba(99, 102, 241, 0.2) !important;
 }
 
+/* Light mode overrides for gradient headers/banners */
+html:not(.dark) .bg-gradient-to-r.from-indigo-950.via-slate-900.to-purple-950,
+html:not(.dark) .bg-gradient-to-r.from-purple-950.via-slate-900.to-indigo-950 {
+  background: linear-gradient(to right, #e0e7ff, #f8fafc, #f3e8ff) !important;
+  border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .bg-gradient-to-br.from-indigo-600\/20.via-slate-900\/80.to-slate-900\/80 {
+  background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.08), #f8fafc, #f8fafc) !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Light mode overrides for text color readability (darkening bright colors on light theme) */
+html:not(.dark) .text-indigo-300 {
+  color: #3730a3 !important; /* indigo-800 */
+}
+html:not(.dark) .text-indigo-400 {
+  color: #4f46e5 !important; /* indigo-600 */
+}
+html:not(.dark) .text-purple-300 {
+  color: #6b21a8 !important; /* purple-700 */
+}
+html:not(.dark) .text-purple-400 {
+  color: #7e22ce !important; /* purple-700 */
+}
+html:not(.dark) .text-emerald-300 {
+  color: #065f46 !important; /* emerald-800 */
+}
+html:not(.dark) .text-emerald-400 {
+  color: #047857 !important; /* emerald-700 */
+}
+html:not(.dark) .text-amber-300 {
+  color: #92400e !important; /* amber-800 */
+}
+html:not(.dark) .text-amber-400 {
+  color: #b45309 !important; /* amber-700 */
+}
+html:not(.dark) .text-rose-300 {
+  color: #9f1239 !important; /* rose-800 */
+}
+html:not(.dark) .text-rose-400 {
+  color: #be123c !important; /* rose-700 */
+}
+
+/* Bright text gradient on landing page */
+html:not(.dark) .from-indigo-400.via-purple-300.to-pink-400 {
+  --tw-gradient-from: #4f46e5 !important;
+  --tw-gradient-via: #7c3aed !important;
+  --tw-gradient-to: #db2777 !important;
+}
+
+/* Border overrides */
+html:not(.dark) .border-slate-700 {
+  border-color: #cbd5e1 !important; /* slate-300 */
+}
+html:not(.dark) .border-slate-700\/60 {
+  border-color: rgba(203, 213, 225, 0.6) !important;
+}
+html:not(.dark) .border-slate-700\/40 {
+  border-color: rgba(203, 213, 225, 0.4) !important;
+}
+html:not(.dark) .bg-slate-800\/40 {
+  background-color: rgba(226, 232, 240, 0.4) !important;
+}
+html:not(.dark) .bg-slate-800\/60 {
+  background-color: rgba(226, 232, 240, 0.6) !important;
+}
+html:not(.dark) .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+html:not(.dark) .divide-slate-850 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+
 /* Smooth transition on theme change */
 * {
   transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease;

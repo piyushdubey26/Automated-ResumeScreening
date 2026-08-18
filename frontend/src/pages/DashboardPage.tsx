@@ -31,7 +31,14 @@ export const DashboardPage: React.FC = () => {
 
   // Tab 1 State: Resume Upload & Analysis
   const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>('sde');
-  const [resumeInput, setResumeInput] = useState(sampleResumesText.sde);
+  const [resumeInput, setResumeInput] = useState(() => {
+    const defaultText = sampleResumesText.sde;
+    if (user && user.name) {
+      return defaultText.replace(/Alex Rivera/g, user.name)
+                        .replace(/alex\.rivera@example\.com/g, user.email || 'alex.rivera@example.com');
+    }
+    return defaultText;
+  });
   const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'high' | 'medium' | 'success'>('all');
@@ -55,7 +62,12 @@ export const DashboardPage: React.FC = () => {
   // Handle Load Sample Resume
   const handleLoadSampleResume = (role: 'sde' | 'ds' | 'marketing') => {
     setTargetRole(role === 'ds' ? 'data-science' : role);
-    setResumeInput(sampleResumesText[role]);
+    const rawText = sampleResumesText[role];
+    if (user && user.name && role === 'sde') {
+      setResumeInput(rawText.replace(/Alex Rivera/g, user.name).replace(/alex\.rivera@example.com/g, user.email || 'alex.rivera@example.com'));
+    } else {
+      setResumeInput(rawText);
+    }
   };
 
   // Run Resume Analysis
@@ -787,7 +799,7 @@ export const DashboardPage: React.FC = () => {
                   <td className="py-3 px-4 font-bold text-amber-400">#1</td>
                   <td className="py-3 px-4 font-bold text-white flex items-center space-x-2">
                     <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="avatar" className="w-6 h-6 rounded-full" />
-                    <span>Alex Rivera (You)</span>
+                    <span>{user?.name || 'Alex Rivera'} (You)</span>
                   </td>
                   <td className="py-3 px-4">UC Berkeley</td>
                   <td className="py-3 px-4 font-bold text-emerald-400">94 / 100</td>
