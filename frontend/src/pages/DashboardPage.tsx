@@ -295,8 +295,8 @@ export const DashboardPage: React.FC = () => {
                 <div className="mt-2 text-5xl font-extrabold text-white">
                   {resumeRecord ? resumeRecord.score : 86} <span className="text-xs font-normal text-slate-500">/ 100</span>
                 </div>
-                <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
-                  Strong SDE Alignment
+                <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase">
+                  Strong {resumeRecord ? resumeRecord.targetRole.replace('-', ' ') : targetRole.replace('-', ' ')} Alignment
                 </span>
               </div>
 
