@@ -49,7 +49,7 @@ export const LandingPage: React.FC = () => {
           
           {isAuthenticated ? (
             <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-300 mb-6 shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
               <span>Welcome back, <strong className="text-white">{user?.name}</strong>! Go to your dashboard or explore tools below.</span>
             </div>
           ) : (

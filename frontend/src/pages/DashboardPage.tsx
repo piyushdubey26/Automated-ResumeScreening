@@ -29,15 +29,21 @@ export const DashboardPage: React.FC = () => {
   // Dashboard Tabs
   const [activeTab, setActiveTab] = useState<'analysis' | 'jd-match' | 'ai-rewrite' | 'portfolio' | 'interview' | 'gamification'>('analysis');
 
+  const customizeResumeText = (rawText: string) => {
+    if (!user || !user.name) return rawText;
+    return rawText
+      .replace(/Alex Rivera/g, user.name)
+      .replace(/Priya Sharma/g, user.name)
+      .replace(/Jordan Lee/g, user.name)
+      .replace(/alex\.rivera@example\.com/g, user.email || 'alex.rivera@example.com')
+      .replace(/priya\.sharma@example\.com/g, user.email || 'priya.sharma@example.com')
+      .replace(/jordan\.lee@example\.com/g, user.email || 'jordan.lee@example.com');
+  };
+
   // Tab 1 State: Resume Upload & Analysis
   const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>('sde');
   const [resumeInput, setResumeInput] = useState(() => {
-    const defaultText = sampleResumesText.sde;
-    if (user && user.name) {
-      return defaultText.replace(/Alex Rivera/g, user.name)
-                        .replace(/alex\.rivera@example\.com/g, user.email || 'alex.rivera@example.com');
-    }
-    return defaultText;
+    return customizeResumeText(sampleResumesText.sde);
   });
   const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -62,12 +68,7 @@ export const DashboardPage: React.FC = () => {
   // Handle Load Sample Resume
   const handleLoadSampleResume = (role: 'sde' | 'ds' | 'marketing') => {
     setTargetRole(role === 'ds' ? 'data-science' : role);
-    const rawText = sampleResumesText[role];
-    if (user && user.name && role === 'sde') {
-      setResumeInput(rawText.replace(/Alex Rivera/g, user.name).replace(/alex\.rivera@example.com/g, user.email || 'alex.rivera@example.com'));
-    } else {
-      setResumeInput(rawText);
-    }
+    setResumeInput(customizeResumeText(sampleResumesText[role]));
   };
 
   // Run Resume Analysis

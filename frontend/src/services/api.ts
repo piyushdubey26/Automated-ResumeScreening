@@ -444,8 +444,21 @@ export const recruiterApi = {
       const res = await api.post('/recruiter/bulk-screen', { candidates, jdText, targetRole });
       return res.data;
     } catch {
+      let candidateName = 'Alex Rivera';
+      let candidateEmail = 'alex.rivera@example.com';
+      try {
+        const savedUserStr = localStorage.getItem('resumeai_user');
+        if (savedUserStr) {
+          const savedUser = JSON.parse(savedUserStr);
+          if (savedUser && savedUser.name) {
+            candidateName = savedUser.name;
+            candidateEmail = savedUser.email;
+          }
+        }
+      } catch {}
+
       const mockShortlist: RecruiterCandidate[] = [
-        { id: 'c-1', recruiterJobId: 'j-1', candidateName: 'Alex Rivera', candidateEmail: 'alex@example.com', targetRole: 'sde', resumeText: 'Full Stack Engineer. Built Node.js, React, Docker microservices.', overallScore: 88, jdMatchPct: 92, status: 'Shortlisted', appliedAt: new Date().toISOString() },
+        { id: 'c-1', recruiterJobId: 'j-1', candidateName: candidateName, candidateEmail: candidateEmail, targetRole: 'sde', resumeText: 'Full Stack Engineer. Built Node.js, React, Docker microservices.', overallScore: 88, jdMatchPct: 92, status: 'Shortlisted', appliedAt: new Date().toISOString() },
         { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: new Date().toISOString() },
         { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python & MySQL.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: new Date().toISOString() },
         { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js and HTML/CSS.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: new Date().toISOString() }
@@ -461,9 +474,20 @@ export const ecosystemApi = {
       const res = await api.get('/ecosystem/leaderboard');
       return res.data;
     } catch {
+      let candidateName = 'Alex Rivera';
+      try {
+        const savedUserStr = localStorage.getItem('resumeai_user');
+        if (savedUserStr) {
+          const savedUser = JSON.parse(savedUserStr);
+          if (savedUser && savedUser.name) {
+            candidateName = savedUser.name;
+          }
+        }
+      } catch {}
+
       return {
         leaderboard: [
-          { rank: 1, name: 'Alex Rivera', institution: 'UC Berkeley', score: 94, badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'], avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
+          { rank: 1, name: candidateName, institution: 'UC Berkeley', score: 94, badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'], avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
           { rank: 2, name: 'Priya Sharma', institution: 'Northeastern Univ', score: 91, badges: ['ML Wizard', 'Data Master'], avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100' },
           { rank: 3, name: 'Jordan Lee', institution: 'NYU Stern', score: 89, badges: ['Growth Hacker', 'CRO Pro'], avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
           { rank: 4, name: 'Samantha Wu', institution: 'Stanford Univ', score: 88, badges: ['Full Stack Ace'], avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
