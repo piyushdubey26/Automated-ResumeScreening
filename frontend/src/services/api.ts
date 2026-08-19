@@ -405,6 +405,10 @@ export const resumeApi = {
         createdAt: new Date().toISOString()
       };
 
+      const db = getLocalDB();
+      db.resumes.push(mockRecord);
+      saveLocalDB(db);
+
       return { resume: mockRecord };
     }
   },

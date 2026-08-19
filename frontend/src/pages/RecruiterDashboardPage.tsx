@@ -12,13 +12,63 @@ export const RecruiterDashboardPage: React.FC = () => {
   const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>('sde');
   const [jdText, setJdText] = useState(sampleJDsText.sde);
 
+  // Get initial candidates dynamically from local storage database if available
+  const getInitialCandidates = (): RecruiterCandidate[] => {
+    let name = 'Alex Rivera';
+    let email = 'alex.rivera@example.com';
+    let score = 88;
+    let text = 'Full Stack Engineer. Built Node.js, React, PostgreSQL, Docker, AWS microservices handling 2M+ requests.';
+
+    try {
+      const savedUserStr = localStorage.getItem('resumeai_user');
+      if (savedUserStr) {
+        const savedUser = JSON.parse(savedUserStr);
+        if (savedUser && savedUser.name && savedUser.name !== 'Recruiter Admin') {
+          name = savedUser.name;
+          email = savedUser.email;
+        }
+      }
+    } catch (e) {}
+
+    // Check if there is an uploaded resume in the database
+    try {
+      const savedDb = localStorage.getItem('resumeai_local_db');
+      if (savedDb) {
+        const db = JSON.parse(savedDb);
+        if (db.resumes && db.resumes.length > 0) {
+          // Get the last parsed resume
+          const lastResume = db.resumes[db.resumes.length - 1];
+          return [
+            {
+              id: lastResume.id,
+              recruiterJobId: 'j-1',
+              candidateName: lastResume.parsedSections.contact.name || name,
+              candidateEmail: lastResume.parsedSections.contact.email || email,
+              targetRole: lastResume.targetRole,
+              resumeText: lastResume.rawText,
+              overallScore: lastResume.score,
+              jdMatchPct: lastResume.score >= 80 ? 92 : lastResume.score >= 65 ? 74 : 58,
+              status: lastResume.score >= 80 ? 'Shortlisted' : lastResume.score >= 65 ? 'Under Review' : 'Rejected',
+              appliedAt: lastResume.createdAt
+            },
+            { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya.sharma@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark. Built BERT NLP models.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: '2026-08-11T14:30:00Z' },
+            { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david.chen@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python, Django, MySQL, AWS REST APIs.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: '2026-08-10T09:15:00Z' },
+            { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria.garcia@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js, HTML, CSS, Webpack.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: '2026-08-09T16:45:00Z' }
+          ];
+        }
+      }
+    } catch (e) {}
+
+    return [
+      { id: 'c-1', recruiterJobId: 'j-1', candidateName: name, candidateEmail: email, targetRole: 'sde', resumeText: text, overallScore: score, jdMatchPct: 92, status: 'Shortlisted', appliedAt: '2026-08-12T10:00:00Z' },
+      { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya.sharma@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark. Built BERT NLP models.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: '2026-08-11T14:30:00Z' },
+      { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david.chen@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python, Django, MySQL, AWS REST APIs.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: '2026-08-10T09:15:00Z' },
+      { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria.garcia@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js, HTML, CSS, Webpack.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: '2026-08-09T16:45:00Z' }
+    ];
+  };
+
   // Shortlist Candidates State
-  const [candidates, setCandidates] = useState<RecruiterCandidate[]>([
-    { id: 'c-1', recruiterJobId: 'j-1', candidateName: 'Alex Rivera', candidateEmail: 'alex.rivera@example.com', targetRole: 'sde', resumeText: 'Full Stack Engineer. Built Node.js, React, PostgreSQL, Docker, AWS microservices handling 2M+ requests.', overallScore: 88, jdMatchPct: 92, status: 'Shortlisted', appliedAt: '2026-08-12T10:00:00Z' },
-    { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya.sharma@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark. Built BERT NLP models.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: '2026-08-11T14:30:00Z' },
-    { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david.chen@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python, Django, MySQL, AWS REST APIs.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: '2026-08-10T09:15:00Z' },
-    { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria.garcia@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js, HTML, CSS, Webpack.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: '2026-08-09T16:45:00Z' }
-  ]);
+  const [candidates, setCandidates] = useState<RecruiterCandidate[]>(getInitialCandidates);
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'Shortlisted' | 'Under Review' | 'Rejected'>('all');
   const [isScreening, setIsScreening] = useState(false);
