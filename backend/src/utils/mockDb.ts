@@ -231,9 +231,50 @@ const recruiterCandidates: RecruiterCandidateRecord[] = [
   }
 ];
 
+import fs from 'fs';
+import path from 'path';
+
 export const mockDb = {
   users,
   resumes,
   jobDescriptions,
   recruiterCandidates
 };
+
+// Simple local JSON database path
+const DB_FILE = path.join(__dirname, '../../data/db.json');
+
+// Helper to save current database to file
+export const saveDb = () => {
+  try {
+    const dir = path.dirname(DB_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DB_FILE, JSON.stringify(mockDb, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Error writing to local JSON database:', e);
+  }
+};
+
+// Load database from file on start
+const loadDb = () => {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const fileData = fs.readFileSync(DB_FILE, 'utf8');
+      const parsed = JSON.parse(fileData);
+      if (parsed.users) mockDb.users = parsed.users;
+      if (parsed.resumes) mockDb.resumes = parsed.resumes;
+      if (parsed.jobDescriptions) mockDb.jobDescriptions = parsed.jobDescriptions;
+      if (parsed.recruiterCandidates) mockDb.recruiterCandidates = parsed.recruiterCandidates;
+    } else {
+      // Create initial DB file from seeds
+      saveDb();
+    }
+  } catch (e) {
+    console.error('Error loading local JSON database:', e);
+  }
+};
+
+// Initial load
+loadDb();

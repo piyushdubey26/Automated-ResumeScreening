@@ -1,5 +1,4 @@
-import { Request, Response } from 'express';
-import { mockDb, ResumeRecord } from '../utils/mockDb';
+import { mockDb, ResumeRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
 import { AIRewriteService } from '../services/aiRewriteService';
@@ -37,6 +36,7 @@ Architected microservices in Node.js, Express, React, PostgreSQL, Docker. Reduce
     };
 
     mockDb.resumes.unshift(newResume);
+    saveDb();
 
     return res.status(201).json({
       message: 'Resume parsed and scored successfully',

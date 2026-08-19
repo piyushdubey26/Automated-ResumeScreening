@@ -155,15 +155,79 @@ const roleOptions = ["All", "SDE", "Data Science", "Marketing", "PM"];
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export const AdminDashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    "seekers" | "recruiters" | "analytics"
-  >("seekers");
+  const [activeTab, setActiveTab] = useState<"seekers" | "recruiters" | "analytics">("seekers");
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
 
+  // Load dynamic users from LocalStorage if available, fallback to mock seed data
+  const getDynamicSeekers = () => {
+    try {
+      const saved = localStorage.getItem('resumeai_local_db');
+      if (saved) {
+        const db = JSON.parse(saved);
+        if (db.users && db.users.length > 0) {
+          const customSeekers = db.users
+            .filter((u: any) => u.userType === 'seeker')
+            .map((u: any) => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              role: u.rolePreference === 'data-science' ? 'Data Science' : u.rolePreference.toUpperCase(),
+              resumeScore: 82,
+              badges: u.badges || ['Verified'],
+              status: "Active" as const
+            }));
+          
+          const merged = [...customSeekers];
+          seekersData.forEach(seed => {
+            if (!merged.some(m => m.email.toLowerCase() === seed.email.toLowerCase())) {
+              merged.push(seed);
+            }
+          });
+          return merged;
+        }
+      }
+    } catch (e) {}
+    return seekersData;
+  };
+
+  const getDynamicRecruiters = () => {
+    try {
+      const saved = localStorage.getItem('resumeai_local_db');
+      if (saved) {
+        const db = JSON.parse(saved);
+        if (db.users && db.users.length > 0) {
+          const customRecruiters = db.users
+            .filter((u: any) => u.userType === 'recruiter')
+            .map((u: any) => ({
+              id: u.id,
+              name: u.name,
+              company: "TechScale Innovations",
+              email: u.email,
+              jobsPosted: 3,
+              candidatesScreened: 24,
+              status: "Active" as const
+            }));
+
+          const merged = [...customRecruiters];
+          recruitersData.forEach(seed => {
+            if (!merged.some(m => m.email.toLowerCase() === seed.email.toLowerCase())) {
+              merged.push(seed);
+            }
+          });
+          return merged;
+        }
+      }
+    } catch (e) {}
+    return recruitersData;
+  };
+
+  const dynamicSeekers = getDynamicSeekers();
+  const dynamicRecruiters = getDynamicRecruiters();
+
   // ── Filtered data ──────────────────────────────────────────────────────────
 
-  const filteredSeekers = seekersData.filter((s) => {
+  const filteredSeekers = dynamicSeekers.filter((s) => {
     const matchesSearch =
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -171,7 +235,7 @@ export const AdminDashboardPage: React.FC = () => {
     return matchesSearch && matchesRole;
   });
 
-  const filteredRecruiters = recruitersData.filter(
+  const filteredRecruiters = dynamicRecruiters.filter(
     (r) =>
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -421,7 +485,7 @@ export const AdminDashboardPage: React.FC = () => {
                         <td className="whitespace-nowrap px-4 py-3">
                           <div className="flex gap-1">
                             {seeker.badges.length > 0 ? (
-                              seeker.badges.map((badge) => (
+                              seeker.badges.map((badge: string) => (
                                 <span
                                   key={badge}
                                   className="rounded-md bg-indigo-500/15 px-2 py-0.5 text-xs font-medium text-indigo-400"

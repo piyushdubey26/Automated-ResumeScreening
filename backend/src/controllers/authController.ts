@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { mockDb, User } from '../utils/mockDb';
+import { mockDb, User, saveDb } from '../utils/mockDb';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_resumeai_token_2026';
 
@@ -29,6 +29,7 @@ export const signup = (req: Request, res: Response) => {
   };
 
   mockDb.users.push(newUser);
+  saveDb();
   const token = jwt.sign({ id: newUser.id, email: newUser.email, userType: newUser.userType }, JWT_SECRET, { expiresIn: '7d' });
   return res.status(201).json({ token, user: newUser });
 };
@@ -55,6 +56,7 @@ export const login = (req: Request, res: Response) => {
       createdAt: new Date().toISOString()
     };
     mockDb.users.push(user);
+    saveDb();
   }
 
   const token = jwt.sign({ id: user.id, email: user.email, userType: user.userType }, JWT_SECRET, { expiresIn: '7d' });

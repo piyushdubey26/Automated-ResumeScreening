@@ -48,6 +48,58 @@ const fallbackUser: User = {
   createdAt: new Date().toISOString()
 };
 
+// ── Browser-based LocalStorage fallback DB ────────────────────────────────────
+const LOCAL_DB_KEY = 'resumeai_local_db';
+
+interface LocalDB {
+  users: User[];
+  resumes: ResumeRecord[];
+}
+
+const getLocalDB = (): LocalDB => {
+  const saved = localStorage.getItem(LOCAL_DB_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {}
+  }
+  
+  // Initial seed data
+  const initial: LocalDB = {
+    users: [
+      {
+        id: 'user-seeker-1',
+        name: 'Alex Rivera',
+        email: 'alex.rivera@example.com',
+        rolePreference: 'sde',
+        userType: 'seeker',
+        badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'],
+        points: 1450,
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'user-recruiter-1',
+        name: 'Sarah Jenkins (Recruiter)',
+        email: 'recruiter@techscale.com',
+        rolePreference: 'sde',
+        userType: 'recruiter',
+        badges: ['Top Talent Scout'],
+        points: 3200,
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+        createdAt: new Date().toISOString()
+      }
+    ],
+    resumes: []
+  };
+  localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(initial));
+  return initial;
+};
+
+const saveLocalDB = (db: LocalDB) => {
+  localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
+};
+
 export const sampleResumesText = {
   sde: `Alex Rivera
 Email: alex.rivera@example.com | GitHub: github.com/arivera | LinkedIn: linkedin.com/in/alex-rivera-dev
@@ -130,12 +182,25 @@ export const authApi = {
         ? 'Recruiter Admin'
         : rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       const userType = isAdmin ? 'admin' : isRecruiter ? 'recruiter' : 'seeker';
-      const user: User = {
-        ...fallbackUser,
-        email,
-        name: displayName,
-        userType: userType as User['userType']
-      };
+      
+      const db = getLocalDB();
+      let user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      if (!user) {
+        user = {
+          id: `user-${Date.now()}`,
+          name: displayName,
+          email,
+          rolePreference: 'sde',
+          userType: userType as User['userType'],
+          badges: ['New Explorer'],
+          points: 500,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
+          createdAt: new Date().toISOString()
+        };
+        db.users.push(user);
+        saveLocalDB(db);
+      }
       return { token: 'mock-jwt-token', user };
     }
   },
@@ -144,6 +209,7 @@ export const authApi = {
       const res = await api.post('/auth/signup', { name, email, rolePreference, userType });
       return res.data;
     } catch {
+      const db = getLocalDB();
       const user: User = {
         id: `user-${Date.now()}`,
         name,
@@ -155,6 +221,8 @@ export const authApi = {
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
         createdAt: new Date().toISOString()
       };
+      db.users.push(user);
+      saveLocalDB(db);
       return { token: 'mock-jwt-token', user };
     }
   },

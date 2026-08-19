@@ -1,5 +1,4 @@
-import { Request, Response } from 'express';
-import { mockDb, RecruiterCandidateRecord } from '../utils/mockDb';
+import { mockDb, RecruiterCandidateRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
 import { JDMatchEngine } from '../services/jdMatchEngine';
@@ -42,6 +41,7 @@ export const bulkScreenResumes = (req: Request, res: Response) => {
 
   // Update recruiterCandidates in mockDb
   mockDb.recruiterCandidates = [...processedList, ...mockDb.recruiterCandidates];
+  saveDb();
 
   return res.json({
     message: `Screened ${processedList.length} candidates successfully`,

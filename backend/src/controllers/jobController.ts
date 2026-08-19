@@ -1,5 +1,4 @@
-import { Request, Response } from 'express';
-import { mockDb, JobDescriptionRecord } from '../utils/mockDb';
+import { mockDb, JobDescriptionRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { JDMatchEngine } from '../services/jdMatchEngine';
 
@@ -21,6 +20,7 @@ export const createJD = (req: Request, res: Response) => {
   };
 
   mockDb.jobDescriptions.unshift(newJd);
+  saveDb();
   return res.status(201).json({ message: 'JD saved successfully', jdId: newJd.id, jd: newJd });
 };
 
