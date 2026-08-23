@@ -22,6 +22,7 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -130,48 +131,115 @@ export const Navbar: React.FC = () => {
 
         {/* Right Actions & User Bar */}
         <div className="flex items-center space-x-3">
-          {/* Theme Toggle Switch */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={toggleTheme}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'
-              }`}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              <span
-                className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center ${
-                  theme === 'dark' ? 'translate-x-5' : 'translate-x-0'
+          {/* Theme Toggle Switch (Only visible when logged out) */}
+          {!isAuthenticated && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleTheme}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'
                 }`}
+                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
-                {theme === 'dark' ? (
-                  <Moon className="w-3.5 h-3.5 text-indigo-600" />
-                ) : (
-                  <Sun className="w-3.5 h-3.5 text-amber-500" />
-                )}
-              </span>
-            </button>
-          </div>
+                <span
+                  className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center ${
+                    theme === 'dark' ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                >
+                  {theme === 'dark' ? (
+                    <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                  ) : (
+                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                  )}
+                </span>
+              </button>
+            </div>
+          )}
 
           {isAuthenticated ? (
-            <div className="flex items-center space-x-3">
-              <div className="hidden sm:flex flex-col text-right">
-                <span className="text-sm font-semibold text-white">{user?.name}</span>
-                <span className="text-[11px] text-slate-400 capitalize flex items-center justify-end space-x-1">
-                  <span className={`w-2 h-2 rounded-full ${user?.userType === 'recruiter' ? 'bg-purple-400' : 'bg-emerald-400'}`}></span>
-                  <span>{user?.userType} Mode</span>
-                </span>
-              </div>
+            /* Profile Dropdown Toggle */
+            <div className="relative">
               <button
-                onClick={() => {
-                  logout();
-                  navigate('/');
-                }}
-                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
-                title="Sign out"
+                onClick={() => setProfileOpen(!profileOpen)}
+                onBlur={() => setTimeout(() => setProfileOpen(false), 200)}
+                className="flex items-center space-x-2.5 p-1.5 rounded-xl bg-slate-900/80 border border-slate-800/80 hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer text-left focus:outline-none"
               >
-                <LogOut className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="hidden sm:block pr-1">
+                  <p className="text-sm font-semibold text-slate-100 leading-none mb-0.5">{user?.name}</p>
+                  <p className="text-[10px] text-slate-400 capitalize leading-none">{user?.userType} Mode</p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
+
+              {/* Profile Dropdown Menu */}
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-800 p-2 shadow-2xl z-50 text-slate-200">
+                  {/* Header: Profile info */}
+                  <div className="p-3 flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-base">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div className="overflow-hidden">
+                      <h4 className="text-sm font-bold text-white truncate">{user?.name}</h4>
+                      <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                      <span className="inline-flex items-center mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 capitalize">
+                        {user?.userType} Mode
+                      </span>
+                    </div>
+                  </div>
+
+                  <hr className="border-slate-800 my-1" />
+
+                  {/* Dark/Light mode toggle switch row */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleTheme();
+                    }}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-800/60 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center space-x-2.5">
+                      {theme === 'dark' ? (
+                        <Moon className="w-4 h-4 text-indigo-400" />
+                      ) : (
+                        <Sun className="w-4 h-4 text-amber-500" />
+                      )}
+                      <span className="text-xs font-medium text-slate-300">Dark Mode</span>
+                    </div>
+                    {/* Switch */}
+                    <div className="pointer-events-none">
+                      <div
+                        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
+                          theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-600'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                            theme === 'dark' ? 'translate-x-4' : 'translate-x-0'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr className="border-slate-800 my-1" />
+
+                  {/* Sign Out Button */}
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                    }}
+                    className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 transition-all text-left cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center space-x-3">
