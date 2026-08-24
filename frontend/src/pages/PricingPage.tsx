@@ -26,9 +26,13 @@ export const PricingPage: React.FC = () => {
   const isRecruiter = user?.userType === 'recruiter';
   const isSeeker = user?.userType === 'seeker';
 
-  return <main className="min-h-screen bg-[#f8f7f3] px-5 py-16 text-[#1d2b3a] sm:px-8 lg:py-24">
+  return <main className="min-h-screen bg-[#f8f7f3] dark:bg-slate-950 px-5 py-16 text-[#1d2b3a] dark:text-slate-100 sm:px-8 lg:py-24">
     <div className="mx-auto max-w-6xl">
-      <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[.16em] text-[#a84c38]">Simple plans, clear access</p><h1 className="mt-4 font-serif text-5xl tracking-[-.04em] sm:text-6xl">Choose the support you need.</h1><p className="mt-5 text-lg leading-8 text-[#607078]">No confusing credits. The Pro request is reviewed by an administrator before paid access is activated.</p></div>
+      <div className="max-w-2xl">
+        <p className="text-xs font-bold uppercase tracking-[.16em] text-[#a84c38]">Simple plans, clear access</p>
+        <h1 className="mt-4 font-serif text-5xl tracking-[-.04em] sm:text-6xl text-slate-900 dark:text-white">Choose the support you need.</h1>
+        <p className="mt-5 text-lg leading-8 text-[#607078] dark:text-slate-400">No confusing credits. The Pro request is reviewed by an administrator before paid access is activated.</p>
+      </div>
       {notice && <div className="mt-8 flex items-start gap-3 border border-[#d9c8b5] bg-[#fff7ee] p-4 text-sm text-[#6d4c2d]"><Clock3 className="mt-0.5 h-4 w-4 shrink-0" />{notice}</div>}
       <div className={`mt-12 grid gap-5 ${isRecruiter && user ? 'mx-auto max-w-xl' : isSeeker && user ? 'lg:grid-cols-3' : 'lg:grid-cols-3'}`}>
         {(!isRecruiter || !user) && <>

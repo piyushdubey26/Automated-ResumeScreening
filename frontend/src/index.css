@@ -109,22 +109,31 @@ body {
   font-family: 'Fraunces', Georgia, serif;
 }
 
-.site-header {
+/* Site Header Light Mode Overrides */
+html:not(.dark) .site-header {
   background: rgba(248, 247, 243, 0.94) !important;
   border-color: #ded9cf !important;
   box-shadow: none !important;
 }
 
-.site-header .bg-gradient-to-tr,
-.site-header .bg-indigo-600 {
+html:not(.dark) .site-header .bg-gradient-to-tr,
+html:not(.dark) .site-header .bg-indigo-600 {
   background: #a84c38 !important;
 }
 
-.site-header .bg-clip-text { color: #1d3848 !important; -webkit-text-fill-color: currentColor; }
-.site-header .text-slate-400 { color: #69747a !important; }
-.site-header .bg-slate-900\/80 { background: #efeee8 !important; border-color: #d8d3c8 !important; }
-.site-header .text-slate-300 { color: #51616a !important; }
-.site-header .text-white { color: #fff !important; }
+html:not(.dark) .site-header .bg-clip-text { color: #1d3848 !important; -webkit-text-fill-color: currentColor; }
+html:not(.dark) .site-header .text-slate-400 { color: #69747a !important; }
+html:not(.dark) .site-header .bg-slate-900\/80 { background: #efeee8 !important; border-color: #d8d3c8 !important; }
+html:not(.dark) .site-header .text-slate-300 { color: #51616a !important; }
+html:not(.dark) .site-header .text-white { color: #fff !important; }
+
+/* Fix link hover states in light mode */
+html:not(.dark) .site-header .hover\:text-white:hover {
+  color: #a84c38 !important;
+}
+html:not(.dark) .site-header .hover\:bg-slate-800\/60:hover {
+  background-color: rgba(168, 76, 56, 0.08) !important;
+}
 
 .site-footer {
   background: #1d3848 !important;

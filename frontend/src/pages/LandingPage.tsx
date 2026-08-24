@@ -27,16 +27,16 @@ export const LandingPage: React.FC = () => {
   const isRecruiterMode = user?.userType === 'recruiter';
 
   return (
-    <main className="landing-page min-h-screen bg-[#f8f7f3] text-[#1d2b3a]">
+    <main className="landing-page min-h-screen bg-[#f8f7f3] dark:bg-slate-950 text-[#1d2b3a] dark:text-slate-100">
       <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-12 lg:gap-16 lg:px-10 lg:pb-28 lg:pt-24">
         <div className="lg:col-span-7 lg:pt-7">
           <p className="mb-7 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#a84c38]">
             <span className="h-px w-8 bg-[#a84c38]" />
             {isRecruiterMode ? "Resume Screening that saves time" : "Resume guidance that speaks plainly"}
           </p>
-          {isAuthenticated && <p className="mb-5 text-sm text-[#5e6870]">Welcome back, {user?.name}. Your hiring overview is ready.</p>}
+          {isAuthenticated && <p className="mb-5 text-sm text-[#5e6870] dark:text-slate-400">Welcome back, {user?.name}. Your hiring overview is ready.</p>}
           
-          <h1 className="max-w-3xl font-serif text-5xl leading-[0.98] tracking-[-0.045em] text-[#172735] sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-3xl font-serif text-5xl leading-[0.98] tracking-[-0.045em] text-[#172735] dark:text-white sm:text-6xl lg:text-7xl">
             {isRecruiterMode ? (
               <>Find the right candidates before the first <em className="font-normal text-[#a84c38]">interview.</em></>
             ) : (
@@ -44,7 +44,7 @@ export const LandingPage: React.FC = () => {
             )}
           </h1>
           
-          <p className="mt-7 max-w-xl text-lg leading-8 text-[#58636b]">
+          <p className="mt-7 max-w-xl text-lg leading-8 text-[#58636b] dark:text-slate-350">
             {isRecruiterMode 
               ? "Upload a job description, let ResumeAI analyze your applicants, rank them, explain why, and surface the people worth interviewing."
               : "Get a practical read on your resume, see how it fits a role, and improve the parts that matter before you apply."}

@@ -96,6 +96,45 @@ export const RecruiterDashboardPage: React.FC = () => {
       candidateCount: 200,
       shortlistedCount: 1,
       status: 'Screening complete'
+    },
+    {
+      id: 'j-4',
+      title: 'Data Scientist',
+      company: 'ComputeCorp',
+      location: 'Remote',
+      employmentType: 'Full-time',
+      skills: ['Python', 'PyTorch', 'SQL', 'Scikit-Learn'],
+      experience: '3+ years',
+      description: 'Analyzing machine learning models, scaling data preprocessing pipelines, and building predictive features.',
+      candidateCount: 94,
+      shortlistedCount: 1,
+      status: 'Screening complete'
+    },
+    {
+      id: 'j-5',
+      title: 'Product Manager',
+      company: 'GrowthCo',
+      location: 'San Francisco, CA',
+      employmentType: 'Full-time',
+      skills: ['Agile', 'Product Strategy', 'Roadmapping', 'Jira'],
+      experience: '4+ years',
+      description: 'Directing lifecycle of premium SaaS widgets. Aligning engineers, designers, and customers on clear feature releases.',
+      candidateCount: 110,
+      shortlistedCount: 2,
+      status: 'In progress'
+    },
+    {
+      id: 'j-6',
+      title: 'Marketing Manager',
+      company: 'AdStudio',
+      location: 'Remote',
+      employmentType: 'Full-time',
+      skills: ['SEO', 'Google Analytics', 'Content Strategy'],
+      experience: '3+ years',
+      description: 'Directing inbound marketing campaigns, optimizing conversion funnels, and managing paid acquisition budgets.',
+      candidateCount: 75,
+      shortlistedCount: 0,
+      status: 'Draft'
     }
   ]);
 
@@ -566,14 +605,20 @@ export const RecruiterDashboardPage: React.FC = () => {
                 <select
                   value={selectedJobId}
                   onChange={(e) => {
-                    setSelectedJobId(e.target.value);
-                    setCompareIds([]);
+                    if (e.target.value === 'add-new-job') {
+                      setActiveNav('Jobs');
+                      setShowCreateJobForm(true);
+                    } else {
+                      setSelectedJobId(e.target.value);
+                      setCompareIds([]);
+                    }
                   }}
                   className="w-full text-xs font-semibold text-slate-350 bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-2 outline-none focus:border-purple-500 cursor-pointer capitalize"
                 >
                   {jobs.map(j => (
                     <option key={j.id} value={j.id}>{j.title}</option>
                   ))}
+                  <option value="add-new-job" className="text-purple-400 font-bold">+ Add Custom Position...</option>
                 </select>
               </div>
               <span className="text-[10px] text-slate-500 block mt-1.5 pl-1">
@@ -1029,14 +1074,20 @@ export const RecruiterDashboardPage: React.FC = () => {
                   <select
                     value={selectedJobId}
                     onChange={(e) => {
-                      setSelectedJobId(e.target.value);
-                      setCompareIds([]);
+                      if (e.target.value === 'add-new-job') {
+                        setActiveNav('Jobs');
+                        setShowCreateJobForm(true);
+                      } else {
+                        setSelectedJobId(e.target.value);
+                        setCompareIds([]);
+                      }
                     }}
-                    className="text-xs font-semibold text-slate-350 bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 outline-none focus:border-purple-500 cursor-pointer capitalize"
+                    className="text-xs font-semibold text-slate-355 bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 outline-none focus:border-purple-500 cursor-pointer capitalize"
                   >
                     {jobs.map(j => (
                       <option key={j.id} value={j.id}>{j.title}</option>
                     ))}
+                    <option value="add-new-job" className="text-purple-400 font-bold">+ Add Custom Position...</option>
                   </select>
                 </div>
               </div>
