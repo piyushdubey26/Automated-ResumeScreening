@@ -11,7 +11,7 @@ interface AuthContextType {
   signup: (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter') => Promise<void>;
   logout: () => void;
   demoLogin: (role: 'seeker' | 'recruiter' | 'admin') => Promise<void>;
-  switchMode: (newMode: 'seeker' | 'recruiter') => void;
+  switchMode: (newMode: 'seeker' | 'recruiter' | 'admin') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const switchMode = (newMode: 'seeker' | 'recruiter') => {
+  const switchMode = (newMode: 'seeker' | 'recruiter' | 'admin') => {
     if (user) {
       const updatedUser = { ...user, userType: newMode };
       setUser(updatedUser);
