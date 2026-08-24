@@ -11,6 +11,7 @@ interface AuthContextType {
   signup: (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter') => Promise<void>;
   logout: () => void;
   demoLogin: (role: 'seeker' | 'recruiter' | 'admin') => Promise<void>;
+  switchMode: (newMode: 'seeker' | 'recruiter') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,6 +112,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const switchMode = (newMode: 'seeker' | 'recruiter') => {
+    if (user) {
+      const updatedUser = { ...user, userType: newMode };
+      setUser(updatedUser);
+      localStorage.setItem('resumeai_user', JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event('resumeai-subscription-updated'));
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -120,7 +130,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       signup,
       logout,
-      demoLogin
+      demoLogin,
+      switchMode
     }}>
       {children}
     </AuthContext.Provider>

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, demoLogin } = useAuth();
+  const { user, isAuthenticated, logout, demoLogin, switchMode } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -198,6 +198,41 @@ export const Navbar: React.FC = () => {
                           }`}
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  <hr className="border-slate-800 my-1" />
+
+                  {/* Mode switcher option */}
+                  <div className="px-3 py-2">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Switch Mode</p>
+                    <div className="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-850">
+                      <button
+                        onClick={() => {
+                          switchMode('seeker');
+                          navigate('/dashboard');
+                        }}
+                        className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
+                          user?.userType === 'seeker'
+                            ? 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Candidate
+                      </button>
+                      <button
+                        onClick={() => {
+                          switchMode('recruiter');
+                          navigate('/recruiter');
+                        }}
+                        className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
+                          user?.userType === 'recruiter'
+                            ? 'bg-purple-600 text-white shadow-sm font-extrabold'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Recruiter
+                      </button>
                     </div>
                   </div>
 
