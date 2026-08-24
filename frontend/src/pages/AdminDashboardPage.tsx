@@ -17,6 +17,8 @@ import {
   ScanLine,
   Filter,
   ChevronDown,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
@@ -158,6 +160,7 @@ export const AdminDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"seekers" | "recruiters" | "analytics">("seekers");
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
+  const [, setSubscriptionVersion] = useState(0);
 
   // Load dynamic users from LocalStorage if available, fallback to mock seed data
   const getDynamicSeekers = () => {
@@ -175,7 +178,10 @@ export const AdminDashboardPage: React.FC = () => {
               role: u.rolePreference === 'data-science' ? 'Data Science' : u.rolePreference.toUpperCase(),
               resumeScore: 82,
               badges: u.badges || ['Verified'],
-              status: "Active" as const
+              status: "Active" as const,
+              plan: u.plan || 'free',
+              subscriptionStatus: u.subscriptionStatus || 'free',
+              requestedAt: u.subscriptionRequestedAt
             }));
           
           const merged = [...customSeekers];
@@ -242,6 +248,23 @@ export const AdminDashboardPage: React.FC = () => {
       r.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const setSubscriptionDecision = (seeker: any, decision: 'approved' | 'declined') => {
+    const saved = localStorage.getItem('resumeai_local_db');
+    if (!saved) return;
+    const db = JSON.parse(saved);
+    const index = db.users.findIndex((user: any) => user.id === seeker.id || user.email === seeker.email);
+    if (index < 0) return;
+    db.users[index] = { ...db.users[index], plan: decision === 'approved' ? 'pro' : 'free', subscriptionStatus: decision };
+    localStorage.setItem('resumeai_local_db', JSON.stringify(db));
+    const signedIn = localStorage.getItem('resumeai_user');
+    if (signedIn) {
+      const activeUser = JSON.parse(signedIn);
+      if (activeUser.id === db.users[index].id) localStorage.setItem('resumeai_user', JSON.stringify(db.users[index]));
+    }
+    window.dispatchEvent(new Event('resumeai-subscription-updated'));
+    setSubscriptionVersion(value => value + 1);
+  };
+
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   const StatusBadge = ({ status }: { status: "Active" | "Suspended" }) => (
@@ -261,8 +284,12 @@ export const AdminDashboardPage: React.FC = () => {
     </span>
   );
 
-  const ActionButtons = () => (
+  const ActionButtons = ({ seeker }: { seeker?: any }) => (
     <div className="flex items-center gap-1">
+      {seeker?.subscriptionStatus === 'pending' && <>
+        <button onClick={() => setSubscriptionDecision(seeker, 'approved')} className="rounded-lg p-1.5 text-emerald-400 transition-colors hover:bg-emerald-500/20" title="Approve Pro"><CheckCircle2 className="h-4 w-4" /></button>
+        <button onClick={() => setSubscriptionDecision(seeker, 'declined')} className="rounded-lg p-1.5 text-rose-400 transition-colors hover:bg-rose-500/20" title="Decline Pro"><XCircle className="h-4 w-4" /></button>
+      </>}
       <button
         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-indigo-500/20 hover:text-indigo-400"
         title="View"
@@ -332,7 +359,7 @@ export const AdminDashboardPage: React.FC = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
+    <div className="admin-dashboard min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         {/* ── Header Banner ─────────────────────────────────────────────── */}
         <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-indigo-600/20 via-slate-900/80 to-slate-900/80 p-8 backdrop-blur-sm">
@@ -440,6 +467,7 @@ export const AdminDashboardPage: React.FC = () => {
                       <th className="px-4 py-3">Role Preference</th>
                       <th className="px-4 py-3">Resume Score</th>
                       <th className="px-4 py-3">Badges</th>
+                      <th className="px-4 py-3">Plan access</th>
                       <th className="px-4 py-3">Status</th>
                       <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
@@ -501,17 +529,20 @@ export const AdminDashboardPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3">
+                          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${seeker.subscriptionStatus === 'approved' ? 'bg-emerald-500/20 text-emerald-400' : seeker.subscriptionStatus === 'pending' ? 'bg-amber-500/20 text-amber-400' : seeker.subscriptionStatus === 'declined' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-800 text-slate-300'}`}>{seeker.subscriptionStatus === 'approved' ? 'Pro approved' : seeker.subscriptionStatus === 'pending' ? 'Pro pending' : seeker.subscriptionStatus === 'declined' ? 'Pro declined' : 'Free'}</span>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">
                           <StatusBadge status={seeker.status} />
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 text-right">
-                          <ActionButtons />
+                          <ActionButtons seeker={seeker} />
                         </td>
                       </tr>
                     ))}
                     {filteredSeekers.length === 0 && (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={8}
                           className="px-4 py-10 text-center text-slate-500"
                         >
                           No seekers found matching your criteria.

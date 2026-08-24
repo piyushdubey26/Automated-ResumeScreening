@@ -104,5 +104,5 @@ export async function extractTextFromFile(file: File): Promise<string> {
     return readTextFile(file);
   }
   
-  throw new Error(`Unsupported file type: ${ext || mimeType}. Please upload PDF, JPG, PNG, or TXT.`);
+  throw new Error(`Unsupported file type: ${ext || mimeType}. Please upload an image, PDF, or TXT file.`);
 }

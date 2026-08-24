@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Check, FileText, Search, Users } from 'lucide-react';
 import { sampleResumesText, resumeApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import {
-  Sparkles,
-  Zap,
-  Target,
-  FileCheck2,
-  Cpu,
-  Users,
-  TrendingUp
-} from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
   const { user, isAuthenticated, demoLogin } = useAuth();
   const navigate = useNavigate();
-
-  // Interactive Live Scorer Demo state on Landing Page
   const [demoRole, setDemoRole] = useState<'sde' | 'ds' | 'marketing'>('sde');
   const [demoText, setDemoText] = useState(sampleResumesText.sde);
   const [demoScore, setDemoScore] = useState<number | null>(88);
@@ -26,238 +16,33 @@ export const LandingPage: React.FC = () => {
     setDemoRole(role);
     setDemoText(sampleResumesText[role]);
   };
-
   const handleTestScore = async () => {
     setIsEvaluating(true);
     try {
       const res = await resumeApi.uploadAndParse(demoText, 'Demo_Resume.pdf', demoRole);
       setDemoScore(res.resume.score);
-    } finally {
-      setIsEvaluating(false);
-    }
+    } finally { setIsEvaluating(false); }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
-      
-      {/* Background Glow Accents */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-indigo-600/15 via-purple-600/10 to-transparent blur-3xl pointer-events-none" />
-
-      <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative pt-12 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-          
-          {isAuthenticated ? (
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-300 mb-6 shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-              <span>Welcome back, <strong className="text-white">{user?.name}</strong>! Go to your dashboard or explore tools below.</span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 text-xs font-semibold text-indigo-300 mb-6 shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-              <span>Role-Aware Resume Screening & Career Ecosystem</span>
-            </div>
-          )}
-
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-            Stop Guessing. Land Interviews with <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">Role-Aware AI Feedback.</span>
-          </h1>
-
-          <p className="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Generic ATS scores fail job seekers. ResumeAI provides targeted SDE, Data Science, and Marketing rubrics, instant bullet rewriter, JD match % analysis, and recruiter screening.
-          </p>
-
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => {
-                demoLogin('seeker');
-                navigate('/dashboard');
-              }}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white font-bold text-base shadow-xl shadow-indigo-600/30 hover:scale-105 transition-all flex items-center justify-center space-x-2"
-            >
-              <Zap className="w-5 h-5 text-amber-300 fill-amber-300" />
-              <span>Try Instant Seeker Demo</span>
-            </button>
-
-            <button
-              onClick={() => {
-                demoLogin('recruiter');
-                navigate('/recruiter');
-              }}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-purple-500/50 text-slate-200 font-semibold text-base hover:bg-slate-850 transition-all flex items-center justify-center space-x-2"
-            >
-              <Users className="w-5 h-5 text-purple-400" />
-              <span>Launch Recruiter Hub</span>
-            </button>
+    <main className="landing-page min-h-screen bg-[#f8f7f3] text-[#1d2b3a]">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-12 lg:gap-16 lg:px-10 lg:pb-28 lg:pt-24">
+        <div className="lg:col-span-7 lg:pt-7">
+          <p className="mb-7 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#a84c38]"><span className="h-px w-8 bg-[#a84c38]" />Resume guidance that speaks plainly</p>
+          {isAuthenticated && <p className="mb-5 text-sm text-[#5e6870]">Welcome back, {user?.name}. Your next review is ready when you are.</p>}
+          <h1 className="max-w-3xl font-serif text-5xl leading-[0.98] tracking-[-0.045em] text-[#172735] sm:text-6xl lg:text-7xl">A clearer path from resume to <em className="font-normal text-[#a84c38]">interview.</em></h1>
+          <p className="mt-7 max-w-xl text-lg leading-8 text-[#58636b]">Get a practical read on your resume, see how it fits a role, and improve the parts that matter before you apply.</p>
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button onClick={() => { demoLogin('seeker'); navigate('/dashboard'); }} className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1d3848] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#294c60]">Review a resume <ArrowRight className="h-4 w-4" /></button>
+            <button onClick={() => { demoLogin('recruiter'); navigate('/recruiter'); }} className="inline-flex items-center justify-center gap-2 rounded-md border border-[#cfcac0] px-5 py-3 text-sm font-semibold text-[#294452] transition hover:border-[#7d8c8f] hover:bg-white">I’m hiring <Users className="h-4 w-4" /></button>
           </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-white">99.4%</div>
-              <div className="text-xs text-slate-400 mt-1">ATS Format Parser Accuracy</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-indigo-400">4 Role Rubrics</div>
-              <div className="text-xs text-slate-400 mt-1">SDE, DS, Marketing, PM</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-purple-400">1-Click Rewrite</div>
-              <div className="text-xs text-slate-400 mt-1">Quantify Impact Bullets</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-emerald-400">Recruiter Bulk</div>
-              <div className="text-xs text-slate-400 mt-1">Rank Candidate Shortlist</div>
-            </div>
-          </div>
-
-          {/* LIVE DEMO INTERACTIVE WIDGET */}
-          <div className="mt-16 text-left max-w-4xl mx-auto bg-slate-900/90 rounded-3xl border border-indigo-500/30 p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 backdrop-blur-xl">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                  <Cpu className="w-5 h-5 text-indigo-400" />
-                  <span>Live Interactive Resume Scorer</span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">Test sample resume text against role rubrics in real-time below.</p>
-              </div>
-
-              {/* Sample Preset Buttons */}
-              <div className="flex items-center space-x-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                <button
-                  onClick={() => handleSelectSample('sde')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                    demoRole === 'sde' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  SDE Sample
-                </button>
-                <button
-                  onClick={() => handleSelectSample('ds')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                    demoRole === 'ds' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Data Science
-                </button>
-                <button
-                  onClick={() => handleSelectSample('marketing')}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                    demoRole === 'marketing' ? 'bg-pink-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Marketing
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              <div className="lg:col-span-2 space-y-3">
-                <label className="text-xs font-semibold text-slate-300 block">Resume Text Content</label>
-                <textarea
-                  value={demoText}
-                  onChange={(e) => setDemoText(e.target.value)}
-                  rows={8}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-                <button
-                  onClick={handleTestScore}
-                  disabled={isEvaluating}
-                  className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
-                >
-                  {isEvaluating ? (
-                    <span>Analyzing Rubric Weights...</span>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 text-amber-300" />
-                      <span>Calculate Role Score</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Instant Score Result Meter */}
-              <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-4">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Calculated ATS Score</span>
-                
-                <div className="relative inline-flex items-center justify-center">
-                  <div className="w-32 h-32 rounded-full border-8 border-indigo-600/20 border-t-indigo-500 animate-pulse flex items-center justify-center">
-                    <span className="text-4xl font-extrabold text-white">{demoScore || 88}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-left pt-2 border-t border-slate-900 text-xs">
-                  <div className="flex justify-between text-slate-400">
-                    <span>Structure & Contact</span>
-                    <span className="text-emerald-400 font-semibold">90 / 100</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Quantified Impact</span>
-                    <span className="text-indigo-400 font-semibold">92 / 100</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Role Skills Match</span>
-                    <span className="text-amber-400 font-semibold">85 / 100</span>
-                  </div>
-                </div>
-
-                <Link
-                  to="/dashboard"
-                  className="block w-full py-2 bg-slate-900 hover:bg-slate-850 text-indigo-400 font-semibold text-xs rounded-xl border border-indigo-500/30 transition-colors"
-                >
-                  Open Full Dashboard →
-                </Link>
-              </div>
-            </div>
-          </div>
-
-        </section>
-
-        {/* CORE FEATURES SECTION */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-900">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">Everything You Need To Win Top Jobs</h2>
-            <p className="mt-4 text-slate-400 text-base">
-              Built systematically across 4 phases to guide job seekers from raw resume upload to recruiter shortlist.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/40 transition-all space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                <Target className="w-6 h-6 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white">Role-Specific Rubrics</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Evaluates SDE, Data Science, Marketing, and PM resumes against dedicated JSON weight schemas rather than generic advice.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-purple-500/40 transition-all space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-                <FileCheck2 className="w-6 h-6 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white">JD Matching & Gap Report</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Paste any Job Description to get side-by-side match percentages, missing keywords, and missing core vs optional skills.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-pink-500/40 transition-all space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-pink-600/20 border border-pink-500/30 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-pink-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white">AI Bullet Point Rewriter</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Transforms weak passive bullets into high-impact, quantified achievement statements with selectable focus parameters.
-              </p>
-            </div>
-          </div>
-        </section>
-
-      </main>
-
-    </div>
+          <div className="mt-12 flex flex-wrap gap-x-7 gap-y-3 text-sm text-[#59676d]"><span className="flex items-center gap-2"><Check className="h-4 w-4 text-[#a84c38]" />Tailored to four career paths</span><span className="flex items-center gap-2"><Check className="h-4 w-4 text-[#a84c38]" />Actionable, not vague</span></div>
+        </div>
+        <div className="relative lg:col-span-5"><div className="absolute -left-3 top-7 h-full w-full border border-[#d8d3c8]" /><div className="relative bg-[#fffefa] p-5 shadow-[0_20px_45px_rgba(34,48,53,0.10)] sm:p-7"><div className="flex items-start justify-between border-b border-[#e7e2d9] pb-5"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#a84c38]">Resume review</p><h2 className="mt-1 font-serif text-2xl text-[#1d2b3a]">Maya Chen · Product Designer</h2></div><span className="rounded-full bg-[#e6eee9] px-3 py-1 text-xs font-bold text-[#35634c]">Strong match</span></div><div className="grid grid-cols-[96px_1fr] gap-6 py-7"><div className="flex h-24 w-24 items-center justify-center rounded-full border-[7px] border-[#d9e6df] text-3xl font-bold text-[#234a40]">86</div><div><p className="text-sm font-semibold text-[#243642]">You’re in good shape for this role.</p><p className="mt-2 text-sm leading-6 text-[#687278]">The experience is relevant. Add one outcome to the first project and make your research methods easier to spot.</p></div></div><div className="space-y-3 border-t border-[#e7e2d9] pt-5 text-sm"><div className="flex items-center justify-between"><span className="flex items-center gap-2 text-[#53616a]"><span className="h-2 w-2 rounded-full bg-[#4d8b68]" />Relevant experience</span><strong>Excellent</strong></div><div className="flex items-center justify-between"><span className="flex items-center gap-2 text-[#53616a]"><span className="h-2 w-2 rounded-full bg-[#d19b4f]" />Evidence of impact</span><strong>Worth improving</strong></div><div className="flex items-center justify-between"><span className="flex items-center gap-2 text-[#53616a]"><span className="h-2 w-2 rounded-full bg-[#4d8b68]" />Core skills</span><strong>Excellent</strong></div></div></div></div>
+      </section>
+      <section className="border-y border-[#ded9cf] bg-[#efeee8]"><div className="mx-auto grid max-w-7xl grid-cols-1 divide-y divide-[#d9d4ca] px-5 sm:px-8 md:grid-cols-3 md:divide-x md:divide-y-0 lg:px-10">{[['01', 'Choose a target', 'Select a role rubric that fits the job you want next.'], ['02', 'Get the useful details', 'See what reads well, what is missing, and where to focus.'], ['03', 'Apply with confidence', 'Keep a sharper resume and compare it to the job description.']].map(([number, title, text]) => <div key={number} className="py-8 md:px-8 md:first:pl-0 md:last:pr-0"><span className="text-xs font-bold tracking-[0.16em] text-[#a84c38]">{number}</span><h3 className="mt-4 font-serif text-2xl text-[#1d2b3a]">{title}</h3><p className="mt-2 max-w-xs text-sm leading-6 text-[#667177]">{text}</p></div>)}</div></section>
+      <section className="mx-auto max-w-5xl px-5 py-20 sm:px-8 lg:py-28"><div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#a84c38]">Try a sample</p><h2 className="mt-3 font-serif text-4xl tracking-[-0.03em] text-[#1d2b3a]">See a review in context.</h2></div><p className="max-w-sm text-sm leading-6 text-[#667177]">Edit the sample or switch roles. We’ll run it through the same scoring flow used in the dashboard.</p></div><div className="border border-[#d8d3c8] bg-white p-4 shadow-[0_12px_30px_rgba(34,48,53,0.06)] sm:p-6"><div className="flex flex-col gap-4 border-b border-[#e6e1d8] pb-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><FileText className="h-5 w-5 text-[#a84c38]" /><div><h3 className="font-semibold">Test a sample resume</h3><p className="text-xs text-[#69747a]">Pick a role, then run a quick review.</p></div></div><div className="flex rounded-md bg-[#f1f0eb] p-1">{(['sde', 'ds', 'marketing'] as const).map(role => <button key={role} onClick={() => handleSelectSample(role)} className={`rounded px-3 py-1.5 text-xs font-semibold transition ${demoRole === role ? 'bg-white text-[#1d3848] shadow-sm' : 'text-[#69747a]'}`}>{role === 'sde' ? 'Engineering' : role === 'ds' ? 'Data science' : 'Marketing'}</button>)}</div></div><div className="mt-5 grid gap-5 lg:grid-cols-[1fr_200px]"><textarea value={demoText} onChange={(e) => setDemoText(e.target.value)} rows={9} className="w-full resize-none border border-[#d8d3c8] bg-[#fcfbf8] p-4 font-mono text-xs leading-5 text-[#40515b] outline-none transition focus:border-[#577683]" /><aside className="flex flex-col justify-between border border-[#d8d3c8] bg-[#f7f6f1] p-5"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#68757a]">Review score</p><p className="mt-3 font-serif text-6xl text-[#1d3848]">{demoScore ?? '—'}</p><p className="mt-1 text-xs text-[#68757a]">out of 100</p><div className="mt-6 border-t border-[#ded9cf] pt-4 text-xs leading-6 text-[#59676d]"><p>Looks for relevant skills, clear structure, and evidence of impact.</p></div></div><button onClick={handleTestScore} disabled={isEvaluating} className="mt-5 inline-flex items-center justify-center gap-2 rounded-md bg-[#a84c38] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#8d3d2d] disabled:opacity-60"><Search className="h-3.5 w-3.5" />{isEvaluating ? 'Reviewing…' : 'Review sample'}</button></aside></div></div><p className="mt-6 text-center text-sm text-[#69747a]">Want the full set of tools? <Link className="font-semibold text-[#a84c38] underline decoration-[#d9ad9e] underline-offset-4" to="/features">Explore what’s included</Link>.</p></section>
+    </main>
   );
 };
 

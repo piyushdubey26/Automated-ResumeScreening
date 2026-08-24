@@ -62,6 +62,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, [token]);
 
+  useEffect(() => {
+    const syncSubscription = () => {
+      const savedUser = localStorage.getItem('resumeai_user');
+      if (savedUser) setUser(formatUser(JSON.parse(savedUser)));
+    };
+    window.addEventListener('resumeai-subscription-updated', syncSubscription);
+    return () => window.removeEventListener('resumeai-subscription-updated', syncSubscription);
+  }, []);
+
   const login = async (email: string, password?: string) => {
     setIsLoading(true);
     try {

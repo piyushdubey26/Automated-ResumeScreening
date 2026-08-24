@@ -1,5 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme {
   --color-border: hsl(var(--border));
@@ -35,8 +35,8 @@
 }
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222.2 84% 4.9%;
+  --background: 48 20% 96%;
+  --foreground: 207 35% 16%;
 
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
@@ -44,7 +44,7 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: 221.2 83.2% 53.3%;
+  --primary: 200 38% 20%;
   --primary-foreground: 210 40% 98%;
 
   --secondary: 173.4 80.4% 33.3%;
@@ -63,7 +63,7 @@
   --input: 214.3 31.8% 91.4%;
   --ring: 221.2 83.2% 53.3%;
 
-  --radius: 0.75rem;
+  --radius: 0.375rem;
 }
 
 .dark {
@@ -97,12 +97,489 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-serif {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.site-header {
+  background: rgba(248, 247, 243, 0.94) !important;
+  border-color: #ded9cf !important;
+  box-shadow: none !important;
+}
+
+.site-header .bg-gradient-to-tr,
+.site-header .bg-indigo-600 {
+  background: #a84c38 !important;
+}
+
+.site-header .bg-clip-text { color: #1d3848 !important; -webkit-text-fill-color: currentColor; }
+.site-header .text-slate-400 { color: #69747a !important; }
+.site-header .bg-slate-900\/80 { background: #efeee8 !important; border-color: #d8d3c8 !important; }
+.site-header .text-slate-300 { color: #51616a !important; }
+.site-header .text-white { color: #fff !important; }
+
+.site-footer {
+  background: #1d3848 !important;
+  border-color: #315060 !important;
+}
+
+.plan-button-primary, .plan-button-secondary {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.plan-button-primary { background: #a84c38; color: white; }
+.plan-button-primary:hover { background: #8e3f2e; }
+.plan-button-primary:disabled { cursor: not-allowed; opacity: .65; }
+.plan-button-secondary { border: 1px solid #bdc5c2; color: #1d3848; }
+.plan-button-secondary:hover { border-color: #56737b; background: #f5f5f0; }
+
+/* Keep semantic colours readable whichever appearance is selected. */
+.dark .landing-page, .dark main.bg-\[\#f8f7f3\] { color: #1d2b3a; }
+.dark .site-header { background: rgba(248, 247, 243, .96) !important; }
+.dark .site-header .profile-trigger .text-slate-100 { color: #1d3848 !important; }
+.dark .site-footer .text-slate-400 { color: #b8c8cc !important; }
+.dark .site-footer .text-slate-300 { color: #dce6e6 !important; }
+
+/* These must come after the older light-mode compatibility rules above. */
+html:not(.dark) .site-footer,
+html:not(.dark) footer.site-footer {
+  background: #1d3848 !important;
+  color: #b8c8cc !important;
+}
+html:not(.dark) .site-footer .text-white { color: #fff !important; }
+html:not(.dark) .site-footer .text-slate-400 { color: #b8c8cc !important; }
+html:not(.dark) .site-footer .text-slate-300 { color: #dce6e6 !important; }
+html:not(.dark) .site-footer .text-\[\#b8c8cc\] { color: #b8c8cc !important; }
+html:not(.dark) .site-footer .text-\[\#dce6e6\] { color: #dce6e6 !important; }
+html:not(.dark) .site-footer .text-\[\#edbcae\] { color: #edbcae !important; }
+
+/* Dark mode uses quiet graphite, ink and a muted terracotta accent—not neon gradients. */
+.dark .bg-slate-950 { background-color: #141a1b !important; }
+.dark .bg-slate-900\/80, .dark .bg-slate-900\/90, .dark .bg-slate-900\/60 { background-color: #202a2b !important; }
+.dark .bg-slate-900, .dark .bg-slate-800\/60 { background-color: #263334 !important; }
+.dark .bg-slate-800 { background-color: #303d3e !important; }
+.dark .border-slate-800, .dark .border-slate-800\/80, .dark .border-slate-900 { border-color: #3a4949 !important; }
+.dark .bg-gradient-to-r, .dark .bg-gradient-to-b, .dark .bg-gradient-to-tr { background-image: none !important; background-color: #a84c38 !important; }
+.dark .shadow-indigo-600\/30, .dark .shadow-purple-600\/30, .dark .shadow-indigo-950 { --tw-shadow-color: rgba(0,0,0,.18) !important; }
+.dark .text-indigo-400, .dark .text-indigo-300 { color: #d8a798 !important; }
+.dark .text-purple-400, .dark .text-purple-300 { color: #cbb5a6 !important; }
+
+/* Matte-black dark appearance: keep hierarchy through borders and spacing, not colored text. */
+html.dark, html.dark body, html.dark #root {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+html.dark .bg-slate-950,
+html.dark .bg-slate-900,
+html.dark .bg-slate-900\/80,
+html.dark .bg-slate-900\/90,
+html.dark .bg-slate-900\/60,
+html.dark .bg-slate-950\/80,
+html.dark .bg-slate-950\/60,
+html.dark .bg-slate-800,
+html.dark .bg-slate-800\/60,
+html.dark .bg-slate-800\/40,
+html.dark .bg-gradient-to-r,
+html.dark .bg-gradient-to-b,
+html.dark .bg-gradient-to-tr {
+  background: #181818 !important;
+  background-image: none !important;
+}
+html.dark .border-slate-800,
+html.dark .border-slate-800\/80,
+html.dark .border-slate-800\/40,
+html.dark .border-slate-900,
+html.dark .border-slate-700,
+html.dark .border-slate-700\/60 {
+  border-color: #343434 !important;
+}
+html.dark .text-slate-100,
+html.dark .text-slate-200,
+html.dark .text-slate-300,
+html.dark .text-slate-400,
+html.dark .text-slate-500,
+html.dark .text-indigo-300,
+html.dark .text-indigo-400,
+html.dark .text-purple-300,
+html.dark .text-purple-400,
+html.dark .text-pink-400,
+html.dark .text-violet-400,
+html.dark .text-sky-400,
+html.dark .text-amber-400,
+html.dark .text-emerald-400,
+html.dark .text-rose-400 {
+  color: #ffffff !important;
+}
+html.dark .site-header,
+html.dark .site-footer {
+  background: #111111 !important;
+  border-color: #343434 !important;
+}
+html.dark .site-header .bg-gradient-to-tr,
+html.dark .site-header .bg-indigo-600,
+html.dark .site-header .bg-slate-900\/80 {
+  background: #181818 !important;
+}
+html.dark .site-header .bg-clip-text { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
+html.dark input, html.dark textarea, html.dark select {
+  background: #0d0d0d !important;
+  color: #ffffff !important;
+  border-color: #3b3b3b !important;
+}
+
+/* Normalize pages that use bespoke warm surfaces so they still follow dark mode. */
+html.dark main,
+html.dark .landing-page,
+html.dark [class*="bg-[#f8f7f3]"],
+html.dark [class*="bg-[#f4f2ec]"],
+html.dark [class*="bg-[#efeee8]"] {
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+html.dark [class*="bg-[#fffefa]"],
+html.dark [class*="bg-[#f7f6f1]"],
+html.dark [class*="bg-[#fcfbf8]"],
+html.dark [class*="bg-white"] {
+  background: #181818 !important;
+  color: #ffffff !important;
+}
+html.dark .landing-page [class*="text-[#"],
+html.dark main [class*="text-[#"] {
+  color: #ffffff !important;
+}
+
+/* Quiet light canvas inspired by HelixFjord's calm product surfaces. */
+html:not(.dark),
+html:not(.dark) body,
+html:not(.dark) #root {
+  background-color: #f6f5f0 !important;
+  color: #111111 !important;
+}
+html:not(.dark) body {
+  background-image: radial-gradient(circle at 1px 1px, rgba(20, 20, 20, .045) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+html:not(.dark) .bg-slate-950,
+html:not(.dark) .bg-slate-900,
+html:not(.dark) .bg-slate-900\/80,
+html:not(.dark) .bg-slate-900\/90,
+html:not(.dark) .bg-slate-900\/60,
+html:not(.dark) .bg-slate-950\/80,
+html:not(.dark) .bg-slate-950\/60,
+html:not(.dark) .bg-slate-800,
+html:not(.dark) .bg-slate-800\/60 {
+  background-color: #f6f5f0 !important;
+  background-image: none !important;
+}
+html:not(.dark) .border-slate-800,
+html:not(.dark) .border-slate-800\/80,
+html:not(.dark) .border-slate-800\/40,
+html:not(.dark) .border-slate-900,
+html:not(.dark) .border-slate-700 {
+  border-color: #d5d2ca !important;
+}
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200,
+html:not(.dark) .text-slate-300,
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-indigo-300,
+html:not(.dark) .text-indigo-400,
+html:not(.dark) .text-purple-300,
+html:not(.dark) .text-purple-400,
+html:not(.dark) .text-pink-400,
+html:not(.dark) .text-violet-400,
+html:not(.dark) .text-sky-400,
+html:not(.dark) .text-amber-400,
+html:not(.dark) .text-emerald-400,
+html:not(.dark) .text-rose-400 {
+  color: #111111 !important;
+}
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #fffefa !important;
+  color: #111111 !important;
+  border-color: #c9c6bd !important;
+}
+
+/* HelixTrack-inspired light system: one quiet canvas, paper surfaces, ink type. */
+html:not(.dark),
+html:not(.dark) body,
+html:not(.dark) #root,
+html:not(.dark) main,
+html:not(.dark) .min-h-screen {
+  background-color: #f4f2ec !important;
+  color: #111111 !important;
+}
+html:not(.dark) body { background-image: none; }
+html:not(.dark) header.site-header,
+html:not(.dark) footer.site-footer {
+  background: #f4f2ec !important;
+  border-color: #d8d4ca !important;
+  color: #111111 !important;
+}
+html:not(.dark) .site-footer .text-white,
+html:not(.dark) .site-footer .text-\[\#b8c8cc\],
+html:not(.dark) .site-footer .text-\[\#dce6e6\],
+html:not(.dark) .site-footer .text-slate-400,
+html:not(.dark) .site-footer .text-slate-300 { color: #111111 !important; }
+html:not(.dark) .site-footer .text-\[\#edbcae\] { color: #8e4a3a !important; }
+html:not(.dark) .bg-white,
+html:not(.dark) .bg-\[\#fffefa\],
+html:not(.dark) .bg-\[\#fff7ee\] { background-color: #fbfaf6 !important; }
+html:not(.dark) .shadow-xl,
+html:not(.dark) .shadow-2xl { --tw-shadow-color: rgba(28, 28, 24, .10) !important; }
+
+/* Single light-mode page canvas. Component cards can remain paper-white, but routes never diverge. */
+html:not(.dark) body,
+html:not(.dark) #root,
+html:not(.dark) main.min-h-screen,
+html:not(.dark) div.min-h-screen {
+  background-color: #f4f2ec !important;
+}
+
+/* Shared visual background from the attached reference image. */
+html:not(.dark) body,
+html.dark body {
+  background-color: #111111 !important;
+  background-image:
+    linear-gradient(rgba(246, 244, 238, .52), rgba(246, 244, 238, .52)),
+    url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html.dark body {
+  background-image:
+    linear-gradient(rgba(17, 17, 17, .48), rgba(17, 17, 17, .48)),
+    url('/resume-background.png') !important;
+}
+html:not(.dark) main,
+html:not(.dark) .min-h-screen {
+  background-color: rgba(246, 244, 238, .52) !important;
+  background-image: linear-gradient(rgba(246, 244, 238, .52), rgba(246, 244, 238, .52)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html.dark main,
+html.dark .min-h-screen {
+  background-color: rgba(17, 17, 17, .48) !important;
+  background-image: linear-gradient(rgba(17, 17, 17, .48), rgba(17, 17, 17, .48)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+
+/* Editorial pricing states: neutral by default, ink-and-rust only after selection. */
+.plan-card-default {
+  border-color: #d8d3c8 !important;
+  background: rgba(255, 254, 250, .92) !important;
+  color: #1d2b3a !important;
+  box-shadow: none !important;
+}
+.plan-card-selected {
+  border-color: #a84c38 !important;
+  background: #203b49 !important;
+  color: #fffaf4 !important;
+  box-shadow: 0 18px 38px rgba(32, 59, 73, .22) !important;
+}
+.plan-card-selected p:not(:first-child),
+.plan-card-selected span,
+.plan-card-selected li {
+  color: #d7e0df !important;
+}
+.plan-card-selected p:first-child { color: #edbcae !important; }
+.plan-card-selected .plan-button-secondary {
+  color: #fffaf4 !important;
+  border-color: #d7c7bb !important;
+  background: transparent !important;
+}
+.plan-card-selected .plan-button-secondary:hover {
+  color: #203b49 !important;
+  border-color: #fffaf4 !important;
+  background: #fffaf4 !important;
+}
+.plan-card:focus-visible {
+  outline: 2px solid #a84c38;
+  outline-offset: 3px;
+}
+html.dark .plan-card-default {
+  border-color: #393735 !important;
+  background: rgba(27, 27, 26, .9) !important;
+  color: #f4eee5 !important;
+}
+html.dark .plan-card-selected {
+  border-color: #c56a50 !important;
+  background: #25343a !important;
+}
+
+/* Replace the remaining electric-indigo action states with the brand rust accent. */
+html:not(.dark) .bg-indigo-600,
+html:not(.dark) .bg-purple-600,
+html:not(.dark) .bg-gradient-to-r.from-indigo-600.to-purple-600 {
+  background-color: #a84c38 !important;
+  background-image: none !important;
+}
+html.dark .bg-indigo-600,
+html.dark .bg-purple-600,
+html.dark .bg-gradient-to-r.from-indigo-600.to-purple-600 {
+  background-color: #b85e48 !important;
+  background-image: none !important;
+}
+
+/* Footer links stay legible after navigation and hover in the light theme. */
+html:not(.dark) .site-footer .footer-link,
+html:not(.dark) .site-footer .footer-link:visited {
+  color: #26353d !important;
+}
+html:not(.dark) .site-footer .footer-link:hover,
+html:not(.dark) .site-footer .footer-link:focus-visible {
+  color: #a84c38 !important;
+}
+html:not(.dark) .site-footer p,
+html:not(.dark) .site-footer span {
+  color: #26353d !important;
+}
+html:not(.dark) .site-footer p.text-xs {
+  color: #8e4a3a !important;
+}
+html.dark .site-footer .footer-link:hover,
+html.dark .site-footer .footer-link:focus-visible {
+  color: #edbcae !important;
+}
+
+/* Header navigation hover states need to remain obvious against both canvases. */
+html:not(.dark) .site-header nav a:hover,
+html:not(.dark) .site-header nav a:focus-visible {
+  background: #e7c9bd !important;
+  color: #24333b !important;
+  box-shadow: inset 0 -2px 0 #a84c38 !important;
+}
+html.dark .site-header nav a:hover,
+html.dark .site-header nav a:focus-visible {
+  background: #3b2a27 !important;
+  color: #fffaf4 !important;
+  box-shadow: inset 0 -2px 0 #c56a50 !important;
+}
+
+/* Admin workspace: keep light-mode surfaces steady instead of letting the image show through. */
+html:not(.dark) .admin-dashboard {
+  color: #1d2b3a !important;
+}
+html:not(.dark) .admin-dashboard > div > div {
+  border-color: #d8d3c8 !important;
+}
+html:not(.dark) .admin-dashboard .bg-gradient-to-br {
+  background: #fbfaf6 !important;
+}
+html:not(.dark) .admin-dashboard .bg-slate-900\/80,
+html:not(.dark) .admin-dashboard .bg-slate-900\/60,
+html:not(.dark) .admin-dashboard .bg-slate-800\/60 {
+  background: #fbfaf6 !important;
+}
+html:not(.dark) .admin-dashboard .text-white,
+html:not(.dark) .admin-dashboard .text-slate-100,
+html:not(.dark) .admin-dashboard .text-slate-200,
+html:not(.dark) .admin-dashboard .text-slate-300 {
+  color: #1d2b3a !important;
+}
+html:not(.dark) .admin-dashboard .text-slate-400,
+html:not(.dark) .admin-dashboard .text-slate-500,
+html:not(.dark) .admin-dashboard .text-slate-600 {
+  color: #607078 !important;
+}
+html:not(.dark) .admin-dashboard button.bg-indigo-600 {
+  background: #a84c38 !important;
+  color: #fffaf4 !important;
+}
+html:not(.dark) .admin-dashboard button:not(.bg-indigo-600):hover {
+  background: #eaded6 !important;
+  color: #26353d !important;
+}
+html:not(.dark) .admin-dashboard input,
+html:not(.dark) .admin-dashboard select {
+  background: #fffefa !important;
+  border-color: #c9c6bd !important;
+  color: #1d2b3a !important;
+}
+html.dark .admin-dashboard .bg-gradient-to-br {
+  background: rgba(25, 25, 24, .96) !important;
+}
+html.dark .feature-comparison h2,
+html.dark .feature-comparison .text-\[\#1d2b3a\],
+html.dark .feature-comparison .text-\[\#26353d\] {
+  color: #f4eee5 !important;
+}
+html.dark .feature-comparison .text-\[\#607078\] {
+  color: #b9c2c0 !important;
+}
+html.dark .feature-comparison > div:last-child {
+  border-color: #3a3935 !important;
+  background: #1b1b1a !important;
+}
+html.dark .feature-comparison > div:last-child > div:first-child {
+  background: #272a28 !important;
+  border-color: #3a3935 !important;
+  color: #f4eee5 !important;
+}
+html.dark .feature-comparison > div:last-child > div:not(:first-child) {
+  border-color: #343532 !important;
+}
+
+/* Put the image on route roots as well as the app shell; this prevents opaque page wrappers from hiding it. */
+html:not(.dark) main,
+html:not(.dark) .min-h-screen {
+  background-color: rgba(246, 244, 238, .52) !important;
+  background-image: linear-gradient(rgba(246, 244, 238, .52), rgba(246, 244, 238, .52)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html.dark main,
+html.dark .min-h-screen {
+  background-color: rgba(17, 17, 17, .48) !important;
+  background-image: linear-gradient(rgba(17, 17, 17, .48), rgba(17, 17, 17, .48)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html:not(.dark) .site-header { background: rgba(246, 244, 238, .90) !important; }
+html.dark .site-header { background: rgba(17, 17, 17, .90) !important; }
+html:not(.dark) .site-footer { background: rgba(246, 244, 238, .94) !important; }
+html.dark .site-footer { background: rgba(17, 17, 17, .94) !important; }
+
+/* The application wrapper sits above body, so it needs the shared image too. */
+html:not(.dark) #root {
+  background-color: #f6f4ee !important;
+  background-image: linear-gradient(rgba(246, 244, 238, .52), rgba(246, 244, 238, .52)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html.dark #root {
+  background-color: #111111 !important;
+  background-image: linear-gradient(rgba(17, 17, 17, .48), rgba(17, 17, 17, .48)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
 }
 
 #root {
@@ -389,3 +866,81 @@ html:not(.dark) .divide-slate-850 > :not([hidden]) ~ :not([hidden]) {
   transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease;
 }
 
+/* Final theme surfaces: keep these after all compatibility overrides. */
+html:not(.dark) body,
+html:not(.dark) #root {
+  background-color: #f6f4ee !important;
+  background-image: linear-gradient(rgba(246, 244, 238, .52), rgba(246, 244, 238, .52)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html.dark body,
+html.dark #root {
+  background-color: #111111 !important;
+  background-image: linear-gradient(rgba(17, 17, 17, .48), rgba(17, 17, 17, .48)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html:not(.dark) main,
+html:not(.dark) .min-h-screen {
+  background-color: rgba(246, 244, 238, .62) !important;
+  background-image: linear-gradient(rgba(246, 244, 238, .62), rgba(246, 244, 238, .62)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+html.dark main,
+html.dark .min-h-screen {
+  background-color: rgba(17, 17, 17, .52) !important;
+  background-image: linear-gradient(rgba(17, 17, 17, .52), rgba(17, 17, 17, .52)), url('/resume-background.png') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+}
+
+/* Final dark-mode readability pass for components that use explicit light-theme ink tokens. */
+html.dark .site-header .profile-trigger .text-slate-100,
+html.dark .site-header .profile-trigger .text-slate-300,
+html.dark .site-header .profile-trigger .text-slate-400,
+html.dark [class*="text-[#1d2b3a]"],
+html.dark [class*="text-[#26353d]"],
+html.dark [class*="text-[#304954]"],
+html.dark [class*="text-[#465961]"],
+html.dark [class*="text-[#607078]"],
+html.dark [class*="text-[#667177]"],
+html.dark [class*="text-[#69747a]"] {
+  color: #f4eee5 !important;
+}
+html.dark [class*="text-[#607078]"],
+html.dark [class*="text-[#667177]"],
+html.dark [class*="text-[#69747a]"] {
+  color: #b9c2c0 !important;
+}
+html.dark .site-header .profile-trigger {
+  color: #f4eee5 !important;
+}
+html.dark .landing-page button:not(.bg-white) {
+  color: #c5cecb !important;
+}
+html.dark .landing-page button.bg-white {
+  color: #1d2b3a !important;
+}
+html.dark .landing-page button {
+  color: #243a43 !important;
+}
+html.dark .landing-page button.bg-white {
+  background: #f4eee5 !important;
+  color: #1d2b3a !important;
+}
+html.dark .landing-page span.rounded-full {
+  background: #d9e9df !important;
+  color: #214735 !important;
+}
+html.dark [class*="text-[#35634c]"] {
+  color: #b9e1c8 !important;
+}
+html.dark [class*="bg-[#e6eee9]"] {
+  background-color: #d9e9df !important;
+}

@@ -1,78 +1,48 @@
-import React from 'react';
-import { Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Clock3, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import type { User } from '../types';
+
+const LOCAL_DB_KEY = 'resumeai_local_db';
 
 export const PricingPage: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-        <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30 uppercase tracking-widest">
-          Transparent Plans
-        </span>
-        <h1 className="text-4xl font-extrabold text-white sm:text-5xl">Plans Built for Students & Recruiters</h1>
-        <p className="text-slate-400 text-lg">Choose the tier that aligns with your job hunt or recruiting workflow.</p>
+  const { user, demoLogin } = useAuth();
+  const [notice, setNotice] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const requestPro = async (tier = 'Job Seeker Pro') => {
+    if (!user) { await demoLogin('seeker'); setNotice('You’re signed in. Select Pro again to send your request.'); return; }
+    if (user.userType !== 'seeker') { setNotice('Pro is available for job seeker accounts.'); return; }
+    const updated: User = { ...user, plan: 'pro', subscriptionStatus: 'pending', subscriptionRequestedAt: new Date().toISOString() };
+    const saved = localStorage.getItem(LOCAL_DB_KEY);
+    const db = saved ? JSON.parse(saved) : { users: [], resumes: [] };
+    const index = db.users.findIndex((item: User) => item.id === user.id || item.email === user.email);
+    if (index >= 0) db.users[index] = updated; else db.users.push(updated);
+    localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
+    localStorage.setItem('resumeai_user', JSON.stringify(updated));
+    window.dispatchEvent(new Event('resumeai-subscription-updated'));
+    setNotice(`Your ${tier} request is pending admin approval. You will keep Free access until it is approved.`);
+  };
+  const status = user?.subscriptionStatus;
+  const isRecruiter = user?.userType === 'recruiter';
+  const isSeeker = user?.userType === 'seeker';
+
+  return <main className="min-h-screen bg-[#f8f7f3] px-5 py-16 text-[#1d2b3a] sm:px-8 lg:py-24">
+    <div className="mx-auto max-w-6xl">
+      <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[.16em] text-[#a84c38]">Simple plans, clear access</p><h1 className="mt-4 font-serif text-5xl tracking-[-.04em] sm:text-6xl">Choose the support you need.</h1><p className="mt-5 text-lg leading-8 text-[#607078]">No confusing credits. The Pro request is reviewed by an administrator before paid access is activated.</p></div>
+      {notice && <div className="mt-8 flex items-start gap-3 border border-[#d9c8b5] bg-[#fff7ee] p-4 text-sm text-[#6d4c2d]"><Clock3 className="mt-0.5 h-4 w-4 shrink-0" />{notice}</div>}
+      <div className={`mt-12 grid gap-5 ${isRecruiter && user ? 'mx-auto max-w-xl' : isSeeker && user ? 'lg:grid-cols-3' : 'lg:grid-cols-3'}`}>
+        {(!isRecruiter || !user) && <>
+          <Plan id="free" selected={selectedPlan === 'free'} onSelect={setSelectedPlan} eyebrow="For students" name="Free" price="$0" period="forever" description="A solid starting point for checking the fundamentals." features={['5 resume reviews each month', 'Engineering and data science rubrics', 'Clear, actionable feedback', 'Profile links and projects']} action={<a href="/dashboard" className="plan-button-secondary">Start with Free</a>} />
+          <Plan id="pro" selected={selectedPlan === 'pro'} onSelect={setSelectedPlan} eyebrow="For active applicants" name="Job Seeker Pro" price="$12" period="per month" description="Everything you need to tailor each application with confidence." features={['Unlimited resume reviews', 'All four role rubrics', 'JD match and skills-gap reports', 'Bullet rewriter and mock interviews', 'Profile links and projects']} action={<button onClick={() => requestPro()} className="plan-button-primary">{status === 'approved' ? 'Pro is active' : status === 'pending' ? 'Approval pending' : 'Request Pro access'}</button>} />
+          {isSeeker && <Plan id="career-max" selected={selectedPlan === 'career-max'} onSelect={setSelectedPlan} eyebrow="For ambitious candidates" name="Career Max" price="$49" period="per month" description="A complete application workspace for candidates targeting their next big role." features={['Everything in Job Seeker Pro', 'Unlimited resume and JD comparisons', 'Portfolio, GitHub, LinkedIn and coding links', 'Priority feedback and recruiter-ready exports', 'Advanced mock interview practice']} action={<button onClick={() => requestPro('Career Max')} className="plan-button-primary">{status === 'approved' ? 'Career Max active' : status === 'pending' ? 'Approval pending' : 'Request Career Max'}</button>} />}
+        </>}
+        {(!isSeeker || !user) && <Plan id="recruiter" selected={selectedPlan === 'recruiter'} onSelect={setSelectedPlan} eyebrow="For hiring teams" name="Recruiter" price="$49" period="per month" description="A focused workspace for screening and prioritising applicants." features={['Bulk resume uploads', 'Candidate ranking and filters', 'Exportable shortlists']} action={<a href="/recruiter" className="plan-button-secondary">Go to recruiter hub</a>} />}
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        {/* Tier 1 */}
-        <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between space-y-6">
-          <div>
-            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider block">Student / Free</span>
-            <div className="text-4xl font-extrabold text-white mt-2">$0 <span className="text-xs font-normal text-slate-400">/ forever</span></div>
-            <p className="text-slate-400 text-xs mt-3">Essential role scoring and basic ATS checks for students.</p>
-            <ul className="mt-6 space-y-3 text-xs text-slate-300">
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>5 Resume Scans / month</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>SDE & Data Science Rubrics</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>Actionable Feedback Cards</span></li>
-            </ul>
-          </div>
-          <a href="/dashboard" className="w-full py-3 text-center bg-slate-850 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-slate-800 transition-colors">
-            Get Started Free
-          </a>
-        </div>
-
-        {/* Tier 2 (Highlighted) */}
-        <div className="p-8 rounded-3xl bg-gradient-to-b from-indigo-950/80 to-slate-900 border-2 border-indigo-500 flex flex-col justify-between space-y-6 relative shadow-2xl shadow-indigo-950">
-          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-[10px] uppercase tracking-wider rounded-full shadow">
-            Most Popular
-          </div>
-          <div>
-            <span className="text-xs font-bold text-indigo-300 uppercase tracking-wider block">Job Seeker Pro</span>
-            <div className="text-4xl font-extrabold text-white mt-2">$12 <span className="text-xs font-normal text-slate-400">/ month</span></div>
-            <p className="text-slate-400 text-xs mt-3">Full suite with JD matching, AI bullet rewriter, and mock interview prep.</p>
-            <ul className="mt-6 space-y-3 text-xs text-slate-300">
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>Unlimited Resume Scans</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>All 4 Role Rubrics (SDE, DS, Marketing, PM)</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>Unlimited JD Match & Gap Reports</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>AI Bullet Point Rewriter</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>AI Mock Interview Generator</span></li>
-            </ul>
-          </div>
-          <a href="/dashboard" className="w-full py-3 text-center bg-indigo-600 rounded-xl text-xs font-bold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition-colors">
-            Start Seeker Pro Trial
-          </a>
-        </div>
-
-        {/* Tier 3 */}
-        <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between space-y-6">
-          <div>
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider block">Recruiter / Team</span>
-            <div className="text-4xl font-extrabold text-white mt-2">$49 <span className="text-xs font-normal text-slate-400">/ month</span></div>
-            <p className="text-slate-400 text-xs mt-3">Bulk multi-candidate screening, JD posting, and ranked shortlists.</p>
-            <ul className="mt-6 space-y-3 text-xs text-slate-300">
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>Bulk Resume Upload & Screening</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>Candidate Ranking & Match % Filter</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /> <span>Recruiter Shortlist Export</span></li>
-            </ul>
-          </div>
-          <a href="/recruiter" className="w-full py-3 text-center bg-purple-600 rounded-xl text-xs font-bold text-white hover:bg-purple-500 transition-colors">
-            Access Recruiter Hub
-          </a>
-        </div>
-
-      </div>
+      <div className="mt-10 flex items-start gap-3 border-t border-[#ded9cf] pt-6 text-sm text-[#667177]"><ShieldCheck className="h-5 w-5 shrink-0 text-[#4d8b68]" /><p><strong className="text-[#304954]">Admin approval:</strong> when a seeker requests Pro, the request appears in the Admin dashboard. An admin can approve or decline it; the plan state is saved in this demo’s browser data.</p></div>
     </div>
-  );
+  </main>;
 };
+
+const Plan: React.FC<{ id: string; selected: boolean; onSelect: (id: string) => void; eyebrow: string; name: string; price: string; period: string; description: string; features: string[]; action: React.ReactNode }> = ({ id, selected, onSelect, eyebrow, name, price, period, description, features, action }) => <section role="button" tabIndex={0} aria-pressed={selected} onClick={() => onSelect(id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelect(id); }} className={`plan-card flex min-h-[470px] cursor-pointer flex-col border p-7 ${selected ? 'plan-card-selected' : 'plan-card-default'}`}><p className="text-xs font-bold uppercase tracking-[.14em] text-[#a84c38]">{eyebrow}</p><h2 className="mt-4 font-serif text-3xl">{name}</h2><div className="mt-5 flex items-end gap-2"><span className="font-serif text-6xl tracking-[-.05em]">{price}</span><span className="mb-2 text-sm text-[#69747a]">{period}</span></div><p className="mt-6 min-h-12 text-sm leading-6 text-[#607078]">{description}</p><ul className="mt-7 space-y-3 text-sm text-[#465961]">{features.map(feature => <li key={feature} className="flex gap-2"><Check className={`h-4 w-4 shrink-0 ${selected ? 'text-[#a84c38]' : 'text-[#4d8b68]'}`} />{feature}</li>)}</ul><div className="mt-auto pt-8">{action}</div></section>;
 
 export default PricingPage;

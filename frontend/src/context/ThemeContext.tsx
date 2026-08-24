@@ -8,20 +8,20 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
       root.style.colorScheme = 'dark';
-      document.body.style.backgroundColor = '#020617'; // slate-950
-      document.body.style.color = '#f1f5f9'; // slate-100
+      document.body.style.backgroundColor = '#020617';
+      document.body.style.color = '#f1f5f9';
     } else {
       root.classList.remove('dark');
       root.style.colorScheme = 'light';
-      document.body.style.backgroundColor = '#f8fafc'; // slate-50
-      document.body.style.color = '#0f172a'; // slate-900
+      document.body.style.backgroundColor = '#f8f7f3';
+      document.body.style.color = '#1d2b3a';
     }
   }, [theme]);
 

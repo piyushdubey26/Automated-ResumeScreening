@@ -1,278 +1,55 @@
 import React, { useState } from 'react';
 import { sampleJDsText, recruiterApi } from '../services/api';
 import type { RecruiterCandidate } from '../types';
-import {
-  FileCheck2,
-  Sparkles,
-  Eye
-} from 'lucide-react';
+import { Activity, BarChart3, BriefcaseBusiness, Check, ChevronDown, FileText, LayoutDashboard, Search, Settings, Sparkles, UploadCloud, UserRound, Users, X, Brain, SlidersHorizontal } from 'lucide-react';
+
+const roleLabels: Record<string, string> = { sde: 'Software Engineer', 'data-science': 'Data Scientist', marketing: 'Marketing', 'product-management': 'Product Manager' };
 
 export const RecruiterDashboardPage: React.FC = () => {
-  const [jdTitle, setJdTitle] = useState('Senior Full Stack Engineer (SDE II)');
+  const [jdTitle, setJdTitle] = useState('Software Engineer');
   const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>('sde');
   const [jdText, setJdText] = useState(sampleJDsText.sde);
-
-  // Get initial candidates dynamically from local storage database if available
-  const getInitialCandidates = (): RecruiterCandidate[] => {
-    let name = 'Alex Rivera';
-    let email = 'alex.rivera@example.com';
-    let score = 88;
-    let text = 'Full Stack Engineer. Built Node.js, React, PostgreSQL, Docker, AWS microservices handling 2M+ requests.';
-
-    try {
-      const savedUserStr = localStorage.getItem('resumeai_user');
-      if (savedUserStr) {
-        const savedUser = JSON.parse(savedUserStr);
-        if (savedUser && savedUser.name && savedUser.name !== 'Recruiter Admin') {
-          name = savedUser.name;
-          email = savedUser.email;
-        }
-      }
-    } catch (e) {}
-
-    // Check if there is an uploaded resume in the database
-    try {
-      const savedDb = localStorage.getItem('resumeai_local_db');
-      if (savedDb) {
-        const db = JSON.parse(savedDb);
-        if (db.resumes && db.resumes.length > 0) {
-          // Get the last parsed resume
-          const lastResume = db.resumes[db.resumes.length - 1];
-          return [
-            {
-              id: lastResume.id,
-              recruiterJobId: 'j-1',
-              candidateName: lastResume.parsedSections.contact.name || name,
-              candidateEmail: lastResume.parsedSections.contact.email || email,
-              targetRole: lastResume.targetRole,
-              resumeText: lastResume.rawText,
-              overallScore: lastResume.score,
-              jdMatchPct: lastResume.score >= 80 ? 92 : lastResume.score >= 65 ? 74 : 58,
-              status: lastResume.score >= 80 ? 'Shortlisted' : lastResume.score >= 65 ? 'Under Review' : 'Rejected',
-              appliedAt: lastResume.createdAt
-            },
-            { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya.sharma@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark. Built BERT NLP models.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: '2026-08-11T14:30:00Z' },
-            { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david.chen@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python, Django, MySQL, AWS REST APIs.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: '2026-08-10T09:15:00Z' },
-            { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria.garcia@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js, HTML, CSS, Webpack.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: '2026-08-09T16:45:00Z' }
-          ];
-        }
-      }
-    } catch (e) {}
-
-    return [
-      { id: 'c-1', recruiterJobId: 'j-1', candidateName: name, candidateEmail: email, targetRole: 'sde', resumeText: text, overallScore: score, jdMatchPct: 92, status: 'Shortlisted', appliedAt: '2026-08-12T10:00:00Z' },
-      { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya.sharma@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark. Built BERT NLP models.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: '2026-08-11T14:30:00Z' },
-      { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david.chen@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python, Django, MySQL, AWS REST APIs.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: '2026-08-10T09:15:00Z' },
-      { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria.garcia@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js, HTML, CSS, Webpack.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: '2026-08-09T16:45:00Z' }
-    ];
-  };
-
-  // Shortlist Candidates State
-  const [candidates, setCandidates] = useState<RecruiterCandidate[]>(getInitialCandidates);
-
+  const [activeNav, setActiveNav] = useState('Dashboard');
+  const [candidates, setCandidates] = useState<RecruiterCandidate[]>([
+    { id: 'c-1', recruiterJobId: 'j-1', candidateName: 'Rahul Sharma', candidateEmail: 'rahul.sharma@example.com', targetRole: 'sde', resumeText: 'Full-stack engineer with React, Node.js, SQL, AWS and Docker experience.', overallScore: 94, jdMatchPct: 94, status: 'Shortlisted', appliedAt: '2026-08-12T10:00:00Z' },
+    { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Singh', candidateEmail: 'priya.singh@example.com', targetRole: 'sde', resumeText: 'Software engineer with React, Python, SQL and cloud experience.', overallScore: 89, jdMatchPct: 89, status: 'Under Review', appliedAt: '2026-08-11T14:30:00Z' },
+    { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'Aman Gupta', candidateEmail: 'aman.gupta@example.com', targetRole: 'sde', resumeText: 'Backend developer with Node.js, MongoDB and REST API experience.', overallScore: 84, jdMatchPct: 84, status: 'Under Review', appliedAt: '2026-08-10T09:15:00Z' },
+    { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Neha Verma', candidateEmail: 'neha.verma@example.com', targetRole: 'sde', resumeText: 'Frontend developer with React and Java experience.', overallScore: 71, jdMatchPct: 71, status: 'Rejected', appliedAt: '2026-08-09T16:45:00Z' },
+  ]);
+  const [selectedCandidate, setSelectedCandidate] = useState<RecruiterCandidate | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'Shortlisted' | 'Under Review' | 'Rejected'>('all');
   const [isScreening, setIsScreening] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState<RecruiterCandidate | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
 
-  // Trigger Bulk Multi-Candidate Screening
-  const handleBulkScreen = async () => {
-    setIsScreening(true);
-    try {
-      const res = await recruiterApi.bulkScreen([], jdText, targetRole);
-      setCandidates(res.shortlist);
-    } finally {
-      setIsScreening(false);
-    }
-  };
+  const handleBulkScreen = async () => { setIsScreening(true); try { const res = await recruiterApi.bulkScreen([], jdText, targetRole); if (res.shortlist?.length) setCandidates(res.shortlist); } finally { setIsScreening(false); } };
+  const updateStatus = (id: string, status: RecruiterCandidate['status']) => setCandidates(prev => prev.map(c => c.id === id ? { ...c, status } : c));
+  const filtered = candidates.filter(c => statusFilter === 'all' || c.status === statusFilter).sort((a, b) => b.jdMatchPct - a.jdMatchPct);
+  const askRecruiter = () => { if (!question.trim()) return; const top = [...candidates].sort((a, b) => b.jdMatchPct - a.jdMatchPct).slice(0, 3); setAnswer(`I found ${candidates.length} candidates. Top matches: ${top.map((c, i) => `${i + 1}. ${c.candidateName} (${c.jdMatchPct}%)`).join('  ')}`); };
+  const navItems = [[LayoutDashboard, 'Dashboard'], [Users, 'Candidates'], [FileText, 'Resume Screening'], [BriefcaseBusiness, 'Jobs'], [Brain, 'AI Recruiter'], [BarChart3, 'Analytics']] as const;
+  const stats: Array<{ label: string; value: string; change: string; Icon: React.ElementType }> = [{ label: 'Candidates', value: '1,248', change: '↑ 12%', Icon: Users }, { label: 'Screened', value: '932', change: '↑ 18%', Icon: FileText }, { label: 'Shortlisted', value: '127', change: '↑ 8%', Icon: Check }, { label: 'Active Jobs', value: '12', change: '', Icon: BriefcaseBusiness }];
 
-  // Update Status
-  const handleStatusChange = (id: string, newStatus: 'Shortlisted' | 'Under Review' | 'Rejected') => {
-    setCandidates(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
-  };
+  return <div className="recruiter-workspace min-h-screen bg-[#f5f7fb] text-[#172033]">
+    <aside className="fixed inset-y-0 left-0 z-20 hidden flex-col bg-[#172033] px-4 py-6 text-white lg:flex" style={{ width: 248 }}><div className="flex items-center gap-2 border-b border-white/10 px-3 pb-7"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#b85e48]"><Sparkles className="h-5 w-5" /></span><span className="text-xl font-semibold tracking-tight">Recruit<span className="text-[#e4a18e]">AI</span></span></div><nav className="mt-8 space-y-1">{navItems.map(([Icon, label]) => <button key={label} onClick={() => setActiveNav(label)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${activeNav === label ? 'bg-[#b85e48] text-white shadow-lg shadow-black/15' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav><div className="mt-auto space-y-1 border-t border-white/10 pt-5"><button onClick={() => setActiveNav('Settings')} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-300 hover:bg-white/10"><Settings className="h-4 w-4" />Settings</button><button onClick={() => setActiveNav('Profile')} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-300 hover:bg-white/10"><UserRound className="h-4 w-4" />Profile</button></div></aside>
 
-  const filteredCandidates = candidates.filter(c => {
-    return statusFilter === 'all' || c.status === statusFilter;
-  });
+    <div className="lg:pl-[248px]"><header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e4e8ef] bg-white/95 px-5 py-4 backdrop-blur sm:px-8"><div className="flex items-center gap-3 lg:hidden"><Sparkles className="h-5 w-5 text-[#b85e48]" /><span className="font-semibold">RecruitAI</span></div><div className="relative hidden max-w-md flex-1 md:block"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#97a1b1]" /><input className="w-full rounded-xl border border-[#e4e8ef] bg-[#f7f9fc] py-2.5 pl-10 pr-4 text-sm outline-none focus:border-[#b85e48]" placeholder="Search candidates, jobs, or skills..." /></div><div className="flex items-center gap-3"><button className="rounded-xl border border-[#e4e8ef] p-2 text-[#657084]"><Activity className="h-4 w-4" /></button><div className="flex items-center gap-2 rounded-xl border border-[#e4e8ef] px-2.5 py-1.5"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ead7d0] text-sm font-semibold text-[#8f4938]">AR</span><span className="hidden text-left text-xs sm:block"><strong className="block text-[#172033]">Alex Rivera</strong><span className="text-[#7b8798]">Recruiter</span></span><ChevronDown className="h-4 w-4 text-[#97a1b1]" /></div></div></header>
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
-      
-      {/* RECRUITER HEADER */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-        <div>
-          <span className="text-xs font-bold text-purple-400 uppercase tracking-widest bg-purple-500/20 px-2.5 py-0.5 rounded border border-purple-500/30">
-            Recruiter Talent Portal
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">Multi-Candidate Resume Screening</h1>
-          <p className="text-xs text-slate-400">Post job descriptions, bulk upload applicant resumes, and manage ranked shortlists.</p>
-        </div>
+      <main className="mx-auto max-w-[1500px] space-y-7 px-5 py-7 sm:px-8"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-medium text-[#b85e48]">AI Recruiter workspace</p><h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#172033]">Good afternoon, Recruiter 👋</h1><p className="mt-1 text-sm text-[#68758a]">Find the best candidates without manually reviewing every resume.</p></div><button onClick={() => alert('Feature coming soon!')} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#b85e48] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#994a39]"><BriefcaseBusiness className="h-4 w-4" />+ Create Job</button></div>
 
-        <button
-          onClick={handleBulkScreen}
-          disabled={isScreening}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-2xl shadow-xl shadow-purple-600/30 transition-all flex items-center space-x-2 shrink-0"
-        >
-          {isScreening ? (
-            <span>Screening Applicant Batch...</span>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Run Automated Bulk Screening</span>
-            </>
-          )}
-        </button>
-      </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{stats.map(({ label, value, change, Icon }) => <div key={label} className="rounded-2xl border border-[#e3e8f0] bg-white p-5 shadow-[0_8px_24px_rgba(20,35,60,.04)]"><div className="flex items-center justify-between"><span className="text-sm text-[#68758a]">{label}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f0e4df] text-[#b85e48]"><Icon className="h-4 w-4" /></span></div><p className="mt-3 text-2xl font-semibold text-[#172033]">{value}</p>{change && <p className="mt-1 text-xs font-medium text-[#3d956e]">{change} this month</p>}</div>)}</div>
+        <section className="rounded-3xl border border-[#e1e7ef] bg-white p-5 shadow-[0_12px_32px_rgba(20,35,60,.05)] sm:p-7"><div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#b85e48]">Your pipeline</p><h2 className="mt-1 text-xl font-semibold text-[#172033]">Active jobs</h2></div><button onClick={() => alert('Feature coming soon!')} className="text-sm font-semibold text-[#b85e48]">View all</button></div><div className="mt-5 grid gap-3 md:grid-cols-3">{[['Senior Frontend Engineer', '142 candidates', '23 shortlisted', 'Screening complete'], ['Product Designer', '86 candidates', '41 resumes remaining', 'In progress'], ['Backend Engineer', '200 candidates', '18 shortlisted', 'Screening complete']].map(([title, count, shortlisted, status]) => <button key={title} onClick={() => { setJdTitle(title); setActiveNav('Resume Screening'); }} className="rounded-2xl border border-[#e6eaf0] bg-[#fbfcfe] p-4 text-left transition hover:border-[#b85e48] hover:bg-[#fffaf8]"><div className="flex items-start justify-between gap-3"><span className="font-semibold text-[#172033]">{title}</span><BriefcaseBusiness className="h-4 w-4 text-[#b85e48]" /></div><p className="mt-3 text-sm text-[#68758a]">{count} · {shortlisted}</p><span className="mt-3 inline-block rounded-full bg-[#edf7f2] px-2.5 py-1 text-xs font-semibold text-[#3d956e]">{status}</span></button>)}</div></section>
 
-      {/* JOB DESCRIPTION CONFIG & CANDIDATE STATS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
-        {/* Left: JD Setup */}
-        <div className="lg:col-span-1 bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-4">
-          <h3 className="font-bold text-white text-base flex items-center space-x-2">
-            <FileCheck2 className="w-5 h-5 text-purple-400" />
-            <span>Active Job Posting</span>
-          </h3>
+        <section className="rounded-3xl border border-[#e1e7ef] bg-white p-5 shadow-[0_12px_32px_rgba(20,35,60,.05)] sm:p-7"><div className="flex flex-col justify-between gap-4 border-b border-[#edf0f4] pb-5 sm:flex-row sm:items-start"><div><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f0e4df] text-[#b85e48]"><Sparkles className="h-4 w-4" /></span><h2 className="text-xl font-semibold text-[#172033]">AI Resume Screening</h2></div><p className="mt-2 text-sm text-[#68758a]">Upload resumes and let RecruitAI rank candidates against your job description.</p></div><span className="rounded-full bg-[#edf7f2] px-3 py-1 text-xs font-semibold text-[#3d956e]">AI ready</span></div><div className="mt-6 grid gap-5 lg:grid-cols-[.9fr_1.1fr]"><div className="space-y-4"><label className="block text-sm font-semibold text-[#344054]">Job Role<select value={targetRole} onChange={e => setTargetRole(e.target.value as typeof targetRole)} className="mt-2 w-full rounded-xl border border-[#dfe5ed] bg-[#fbfcfe] px-3 py-3 text-sm text-[#172033] outline-none focus:border-[#b85e48]"><option value="sde">Software Engineer</option><option value="data-science">Data Scientist</option><option value="marketing">Marketing</option><option value="product-management">Product Manager</option></select></label><label className="block text-sm font-semibold text-[#344054]">Job Description<textarea value={jdText} onChange={e => setJdText(e.target.value)} rows={5} className="mt-2 w-full resize-none rounded-xl border border-[#dfe5ed] bg-[#fbfcfe] px-3 py-3 text-sm leading-6 text-[#4d5a6d] outline-none focus:border-[#b85e48]" /></label><input value={jdTitle} onChange={e => setJdTitle(e.target.value)} className="w-full rounded-xl border border-[#dfe5ed] bg-[#fbfcfe] px-3 py-2.5 text-sm text-[#172033]" placeholder="Job title" /></div><div><p className="mb-2 text-sm font-semibold text-[#344054]">Upload Resumes</p><label className="flex min-h-[238px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#d5dde8] bg-[#fbfcfe] px-6 text-center transition hover:border-[#b85e48] hover:bg-[#fff9f7]"><UploadCloud className="h-9 w-9 text-[#b85e48]" /><span className="mt-3 text-sm font-semibold text-[#344054]">Upload resumes</span><span className="mt-1 text-xs text-[#7b8798]">Drag & drop PDF/DOCX files here or <span className="font-semibold text-[#b85e48]">Browse files</span></span><span className="mt-3 rounded-full bg-[#f0f3f7] px-3 py-1 text-[11px] text-[#68758a]">Up to 100 resumes</span><input type="file" multiple accept=".pdf,.doc,.docx" className="hidden" onChange={e => setUploadedFiles(Array.from(e.target.files || []))} /></label>{uploadedFiles.length > 0 && <p className="mt-2 text-xs text-[#3d956e]">{uploadedFiles.length} resume{uploadedFiles.length > 1 ? 's' : ''} ready to screen</p>}<button onClick={handleBulkScreen} disabled={isScreening} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#b85e48] px-4 py-3 text-sm font-semibold text-white hover:bg-[#994a39] disabled:opacity-60"><Sparkles className="h-4 w-4" />{isScreening ? 'Analyzing candidates...' : 'Analyze Candidates'}</button></div></div></section>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Job Title</label>
-            <input
-              type="text"
-              value={jdTitle}
-              onChange={(e) => setJdTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none"
-            />
-          </div>
+        <section className="rounded-3xl border border-[#e1e7ef] bg-white p-5 shadow-[0_12px_32px_rgba(20,35,60,.05)] sm:p-7"><div className="flex flex-col justify-between gap-4 border-b border-[#edf0f4] pb-5 sm:flex-row sm:items-center"><div><h2 className="text-xl font-semibold text-[#172033]">Ranked candidates</h2><p className="mt-1 text-sm text-[#68758a]">AI-ranked for {roleLabels[targetRole]} · {candidates.length} candidates analyzed</p></div><div className="flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-[#7b8798]" />{(['all', 'Shortlisted', 'Under Review', 'Rejected'] as const).map(filter => <button key={filter} onClick={() => setStatusFilter(filter)} className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold ${statusFilter === filter ? 'bg-[#f0e4df] text-[#994a39]' : 'text-[#7b8798] hover:bg-[#f5f7fa]'}`}>{filter === 'all' ? 'All' : filter === 'Under Review' ? 'Review' : filter}</button>)}</div></div><div className="mt-4 overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="text-xs uppercase tracking-wide text-[#8a95a5]"><tr><th className="px-3 py-3">Rank</th><th className="px-3 py-3">Candidate</th><th className="px-3 py-3">AI match</th><th className="px-3 py-3">Skills</th><th className="px-3 py-3">Experience</th><th className="px-3 py-3">Status</th><th className="px-3 py-3 text-right">Report</th></tr></thead><tbody>{filtered.map((candidate, index) => <tr key={candidate.id} className="border-t border-[#edf0f4] hover:bg-[#fbfcfe]"><td className="px-3 py-4 font-semibold text-[#68758a]">{index < 3 ? ['🥇', '🥈', '🥉'][index] : index + 1}</td><td className="px-3 py-4"><button onClick={() => setSelectedCandidate(candidate)} className="text-left"><strong className="block text-[#172033] hover:text-[#b85e48]">{candidate.candidateName}</strong><span className="text-xs text-[#8a95a5]">{candidate.candidateEmail}</span></button></td><td className="px-3 py-4"><span className={`text-lg font-semibold ${candidate.jdMatchPct >= 85 ? 'text-[#3d956e]' : candidate.jdMatchPct >= 75 ? 'text-[#b07831]' : 'text-[#9a5960]'}`}>{candidate.jdMatchPct}%</span></td><td className="px-3 py-4 text-xs text-[#68758a]">{candidate.targetRole === 'sde' ? 'React, Node, AWS' : 'Python, SQL, Cloud'}</td><td className="px-3 py-4 text-[#68758a]">{candidate.jdMatchPct >= 90 ? '4 yrs' : candidate.jdMatchPct >= 80 ? '3 yrs' : '2 yrs'}</td><td className="px-3 py-4"><select value={candidate.status} onChange={e => updateStatus(candidate.id, e.target.value as RecruiterCandidate['status'])} className="rounded-lg border border-[#e0e6ee] bg-white px-2 py-1.5 text-xs font-semibold text-[#4d5a6d]"><option>Shortlisted</option><option>Under Review</option><option>Rejected</option></select></td><td className="px-3 py-4 text-right"><button onClick={() => setSelectedCandidate(candidate)} className="rounded-lg border border-[#dfe5ed] px-3 py-1.5 text-xs font-semibold text-[#536176] hover:border-[#b85e48] hover:text-[#994a39]">View report</button></td></tr>)}</tbody></table></div></section>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Target Rubric Category</label>
-            <select
-              value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value as any)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none"
-            >
-              <option value="sde">Software Development Engineer (SDE)</option>
-              <option value="data-science">Data Scientist / ML</option>
-              <option value="marketing">Growth & Marketing</option>
-              <option value="product-management">Product Management</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Job Description Text</label>
-            <textarea
-              value={jdText}
-              onChange={(e) => setJdText(e.target.value)}
-              rows={8}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Right: Candidate Screening Table */}
-        <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-6">
-          
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-            <div>
-              <h3 className="font-bold text-white text-base">Ranked Candidate Shortlist</h3>
-              <p className="text-xs text-slate-400">Automated rank order by JD Match Percentage.</p>
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
-              <button onClick={() => setStatusFilter('all')} className={`px-2.5 py-1 font-bold rounded ${statusFilter === 'all' ? 'bg-purple-600 text-white' : 'text-slate-400'}`}>All ({candidates.length})</button>
-              <button onClick={() => setStatusFilter('Shortlisted')} className={`px-2.5 py-1 font-bold rounded ${statusFilter === 'Shortlisted' ? 'bg-emerald-600 text-white' : 'text-slate-400'}`}>Shortlisted</button>
-              <button onClick={() => setStatusFilter('Under Review')} className={`px-2.5 py-1 font-bold rounded ${statusFilter === 'Under Review' ? 'bg-amber-600 text-white' : 'text-slate-400'}`}>Review</button>
-            </div>
-          </div>
-
-          {/* Candidates Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="py-3 px-3">Candidate</th>
-                  <th className="py-3 px-3">Overall Score</th>
-                  <th className="py-3 px-3">JD Match %</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-850 text-slate-300">
-                {filteredCandidates.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-850/50 transition-colors">
-                    <td className="py-3.5 px-3">
-                      <div className="font-bold text-white text-xs">{c.candidateName}</div>
-                      <div className="text-[11px] text-slate-400">{c.candidateEmail}</div>
-                    </td>
-                    <td className="py-3.5 px-3 font-bold text-slate-200">
-                      {c.overallScore} / 100
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <span className={`font-extrabold ${c.jdMatchPct >= 80 ? 'text-emerald-400' : c.jdMatchPct >= 65 ? 'text-amber-400' : 'text-rose-400'}`}>
-                        {c.jdMatchPct}%
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <select
-                        value={c.status}
-                        onChange={(e) => handleStatusChange(c.id, e.target.value as any)}
-                        className="px-2 py-1 rounded bg-slate-950 border border-slate-800 text-[11px] font-bold text-white focus:outline-none"
-                      >
-                        <option value="Shortlisted">Shortlisted</option>
-                        <option value="Under Review">Under Review</option>
-                        <option value="Rejected">Rejected</option>
-                      </select>
-                    </td>
-                    <td className="py-3.5 px-3 text-right">
-                      <button
-                        onClick={() => setSelectedCandidate(c)}
-                        className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-indigo-400 hover:text-white transition-colors"
-                        title="View Resume Summary"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Candidate Modal */}
-      {selectedCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-bold text-white">{selectedCandidate.candidateName}</h3>
-                <p className="text-xs text-slate-400">{selectedCandidate.candidateEmail}</p>
-              </div>
-              <button onClick={() => setSelectedCandidate(null)} className="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-2 font-mono text-slate-300">
-              <span className="text-purple-400 font-bold block">// Resume Text Summary</span>
-              <p>{selectedCandidate.resumeText}</p>
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setSelectedCandidate(null)}
-                className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs"
-              >
-                Close Modal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+        <section className="rounded-3xl border border-[#e1e7ef] bg-[#172033] p-5 text-white shadow-[0_12px_32px_rgba(20,35,60,.12)] sm:p-7"><div className="flex items-start gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#b85e48]"><Sparkles className="h-4 w-4" /></span><div><h2 className="text-xl font-semibold">Ask AI Recruiter</h2><p className="mt-1 text-sm text-slate-300">Ask anything about your candidates and get a useful shortlist.</p></div></div><div className="mt-5 flex flex-col gap-3 md:flex-row"><input value={question} onChange={e => setQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && askRecruiter()} className="flex-1 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-[#e4a18e]" placeholder="Find candidates with React + AWS and at least 3 years..." /><button onClick={askRecruiter} className="rounded-xl bg-[#e4a18e] px-5 py-3 text-sm font-semibold text-[#172033] hover:bg-white">Ask RecruitAI</button></div>{answer && <div className="mt-4 rounded-xl border border-white/10 bg-white/10 p-4 text-sm leading-6 text-slate-100">{answer}<button onClick={() => setStatusFilter('all')} className="ml-3 font-semibold text-[#e4a18e]">View candidates</button></div>}</section>
+      </main>
     </div>
-  );
+
+    {selectedCandidate && <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0e1422]/70 p-4 backdrop-blur-sm"><article className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-8"><div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#b85e48]">AI Candidate Report</p><h2 className="mt-2 text-2xl font-semibold text-[#172033]">{selectedCandidate.candidateName}</h2><p className="text-sm text-[#68758a]">{roleLabels[selectedCandidate.targetRole] || 'Candidate'} · {selectedCandidate.candidateEmail}</p></div><button onClick={() => setSelectedCandidate(null)} className="rounded-lg p-2 text-[#7b8798] hover:bg-[#f1f3f6]"><X className="h-5 w-5" /></button></div><div className="mt-6 flex items-center justify-between rounded-2xl bg-[#f7f9fc] p-4"><div><p className="text-xs uppercase tracking-wide text-[#8a95a5]">AI match</p><p className="mt-1 text-4xl font-semibold text-[#3d956e]">{selectedCandidate.jdMatchPct}%</p></div><span className="rounded-full bg-[#edf7f2] px-3 py-1 text-xs font-semibold text-[#3d956e]">{selectedCandidate.jdMatchPct >= 85 ? 'Strong interview recommendation' : 'Review recommended'}</span></div><div className="mt-6 grid gap-6 md:grid-cols-2"><div><h3 className="font-semibold text-[#172033]">AI summary</h3><p className="mt-2 text-sm leading-6 text-[#68758a]">Strong alignment with the {roleLabels[selectedCandidate.targetRole] || 'target'} role. The resume shows relevant experience and a practical project track record worth exploring in an interview.</p><h3 className="mt-6 font-semibold text-[#172033]">Strengths</h3><ul className="mt-2 space-y-2 text-sm text-[#68758a]"><li>✓ Relevant hands-on experience</li><li>✓ Strong technical stack alignment</li><li>✓ Evidence of shipped work</li></ul></div><div><h3 className="font-semibold text-[#172033]">Skill match</h3>{['React.js', 'Node.js', 'SQL', 'AWS', 'Docker'].map((skill, i) => <div key={skill} className="mt-3"><div className="flex justify-between text-xs text-[#68758a]"><span>{skill}</span><span>{Math.max(65, selectedCandidate.jdMatchPct - i * 4)}%</span></div><div className="mt-1 h-2 rounded-full bg-[#edf0f4]"><div className="h-2 rounded-full bg-[#b85e48]" style={{ width: `${Math.max(65, selectedCandidate.jdMatchPct - i * 4)}%` }} /></div></div>)}</div></div><div className="mt-7 flex justify-end gap-2 border-t border-[#edf0f4] pt-5"><button onClick={() => setSelectedCandidate(null)} className="rounded-xl border border-[#dfe5ed] px-4 py-2 text-sm font-semibold text-[#536176]">Close</button><button onClick={() => { updateStatus(selectedCandidate.id, 'Shortlisted'); setSelectedCandidate(null); }} className="rounded-xl bg-[#b85e48] px-4 py-2 text-sm font-semibold text-white">⭐ Shortlist</button></div></article></div>}
+  </div>;
 };
 
 export default RecruiterDashboardPage;

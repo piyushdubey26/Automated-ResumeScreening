@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
   const isCurrent = (path: string) => location.pathname === path;
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+    <header className={`site-header sticky top-0 z-50 transition-all duration-300 ${
       scrolled
         ? 'py-2 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-xl'
         : 'py-4 bg-slate-950/60 backdrop-blur-sm border-b border-slate-800/40'
@@ -131,30 +131,6 @@ export const Navbar: React.FC = () => {
 
         {/* Right Actions & User Bar */}
         <div className="flex items-center space-x-3">
-          {/* Theme Toggle Switch (Only visible when logged out) */}
-          {!isAuthenticated && (
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={toggleTheme}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'
-                }`}
-                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              >
-                <span
-                  className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center ${
-                    theme === 'dark' ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                >
-                  {theme === 'dark' ? (
-                    <Moon className="w-3.5 h-3.5 text-indigo-600" />
-                  ) : (
-                    <Sun className="w-3.5 h-3.5 text-amber-500" />
-                  )}
-                </span>
-              </button>
-            </div>
-          )}
 
           {isAuthenticated ? (
             /* Profile Dropdown Toggle */
@@ -162,7 +138,7 @@ export const Navbar: React.FC = () => {
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
                 onBlur={() => setTimeout(() => setProfileOpen(false), 200)}
-                className="flex items-center space-x-2.5 p-1.5 rounded-xl bg-slate-900/80 border border-slate-800/80 hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer text-left focus:outline-none"
+                className="profile-trigger flex items-center space-x-2.5 p-1.5 rounded-xl bg-slate-900/80 border border-slate-800/80 hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer text-left focus:outline-none"
               >
                 <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}

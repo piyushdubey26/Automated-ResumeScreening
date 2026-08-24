@@ -1,76 +1,18 @@
 import React from 'react';
-import { Sparkles, Globe, Share2, ExternalLink, Heart } from 'lucide-react';
+import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export const Footer: React.FC = () => {
-  return (
-    <footer className="bg-slate-950 border-t border-slate-800/80 pt-12 pb-8 text-slate-400 text-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-lg text-white">ResumeAI</span>
-            </div>
-            <p className="text-slate-400 text-xs leading-relaxed">
-              Modern role-aware automated resume screening platform, JD matcher, AI rewriter, and recruiter talent ecosystem.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-white mb-3">Platform Features</h4>
-            <ul className="space-y-2 text-xs">
-              <li><a href="/features" className="hover:text-indigo-400 transition-colors">Role-Specific Rubrics</a></li>
-              <li><a href="/features" className="hover:text-indigo-400 transition-colors">JD Match & Gap Analysis</a></li>
-              <li><a href="/features" className="hover:text-indigo-400 transition-colors">AI Resume Bullet Rewriter</a></li>
-              <li><a href="/features" className="hover:text-indigo-400 transition-colors">AI Mock Interview Generator</a></li>
-              <li><a href="/recruiter" className="hover:text-indigo-400 transition-colors">Recruiter Bulk Screening</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-white mb-3">Role Rubrics</h4>
-            <ul className="space-y-2 text-xs">
-              <li><span className="text-slate-300">Software Development Engineer (SDE)</span></li>
-              <li><span className="text-slate-300">Data Scientist & ML Engineer</span></li>
-              <li><span className="text-slate-300">Growth & Digital Marketer</span></li>
-              <li><span className="text-slate-300">Product Manager (PM)</span></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-white mb-3">Community & Credits</h4>
-            <p className="text-xs text-slate-400 mb-3">
-              Built by Piyush Dubey.
-            </p>
-            <div className="flex items-center space-x-3">
-              <a href="https://github.com" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors" title="GitHub">
-                <Globe className="w-4 h-4" />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors" title="Social">
-                <Share2 className="w-4 h-4" />
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors" title="LinkedIn">
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} ResumeAI Platform. Open Source under MIT License.</p>
-          <p className="flex items-center space-x-1 mt-2 sm:mt-0">
-            <span>Crafted with</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-            <span>for job seekers & recruiters.</span>
-          </p>
-        </div>
+export const Footer: React.FC = () => (
+  <footer className="site-footer text-sm">
+    <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+      <div className="grid gap-10 border-b border-[#42616d] pb-10 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div><Link to="/" className="inline-flex items-center gap-2 text-lg font-bold text-white"><span className="flex h-8 w-8 items-center justify-center rounded bg-[#a84c38]"><Sparkles className="h-4 w-4" /></span>ResumeAI</Link><p className="mt-4 max-w-sm leading-6 text-[#b8c8cc]">Practical resume feedback for people looking for their next role—and teams looking for the right people.</p></div>
+        <div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#edbcae]">Explore</p><div className="mt-4 space-y-3 text-[#dce6e6]"><Link className="block hover:text-white" to="/features">How it works</Link><Link className="block hover:text-white" to="/pricing">Plans and pricing</Link><Link className="block hover:text-white" to="/dashboard">Resume review</Link></div></div>
+        <div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#edbcae]">For teams</p><div className="mt-4 space-y-3 text-[#dce6e6]"><Link className="block footer-link" to="/recruiter">Recruiter workspace</Link><a className="flex items-center gap-1 footer-link" href="mailto:piyushdubey447@gmail.com">Contact us <ArrowUpRight className="h-3.5 w-3.5" /></a><a className="flex items-center gap-1 footer-link" href="https://www.linkedin.com/in/piyush-dubey-70183429a" target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight className="h-3.5 w-3.5" /></a><span className="block text-[#b8c8cc]">Built by Piyush Dubey</span></div></div>
       </div>
-    </footer>
-  );
-};
+      <div className="flex flex-col gap-2 pt-6 text-xs text-[#b8c8cc] sm:flex-row sm:items-center sm:justify-between"><span>© {new Date().getFullYear()} ResumeAI. All rights reserved.</span><span>Made for thoughtful applications.</span></div>
+    </div>
+  </footer>
+);
 
 export default Footer;

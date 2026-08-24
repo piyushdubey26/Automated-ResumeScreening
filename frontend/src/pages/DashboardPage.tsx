@@ -48,6 +48,17 @@ export const DashboardPage: React.FC = () => {
   const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'high' | 'medium' | 'success'>('all');
+  const [profileLinks, setProfileLinks] = useState({ github: '', linkedin: '', project: '', coding: '' });
+
+  const resumeWithLinks = () => {
+    const links = [
+      profileLinks.github && `GitHub: ${profileLinks.github}`,
+      profileLinks.linkedin && `LinkedIn: ${profileLinks.linkedin}`,
+      profileLinks.project && `Project / Portfolio: ${profileLinks.project}`,
+      profileLinks.coding && `Coding profile: ${profileLinks.coding}`,
+    ].filter(Boolean).join('\n');
+    return links ? `${resumeInput}\n\nPROFESSIONAL LINKS\n${links}` : resumeInput;
+  };
 
   // Tab 2 State: JD Matching
   const [jdInput, setJdInput] = useState(sampleJDsText.sde);
@@ -71,24 +82,29 @@ export const DashboardPage: React.FC = () => {
     setResumeInput(customizeResumeText(sampleResumesText[role]));
   };
 
-  // Run Resume Analysis
-  const handleRunAnalysis = async () => {
-    setIsAnalyzing(true);
-    try {
-      const res = await resumeApi.uploadAndParse(resumeInput, 'My_Resume.pdf', targetRole);
-      setResumeRecord(res.resume);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
   // Run JD Matching
   const handleRunJDMatch = async () => {
     setIsMatching(true);
     try {
-      const res = await jobApi.matchJD(resumeInput, jdInput, targetRole);
+      const res = await jobApi.matchJD(resumeWithLinks(), jdInput, targetRole);
       setJdMatchResult(res);
     } finally {
+      setIsMatching(false);
+    }
+  };
+
+  const handleRunComparison = async () => {
+    setIsAnalyzing(true);
+    setIsMatching(true);
+    try {
+      const [resume, match] = await Promise.all([
+        resumeApi.uploadAndParse(resumeWithLinks(), 'My_Resume.pdf', targetRole),
+        jobApi.matchJD(resumeWithLinks(), jdInput, targetRole)
+      ]);
+      setResumeRecord(resume.resume);
+      setJdMatchResult(match);
+    } finally {
+      setIsAnalyzing(false);
       setIsMatching(false);
     }
   };
@@ -108,7 +124,7 @@ export const DashboardPage: React.FC = () => {
   const handleGenerateInterview = async () => {
     setIsLoadingInterview(true);
     try {
-      const res = await resumeApi.generateMockInterview(targetRole, resumeInput, jdInput);
+      const res = await resumeApi.generateMockInterview(targetRole, resumeWithLinks(), jdInput);
       setInterviewQuestions(res.questions);
     } finally {
       setIsLoadingInterview(false);
@@ -154,7 +170,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* DASHBOARD TABS NAVIGATION */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-2 border-b border-slate-800 no-scrollbar">
+      <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-800">
         <button
           onClick={() => setActiveTab('analysis')}
           className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
@@ -166,23 +182,13 @@ export const DashboardPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('jd-match')}
-          className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'jd-match' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-slate-900/60 text-slate-400 hover:text-white'
-          }`}
-        >
-          <FileCheck2 className="w-4 h-4 text-purple-400" />
-          <span>2. JD Matcher & Skills Gap</span>
-        </button>
-
-        <button
           onClick={() => setActiveTab('ai-rewrite')}
           className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 ${
             activeTab === 'ai-rewrite' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-slate-900/60 text-slate-400 hover:text-white'
           }`}
         >
           <Zap className="w-4 h-4 text-amber-400" />
-          <span>3. AI Bullet Rewriter</span>
+          <span>2. AI Bullet Rewriter</span>
         </button>
 
         <button
@@ -192,7 +198,7 @@ export const DashboardPage: React.FC = () => {
           }`}
         >
           <BookOpen className="w-4 h-4 text-emerald-400" />
-          <span>4. Portfolio & Learning</span>
+          <span>3. Portfolio & Learning</span>
         </button>
 
         <button
@@ -202,7 +208,7 @@ export const DashboardPage: React.FC = () => {
           }`}
         >
           <HelpCircle className="w-4 h-4 text-pink-400" />
-          <span>5. AI Mock Interview</span>
+          <span>4. AI Mock Interview</span>
         </button>
 
         <button
@@ -212,7 +218,7 @@ export const DashboardPage: React.FC = () => {
           }`}
         >
           <Award className="w-4 h-4 text-amber-400" />
-          <span>6. Leaderboard & Badges</span>
+          <span>5. Leaderboard & Badges</span>
         </button>
       </div>
 
@@ -245,6 +251,27 @@ export const DashboardPage: React.FC = () => {
               </select>
             </div>
 
+            <div className="border-t border-slate-800 pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-semibold text-slate-400">Target job description</label>
+                <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300">Load sample JD</button>
+              </div>
+              <FileUpload
+                onTextExtracted={(text) => setJdInput(text)}
+                label="Upload JD image or document"
+                accept="image/*,.pdf,.txt"
+                helpText="Any image, PDF, or TXT file (max 10MB)"
+              />
+              <textarea
+                value={jdInput}
+                onChange={(e) => setJdInput(e.target.value)}
+                rows={7}
+                placeholder="Paste the job description you want to compare..."
+                className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+              <p className="mt-2 text-[11px] leading-5 text-slate-500">Add both your resume and the job description here. We will score the resume and show the skills gap together.</p>
+            </div>
+
             {/* File Upload Zone */}
             <FileUpload
               onTextExtracted={(text) => setResumeInput(text)}
@@ -270,9 +297,24 @@ export const DashboardPage: React.FC = () => {
               />
             </div>
 
+            <div className="border-t border-slate-800 pt-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div><label className="block text-xs font-semibold text-slate-300">Links & profiles</label><p className="mt-1 text-[11px] text-slate-500">Add public profiles so the review can check your project footprint.</p></div>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Optional</span>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {([
+                  ['github', 'GitHub profile', 'https://github.com/you'],
+                  ['linkedin', 'LinkedIn profile', 'https://linkedin.com/in/you'],
+                  ['project', 'Project / portfolio link', 'https://yourproject.com'],
+                  ['coding', 'Coding platform', 'LeetCode, Kaggle, HackerRank…'],
+                ] as const).map(([key, label, placeholder]) => <label key={key} className="block"><span className="mb-1 block text-[10px] font-semibold text-slate-400">{label}</span><input type={key === 'coding' ? 'text' : 'url'} value={profileLinks[key]} onChange={(event) => setProfileLinks(current => ({ ...current, [key]: event.target.value }))} placeholder={placeholder} className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-200 outline-none transition focus:border-indigo-500" /></label>)}
+              </div>
+            </div>
+
             <button
-              onClick={handleRunAnalysis}
-              disabled={isAnalyzing}
+              onClick={handleRunComparison}
+              disabled={isAnalyzing || isMatching}
               className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
             >
               {isAnalyzing ? (
@@ -280,7 +322,7 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Analyze Against {targetRole.toUpperCase()} Rubric</span>
+                  <span>Compare Resume & Job Description</span>
                 </>
               )}
             </button>
@@ -328,6 +370,11 @@ export const DashboardPage: React.FC = () => {
                   <span className="text-sm font-bold text-indigo-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.ats : 82}%</span>
                 </div>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 md:grid-cols-[150px_1fr] md:items-center">
+              <div className="md:border-r md:border-slate-800 md:pr-5"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">JD match</p><p className="mt-1 text-4xl font-extrabold text-emerald-400">{jdMatchResult ? jdMatchResult.matchPct : 86}%</p><p className="mt-1 text-[11px] text-slate-500">Resume vs. this role</p></div>
+              <div><p className="text-xs font-semibold text-slate-300">Skills to review</p><div className="mt-2 flex flex-wrap gap-2">{(jdMatchResult ? jdMatchResult.missingCoreSkills : ['GraphQL', 'Kubernetes']).map(skill => <span key={skill} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-400">{skill}</span>)}</div><p className="mt-3 text-[11px] text-slate-500">The matching score compares the resume text with the job description entered on the left.</p></div>
             </div>
 
             {/* Actionable Feedback Cards */}
