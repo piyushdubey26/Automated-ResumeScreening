@@ -454,26 +454,7 @@ html.dark .bg-gradient-to-r.from-indigo-600.to-purple-600 {
   background-image: none !important;
 }
 
-/* Footer links stay legible after navigation and hover in the light theme. */
-html:not(.dark) .site-footer .footer-link,
-html:not(.dark) .site-footer .footer-link:visited {
-  color: #26353d !important;
-}
-html:not(.dark) .site-footer .footer-link:hover,
-html:not(.dark) .site-footer .footer-link:focus-visible {
-  color: #a84c38 !important;
-}
-html:not(.dark) .site-footer p,
-html:not(.dark) .site-footer span {
-  color: #26353d !important;
-}
-html:not(.dark) .site-footer p.text-xs {
-  color: #8e4a3a !important;
-}
-html.dark .site-footer .footer-link:hover,
-html.dark .site-footer .footer-link:focus-visible {
-  color: #edbcae !important;
-}
+
 
 /* Header navigation hover states need to remain obvious against both canvases. */
 html:not(.dark) .site-header nav a:hover,
