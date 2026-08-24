@@ -19,7 +19,6 @@ import {
   Lock,
   Settings,
   AlertTriangle,
-  Menu,
   X,
   Edit2
 } from "lucide-react";
@@ -58,8 +57,7 @@ export const AdminDashboardPage: React.FC = () => {
     | "Settings"
   >("Dashboard");
 
-  // Mobile sidebar menu drawer state
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   // Search & filters state
   const [globalSearch, setGlobalSearch] = useState("");
@@ -305,183 +303,94 @@ export const AdminDashboardPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-955 text-slate-100 flex flex-col lg:flex-row">
-      {/* ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 bg-slate-900 border-r border-slate-800 flex-col shrink-0">
-        {/* Branding header */}
-        <div className="p-6 border-b border-slate-800 flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-[#a84c38] flex items-center justify-center shadow-lg shadow-[#a84c38]/20">
-            <ShieldCheck className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h3 className="font-serif text-base font-bold text-white leading-none">ResumeAI 2.0</h3>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Platform Control</span>
-          </div>
-        </div>
-
-        {/* Sidebar Nav Items */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-          {[
-            { name: "Dashboard", icon: BarChart3 },
-            { name: "Users", icon: Users },
-            { name: "Recruiters", icon: Briefcase },
-            { name: "Candidates", icon: UserPlus },
-            { name: "Jobs", icon: Briefcase },
-            { name: "Resumes", icon: FileText },
-            { name: "AI Usage", icon: Brain },
-            { name: "Analytics", icon: Activity },
-            { name: "Subscriptions", icon: CreditCard },
-            { name: "Security", icon: Lock },
-            { name: "Settings", icon: Settings }
-          ].map(item => {
-            const Icon = item.icon;
-            const isActive = activeNav === item.name;
-            return (
-              <button
-                key={item.name}
-                onClick={() => setActiveNav(item.name as any)}
-                className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-amber-600/10 text-amber-500 border border-amber-500/20 shadow-md shadow-amber-955/10"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent"
-                }`}
-              >
-                <Icon className="w-4.5 h-4.5" />
-                <span>{item.name}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Admin context footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-lg bg-amber-600 flex items-center justify-center font-bold text-white text-sm">
-            P
-          </div>
-          <div className="overflow-hidden">
-            <h4 className="text-xs font-bold text-white truncate">Piyush Dubey</h4>
-            <p className="text-[10px] text-slate-400 truncate">Admin Mode</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* ─── MOBILE BAR & DRAWER ──────────────────────────────────────────────── */}
-      <div className="lg:hidden flex items-center justify-between bg-slate-900 border-b border-slate-800 px-4 py-3 z-40">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-[#a84c38] flex items-center justify-center">
-            <ShieldCheck className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h3 className="font-serif text-sm font-bold text-white">ResumeAI 2.0</h3>
-            <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">Control Center</span>
-          </div>
-        </div>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-slate-955/90 backdrop-blur-sm z-30 pt-16 flex flex-col">
-          <nav className="p-6 space-y-2 overflow-y-auto flex-1">
-            {[
-              { name: "Dashboard", icon: BarChart3 },
-              { name: "Users", icon: Users },
-              { name: "Recruiters", icon: Briefcase },
-              { name: "Candidates", icon: UserPlus },
-              { name: "Jobs", icon: Briefcase },
-              { name: "Resumes", icon: FileText },
-              { name: "AI Usage", icon: Brain },
-              { name: "Analytics", icon: Activity },
-              { name: "Subscriptions", icon: CreditCard },
-              { name: "Security", icon: Lock },
-              { name: "Settings", icon: Settings }
-            ].map(item => {
-              const Icon = item.icon;
-              const isActive = activeNav === item.name;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    setActiveNav(item.name as any);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-amber-600/10 text-amber-500 border border-amber-500/20"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </button>
-              );
-            })}
-          </nav>
-          <div className="p-6 border-t border-slate-800 bg-slate-900 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-600 flex items-center justify-center font-bold text-white text-base">
-              P
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-white">Piyush Dubey</h4>
-              <p className="text-xs text-slate-400">Admin Mode</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── MAIN CONTENT CONTAINER ───────────────────────────────────────────── */}
-      <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col lg:flex-row gap-8">
         
-        {/* ── HEADER OVERVIEW ────────────────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-900 pb-6">
-          <div>
-            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
-              ADMIN CONTROL CENTER
-            </span>
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-white mt-1">
-              {activeNav.toUpperCase()}
-            </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              {activeNav === "Dashboard" && "Here's what's happening across ResumeAI today."}
-              {activeNav === "Users" && "Manage every account across ResumeAI."}
-              {activeNav === "Recruiters" && "Overview of active hiring managers and teams."}
-              {activeNav === "Candidates" && "Analyze seeker accounts and dynamic resume parsing activity."}
-              {activeNav === "Jobs" && "Monitor active and closed job vacancies."}
-              {activeNav === "Resumes" && "Review parsed documents, failure metrics, and status."}
-              {activeNav === "AI Usage" && "Real-time cost, token usage, and AI rubrics telemetry."}
-              {activeNav === "Analytics" && "Understand user growth, distribution, and engagement."}
-              {activeNav === "Subscriptions" && "Approve plan upgrade requests and track monetization."}
-              {activeNav === "Security" && "Audit security events, API key status, and failed authorization logs."}
-              {activeNav === "Settings" && "Configure AI API endpoints, retention parameters, and notification alerts."}
-            </p>
+        {/* SIDEBAR NAVIGATION PANEL */}
+        <aside className="w-full lg:w-60 shrink-0">
+          <div className="sticky top-24 space-y-6">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Platform Overview</p>
+              <h2 className="font-serif text-lg text-white font-semibold">Admin Panel</h2>
+            </div>
+
+            <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none border-b border-slate-900 lg:border-none">
+              {[
+                { name: "Dashboard", icon: BarChart3 },
+                { name: "Users", icon: Users },
+                { name: "Recruiters", icon: Briefcase },
+                { name: "Candidates", icon: UserPlus },
+                { name: "Jobs", icon: Briefcase },
+                { name: "Resumes", icon: FileText },
+                { name: "AI Usage", icon: Brain },
+                { name: "Analytics", icon: Activity },
+                { name: "Subscriptions", icon: CreditCard },
+                { name: "Security", icon: Lock },
+                { name: "Settings", icon: Settings }
+              ].map(item => {
+                const Icon = item.icon;
+                const isActive = activeNav === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => setActiveNav(item.name as any)}
+                    className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                      isActive
+                        ? "bg-amber-600/20 text-amber-500 border border-amber-500/20 shadow-md shadow-amber-950/20"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-transparent"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
+        </aside>
 
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Platform Online
-            </span>
-          </div>
-        </div>
-
-        {/* ─── VIEW RENDERER ─────────────────────────────────────────────────── */}
-
-        {/* 1. DASHBOARD VIEW */}
-        {activeNav === "Dashboard" && (
-          <div className="space-y-8">
-            {/* Hero Greeting banner */}
-            <div className="rounded-3xl border border-slate-900 bg-gradient-to-br from-slate-900/60 via-slate-955 to-slate-955 p-6 sm:p-8 relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/5 rounded-full filter blur-3xl"></div>
-              <h2 className="font-serif text-2xl sm:text-3xl text-white">Good afternoon, Piyush 👋</h2>
-              <p className="text-slate-400 text-xs mt-1.5 max-w-xl">
-                Monitor users, hiring activity, AI usage, and platform health from one place.
+        {/* MAIN DASHBOARD INTERFACE CONTENT */}
+        <main className="flex-1 min-w-0 flex flex-col space-y-6">
+          
+          {/* USER WELCOME HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-900 pb-5">
+            <div>
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                ResumeAI 2.0 Admin Panel
+              </p>
+              <h1 className="font-serif text-3xl font-bold text-white mt-1">
+                Good afternoon, Piyush 👋
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                {activeNav === "Dashboard" && "Here's what's happening across ResumeAI today."}
+                {activeNav === "Users" && "Manage every account across ResumeAI."}
+                {activeNav === "Recruiters" && "Overview of active hiring managers and teams."}
+                {activeNav === "Candidates" && "Analyze seeker accounts and dynamic resume parsing activity."}
+                {activeNav === "Jobs" && "Monitor active and closed job vacancies."}
+                {activeNav === "Resumes" && "Review parsed documents, failure metrics, and status."}
+                {activeNav === "AI Usage" && "Real-time cost, token usage, and AI rubrics telemetry."}
+                {activeNav === "Analytics" && "Understand user growth, distribution, and engagement."}
+                {activeNav === "Subscriptions" && "Approve plan upgrade requests and track monetization."}
+                {activeNav === "Security" && "Audit security events, API key status, and failed authorization logs."}
+                {activeNav === "Settings" && "Configure AI API endpoints, retention parameters, and notification alerts."}
               </p>
             </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Platform Online
+              </span>
+            </div>
+          </div>
+
+          {/* ─── VIEW RENDERER ─────────────────────────────────────────────────── */}
+
+          {/* 1. DASHBOARD VIEW */}
+          {activeNav === "Dashboard" && (
+            <div className="space-y-8">
+
 
             {/* Platform KPI Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1485,6 +1394,7 @@ export const AdminDashboardPage: React.FC = () => {
       )}
 
     </div>
+  </div>
   );
 };
 
