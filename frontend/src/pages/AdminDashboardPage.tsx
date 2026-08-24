@@ -430,13 +430,13 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="lg:col-span-2 bg-slate-900/50 border border-slate-900 rounded-3xl p-5 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-900 pb-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">PLATFORM ACTIVITY</h3>
-                  <div className="flex bg-slate-955 border border-slate-850 rounded-lg p-0.5 text-[10px] font-bold">
+                  <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[10px] font-bold">
                     {(["7D", "30D", "90D", "1Y"] as const).map(tf => (
                       <button
                         key={tf}
                         onClick={() => setAnalyticsTimeframe(tf)}
                         className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                          analyticsTimeframe === tf ? "bg-amber-650 text-white" : "text-slate-500 hover:text-slate-350"
+                          analyticsTimeframe === tf ? "bg-amber-600 text-white" : "text-slate-500 hover:text-slate-300"
                         }`}
                       >
                         {tf === "7D" ? "7 Days" : tf === "30D" ? "30 Days" : tf === "90D" ? "90 Days" : "1 Year"}
@@ -550,7 +550,7 @@ export const AdminDashboardPage: React.FC = () => {
                     <div key={i} className="flex items-start justify-between text-xs">
                       <div>
                         <span className="font-bold text-white">{act.name}</span>
-                        <span className="text-[10px] text-purple-400 bg-purple-955/40 px-1 py-0.5 rounded ml-2 border border-purple-500/10 uppercase font-medium">{act.role}</span>
+                        <span className="text-[10px] text-purple-400 bg-purple-950/40 px-1 py-0.5 rounded ml-2 border border-purple-500/10 uppercase font-medium">{act.role}</span>
                         <p className="text-slate-400 mt-1">{act.act}</p>
                       </div>
                       <span className="text-[10px] text-slate-500">{act.time}</span>
@@ -584,7 +584,7 @@ export const AdminDashboardPage: React.FC = () => {
                         <tr key={i} className="hover:bg-slate-900/20">
                           <td className="py-2.5 font-semibold text-slate-200">{j.title}</td>
                           <td className="py-2.5 text-slate-400">{j.recruiter}</td>
-                          <td className="py-2.5 text-slate-350">{j.count}</td>
+                          <td className="py-2.5 text-slate-300">{j.count}</td>
                           <td className="py-2.5 text-right">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               j.status === "Active" ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-800 text-slate-500"
@@ -613,7 +613,7 @@ export const AdminDashboardPage: React.FC = () => {
                   placeholder="Search users..."
                   value={globalSearch}
                   onChange={e => setGlobalSearch(e.target.value)}
-                  className="w-full text-xs text-slate-200 bg-slate-955 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-amber-500"
+                  className="w-full text-xs text-slate-200 bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -623,7 +623,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <select
                     value={roleFilter}
                     onChange={e => setRoleFilter(e.target.value)}
-                    className="w-full text-xs bg-slate-955 border border-slate-800 rounded-xl pl-8 pr-8 py-2.5 outline-none focus:border-amber-500 cursor-pointer appearance-none"
+                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2.5 outline-none focus:border-amber-500 cursor-pointer appearance-none"
                   >
                     <option value="All">All Roles</option>
                     <option value="Admin">Admin</option>
@@ -637,7 +637,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <select
                     value={statusFilter}
                     onChange={e => setStatusFilter(e.target.value)}
-                    className="w-full text-xs bg-slate-955 border border-slate-800 rounded-xl pl-3 pr-8 py-2.5 outline-none focus:border-amber-500 cursor-pointer appearance-none"
+                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-8 py-2.5 outline-none focus:border-amber-500 cursor-pointer appearance-none"
                   >
                     <option value="All">All Statuses</option>
                     <option value="Active">Active</option>
@@ -668,7 +668,7 @@ export const AdminDashboardPage: React.FC = () => {
                       <tr key={user.id} className="hover:bg-slate-900/20 transition-colors">
                         <td className="px-5 py-3.5 font-semibold text-slate-200">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-850 flex items-center justify-center font-bold text-slate-350">
+                            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-slate-300">
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -720,7 +720,7 @@ export const AdminDashboardPage: React.FC = () => {
                             </button>
                             <button
                               onClick={() => setEditModalUser(user)}
-                              className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-350"
+                              className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300"
                               title="Edit Details"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -730,7 +730,7 @@ export const AdminDashboardPage: React.FC = () => {
                               className={`p-1 rounded ${
                                 user.status === "Suspended"
                                   ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/10 hover:bg-emerald-900/30"
-                                  : "bg-rose-955/40 text-rose-400 border border-rose-500/10 hover:bg-rose-900/30"
+                                  : "bg-rose-950/40 text-rose-400 border border-rose-500/10 hover:bg-rose-900/30"
                               }`}
                               title={user.status === "Suspended" ? "Activate User" : "Suspend User"}
                             >
@@ -738,7 +738,7 @@ export const AdminDashboardPage: React.FC = () => {
                             </button>
                             <button
                               onClick={() => setConfirmModal({ type: "delete", userId: user.id })}
-                              className="p-1 rounded bg-slate-850 hover:bg-rose-955/30 hover:text-rose-400 text-slate-500"
+                              className="p-1 rounded bg-slate-800 hover:bg-rose-950/30 hover:text-rose-400 text-slate-500"
                               title="Delete User"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -791,7 +791,7 @@ export const AdminDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded text-[10px] text-slate-350">{rec.company || "TechCorp"}</span>
+                        <span className="bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded text-[10px] text-slate-300">{rec.company || "TechCorp"}</span>
                       </td>
                       <td className="px-5 py-3.5 text-slate-300 font-medium">12</td>
                       <td className="px-5 py-3.5 text-slate-400">428</td>
@@ -838,8 +838,8 @@ export const AdminDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-5 py-3.5 text-slate-400">{c.email}</td>
-                      <td className="px-5 py-3.5 text-slate-350">5</td>
-                      <td className="px-5 py-3.5 text-slate-350">3</td>
+                      <td className="px-5 py-3.5 text-slate-300">5</td>
+                      <td className="px-5 py-3.5 text-slate-300">3</td>
                       <td className="px-5 py-3.5 text-slate-400">{c.lastActive}</td>
                       <td className="px-5 py-3.5">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -883,11 +883,11 @@ export const AdminDashboardPage: React.FC = () => {
                     <tr key={job.id} className="hover:bg-slate-900/20">
                       <td className="px-5 py-3.5 font-semibold text-slate-200">{job.title}</td>
                       <td className="px-5 py-3.5 text-slate-400">{job.rec}</td>
-                      <td className="px-5 py-3.5 text-slate-350">{job.comp}</td>
-                      <td className="px-5 py-3.5 text-slate-450">{job.apps}</td>
-                      <td className="px-5 py-3.5 text-slate-450">{job.scr}</td>
+                      <td className="px-5 py-3.5 text-slate-300">{job.comp}</td>
+                      <td className="px-5 py-3.5 text-slate-400">{job.apps}</td>
+                      <td className="px-5 py-3.5 text-slate-400">{job.scr}</td>
                       <td className="px-5 py-3.5 text-emerald-400 font-bold">{job.sl}</td>
-                      <td className="px-5 py-3.5 text-slate-450">{job.dt}</td>
+                      <td className="px-5 py-3.5 text-slate-400">{job.dt}</td>
                       <td className="px-5 py-3.5 text-right">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           job.st === "Active" ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-800 text-slate-500"
@@ -943,7 +943,7 @@ export const AdminDashboardPage: React.FC = () => {
         {/* 7. AI USAGE VIEW */}
         {activeNav === "AI Usage" && (
           <div className="space-y-6">
-            <h2 className="font-serif text-lg font-bold text-slate-350">✦ AI USAGE TELEMETRY</h2>
+            <h2 className="font-serif text-lg font-bold text-slate-300">✦ AI USAGE TELEMETRY</h2>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
@@ -997,7 +997,7 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Failed AI Requests</span>
-                      <span className="font-bold text-rose-450">14 requests</span>
+                      <span className="font-bold text-rose-400">14 requests</span>
                     </div>
                   </div>
                 </div>
@@ -1082,7 +1082,7 @@ export const AdminDashboardPage: React.FC = () => {
                           <p className="font-bold text-slate-200 text-xs">{seeker.name}</p>
                           <p className="text-[10px] text-slate-500 mt-0.5">{seeker.email}</p>
                         </td>
-                        <td className="py-3 text-slate-450 uppercase">{seeker.plan || "Free"}</td>
+                        <td className="py-3 text-slate-400 uppercase">{seeker.plan || "Free"}</td>
                         <td className="py-3">
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                             Upgrade Requested
@@ -1092,13 +1092,13 @@ export const AdminDashboardPage: React.FC = () => {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => setConfirmModal({ type: "approve-pro", userId: seeker.id })}
-                              className="px-2.5 py-1 rounded bg-emerald-955/40 hover:bg-emerald-900/30 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold cursor-pointer"
+                              className="px-2.5 py-1 rounded bg-emerald-950/40 hover:bg-emerald-900/30 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold cursor-pointer"
                             >
                               Approve
                             </button>
                             <button
                               onClick={() => setConfirmModal({ type: "decline-pro", userId: seeker.id })}
-                              className="px-2.5 py-1 rounded bg-rose-955/40 hover:bg-rose-900/30 text-rose-400 border border-rose-500/20 text-[10px] font-bold cursor-pointer"
+                              className="px-2.5 py-1 rounded bg-rose-950/40 hover:bg-rose-900/30 text-rose-400 border border-rose-500/20 text-[10px] font-bold cursor-pointer"
                             >
                               Decline
                             </button>
@@ -1159,7 +1159,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <input
                     type="text"
                     defaultValue="https://api.openai.com/v1/chat/completions"
-                    className="w-full bg-slate-955 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-amber-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-amber-500"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -1167,7 +1167,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <input
                     type="text"
                     defaultValue="$1,200.00"
-                    className="w-full bg-slate-955 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-amber-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -1188,7 +1188,7 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* ─── MODAL 1: VIEW DETAILS MODAL ─────────────────────────────────────── */}
       {detailModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-slate-955/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl relative">
             <button
               onClick={() => { setDetailModalOpen(false); setSelectedUser(null); }}
@@ -1211,7 +1211,7 @@ export const AdminDashboardPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="border-t border-b border-slate-850 py-4 space-y-3 text-xs">
+            <div className="border-t border-b border-slate-800 py-4 space-y-3 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-500">Email Address</span>
                 <span className="font-semibold text-slate-200">{selectedUser.email}</span>
@@ -1256,8 +1256,8 @@ export const AdminDashboardPage: React.FC = () => {
                   }}
                   className={`w-full py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                     selectedUser.status === "Suspended"
-                      ? "bg-emerald-955/40 text-emerald-400 border-emerald-500/20 hover:bg-emerald-900/30"
-                      : "bg-rose-955/40 text-rose-400 border-rose-500/20 hover:bg-rose-900/30"
+                      ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/20 hover:bg-emerald-900/30"
+                      : "bg-rose-950/40 text-rose-400 border-rose-500/20 hover:bg-rose-900/30"
                   }`}
                 >
                   {selectedUser.status === "Suspended" ? "Activate Account" : "Suspend Account"}
@@ -1294,14 +1294,14 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* ─── MODAL 2: CONFIRMATION MODAL ────────────────────────────────────── */}
       {confirmModal.type && (
-        <div className="fixed inset-0 bg-slate-955/80 backdrop-blur-sm z-55 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-55 flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
             <div className="flex items-center space-x-3 text-amber-500">
               <AlertTriangle className="w-6 h-6" />
               <h3 className="font-serif text-lg font-bold text-white">Confirm Admin Action</h3>
             </div>
             
-            <p className="text-slate-350 text-xs leading-relaxed">
+            <p className="text-slate-300 text-xs leading-relaxed">
               {confirmModal.type === "delete" && "Are you sure you want to permanently delete this user account? All resume reviews and profiles linked to this user ID will be destroyed."}
               {confirmModal.type === "suspend" && "Toggle status between Suspended and Active? Suspended accounts cannot log in to ResumeAI."}
               {confirmModal.type === "approve-pro" && "Approve access to the Pro tier for this candidate user?"}
@@ -1331,7 +1331,7 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* ─── MODAL 3: EDIT USER PROFILE MODAL ─────────────────────────────────── */}
       {editModalUser && (
-        <div className="fixed inset-0 bg-slate-955/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <form onSubmit={handleSaveUserEdit} className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
             <div>
               <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest block">Modify Profile Data</span>
@@ -1346,7 +1346,7 @@ export const AdminDashboardPage: React.FC = () => {
                   required
                   value={editModalUser.name}
                   onChange={e => setEditModalUser({ ...editModalUser, name: e.target.value })}
-                  className="w-full bg-slate-955 border border-slate-850 rounded-xl p-2.5 text-slate-250 outline-none focus:border-amber-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-250 outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -1357,7 +1357,7 @@ export const AdminDashboardPage: React.FC = () => {
                   required
                   value={editModalUser.email}
                   onChange={e => setEditModalUser({ ...editModalUser, email: e.target.value })}
-                  className="w-full bg-slate-955 border border-slate-850 rounded-xl p-2.5 text-slate-250 outline-none focus:border-amber-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-250 outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -1368,7 +1368,7 @@ export const AdminDashboardPage: React.FC = () => {
                     type="text"
                     value={editModalUser.company || ""}
                     onChange={e => setEditModalUser({ ...editModalUser, company: e.target.value })}
-                    className="w-full bg-slate-955 border border-slate-850 rounded-xl p-2.5 text-slate-250 outline-none focus:border-amber-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-250 outline-none focus:border-amber-500"
                   />
                 </div>
               )}

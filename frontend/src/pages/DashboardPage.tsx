@@ -212,7 +212,7 @@ export const DashboardPage: React.FC = () => {
   }) || [];
 
   return (
-    <div className="min-h-screen bg-slate-955 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col lg:flex-row gap-8">
         
         {/* SIDEBAR NAVIGATION PANEL */}
@@ -302,7 +302,7 @@ export const DashboardPage: React.FC = () => {
               {/* KPI Cards Row */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "RESUME SCORE", val: resumeRecord ? `${resumeRecord.score} / 100` : "86 / 100", change: "↑ +6 this month", col: "text-emerald-450", desc: "Based on SDE rubric" },
+                  { label: "RESUME SCORE", val: resumeRecord ? `${resumeRecord.score} / 100` : "86 / 100", change: "↑ +6 this month", col: "text-emerald-400", desc: "Based on SDE rubric" },
                   { label: "JOB MATCHES", val: "18", change: "5 strong matches", col: "text-purple-400", desc: "Top match: 94%" },
                   { label: "APPLICATIONS", val: "24", change: "6 active pipelines", col: "text-[#a84c38]", desc: "Last application: 2d ago" },
                   { label: "INTERVIEW READY", val: "82%", change: "↑ 12% improvement", col: "text-indigo-400", desc: "Average mock rating" }
@@ -313,7 +313,7 @@ export const DashboardPage: React.FC = () => {
                     <div className="text-2xl font-extrabold mt-2 text-white">{stat.val}</div>
                     <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-slate-900">
                       <span className={`text-[10px] font-bold ${stat.col}`}>{stat.change}</span>
-                      <span className="text-[9px] text-slate-550 group-hover:text-slate-400 transition-colors">{stat.desc}</span>
+                      <span className="text-[9px] text-slate-500 group-hover:text-slate-400 transition-colors">{stat.desc}</span>
                     </div>
                   </div>
                 ))}
@@ -352,7 +352,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="bg-slate-900/50 border border-slate-900 rounded-3xl p-6 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-slate-900 pb-3">
-                      <h3 className="text-xs font-bold text-slate-450 uppercase tracking-widest">Resume Health</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resume Health</h3>
                       <span className="text-xl font-extrabold text-[#a84c38]">{resumeRecord ? resumeRecord.score : 86}%</span>
                     </div>
 
@@ -390,7 +390,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="bg-slate-900/50 border border-slate-900 rounded-3xl p-6 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-slate-900 pb-3">
-                      <h3 className="text-xs font-bold text-slate-455 uppercase tracking-widest">Career Progress</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Career Progress</h3>
                       <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold">ATS Ninja</span>
                     </div>
 
@@ -400,7 +400,7 @@ export const DashboardPage: React.FC = () => {
                           <span>Next Tier: <strong className="text-white">Resume Strategist</strong></span>
                           <span>1,450 / 2,200 XP</span>
                         </div>
-                        <div className="w-full bg-slate-950 rounded-full h-4 overflow-hidden border border-slate-850 flex items-center p-0.5">
+                        <div className="w-full bg-slate-950 rounded-full h-4 overflow-hidden border border-slate-800 flex items-center p-0.5">
                           <div className="bg-gradient-to-r from-purple-600 to-[#a84c38] h-full rounded-sm" style={{ width: "65.9%" }}></div>
                         </div>
                         <span className="text-[10px] text-slate-500 block mt-1.5">750 XP remaining for promotion.</span>
@@ -415,9 +415,9 @@ export const DashboardPage: React.FC = () => {
                             { emoji: "⚡", label: "5 AI Improvements" },
                             { emoji: "🎤", label: "First Mock Interview" }
                           ].map(ach => (
-                            <div key={ach.label} className="p-2 rounded-xl bg-slate-950 border border-slate-850 flex items-center space-x-2">
+                            <div key={ach.label} className="p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-2">
                               <span className="text-sm">{ach.emoji}</span>
-                              <span className="text-slate-350 font-bold">{ach.label}</span>
+                              <span className="text-slate-300 font-bold">{ach.label}</span>
                             </div>
                           ))}
                         </div>
@@ -504,7 +504,7 @@ export const DashboardPage: React.FC = () => {
                 <p className="text-[11px] text-slate-400">Ask ResumeAI what to improve, where to apply, or how to prepare.</p>
                 
                 {chatHistory.length > 0 && (
-                  <div className="space-y-3 bg-slate-950/80 p-4 rounded-2xl border border-slate-850 text-xs max-h-48 overflow-y-auto scrollbar-thin">
+                  <div className="space-y-3 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 text-xs max-h-48 overflow-y-auto scrollbar-thin">
                     {chatHistory.map((chat, idx) => (
                       <div key={idx} className="space-y-1">
                         <div className="flex items-center space-x-1.5 text-slate-500 font-bold">
@@ -543,7 +543,7 @@ export const DashboardPage: React.FC = () => {
                       type="button"
                       key={prompt}
                       onClick={() => handleTriggerSuggestedPrompt(prompt)}
-                      className="px-2.5 py-1 rounded bg-slate-950 border border-slate-850 text-[10px] text-slate-400 hover:text-white hover:border-[#a84c38]/30 transition-all cursor-pointer"
+                      className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-[10px] text-slate-400 hover:text-white hover:border-[#a84c38]/30 transition-all cursor-pointer"
                     >
                       {prompt}
                     </button>
@@ -562,9 +562,9 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-white text-base">Target Rubric & Text</h3>
                   <div className="flex items-center space-x-1">
-                    <button onClick={() => handleLoadSampleResume('sde')} className="text-[10px] font-bold px-2 py-1 bg-slate-850 rounded text-slate-350 hover:text-white cursor-pointer">SDE</button>
-                    <button onClick={() => handleLoadSampleResume('ds')} className="text-[10px] font-bold px-2 py-1 bg-slate-850 rounded text-slate-355 hover:text-white cursor-pointer">DS</button>
-                    <button onClick={() => handleLoadSampleResume('marketing')} className="text-[10px] font-bold px-2 py-1 bg-slate-850 rounded text-slate-355 hover:text-white cursor-pointer">MKT</button>
+                    <button onClick={() => handleLoadSampleResume('sde')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">SDE</button>
+                    <button onClick={() => handleLoadSampleResume('ds')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">DS</button>
+                    <button onClick={() => handleLoadSampleResume('marketing')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">MKT</button>
                   </div>
                 </div>
 
@@ -573,7 +573,7 @@ export const DashboardPage: React.FC = () => {
                   <select
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-slate-955 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
                   >
                     <option value="sde">Software Development Engineer (SDE)</option>
                     <option value="data-science">Data Scientist / ML Engineer</option>
@@ -582,10 +582,10 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="border-t border-slate-850 pt-4">
+                <div className="border-t border-slate-800 pt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-xs font-semibold text-slate-400">Target job description</label>
-                    <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold text-indigo-405 hover:text-indigo-300">Load sample JD</button>
+                    <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300">Load sample JD</button>
                   </div>
                   <FileUpload
                     onTextExtracted={(text) => setJdInput(text)}
@@ -598,7 +598,7 @@ export const DashboardPage: React.FC = () => {
                     onChange={(e) => setJdInput(e.target.value)}
                     rows={7}
                     placeholder="Paste the job description you want to compare..."
-                    className="w-full p-3.5 bg-slate-955 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                   <p className="mt-2 text-[11px] leading-5 text-slate-500">Add both your resume and the job description here. We will score the resume and show the skills gap together.</p>
                 </div>
@@ -612,9 +612,9 @@ export const DashboardPage: React.FC = () => {
                 />
 
                 <div className="flex items-center space-x-3 text-[10px] text-slate-500">
-                  <div className="flex-1 h-px bg-slate-850"></div>
+                  <div className="flex-1 h-px bg-slate-800"></div>
                   <span className="font-bold uppercase tracking-wider">or paste text manually</span>
-                  <div className="flex-1 h-px bg-slate-850"></div>
+                  <div className="flex-1 h-px bg-slate-800"></div>
                 </div>
 
                 <div>
@@ -624,11 +624,11 @@ export const DashboardPage: React.FC = () => {
                     onChange={(e) => setResumeInput(e.target.value)}
                     rows={8}
                     placeholder="Paste your resume text here..."
-                    className="w-full p-3.5 bg-slate-955 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
 
-                <div className="border-t border-slate-850 pt-4">
+                <div className="border-t border-slate-800 pt-4">
                   <div className="mb-3 flex items-center justify-between">
                     <div><label className="block text-xs font-semibold text-slate-300">Links & profiles</label><p className="mt-1 text-[11px] text-slate-500">Add public profiles so the review can check your project footprint.</p></div>
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Optional</span>
@@ -647,7 +647,7 @@ export const DashboardPage: React.FC = () => {
                           value={profileLinks[key]}
                           onChange={(event) => setProfileLinks(current => ({ ...current, [key]: event.target.value }))}
                           placeholder={placeholder}
-                          className="w-full rounded-lg border border-slate-800 bg-slate-955 px-3 py-2 text-[11px] text-slate-200 outline-none transition focus:border-indigo-500"
+                          className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-200 outline-none transition focus:border-indigo-500"
                         />
                       </label>
                     ))}
@@ -675,7 +675,7 @@ export const DashboardPage: React.FC = () => {
                 
                 {/* Score Summary Card */}
                 <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-900 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                  <div className="text-center md:border-r md:border-slate-850 pr-4">
+                  <div className="text-center md:border-r md:border-slate-800 pr-4">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Role Score</span>
                     <div className="mt-2 text-5xl font-extrabold text-white">
                       {resumeRecord ? resumeRecord.score : 86} <span className="text-xs font-normal text-slate-500">/ 100</span>
@@ -687,27 +687,27 @@ export const DashboardPage: React.FC = () => {
 
                   {/* Sub-score Pillars */}
                   <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-850">
+                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Structure & Contact</span>
                       <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.structure : 90}%</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-850">
+                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Clarity & Verbs</span>
                       <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.clarity : 88}%</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-850">
+                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Impact & Metrics</span>
                       <span className="text-sm font-bold text-emerald-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.impact : 92}%</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-850">
+                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Role Hard Skills</span>
                       <span className="text-sm font-bold text-amber-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.skills : 85}%</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-850">
+                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Projects & Links</span>
                       <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.projects : 80}%</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-850">
+                    <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">ATS Readability</span>
                       <span className="text-sm font-bold text-indigo-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.ats : 82}%</span>
                     </div>
@@ -715,7 +715,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 rounded-2xl border border-slate-900 bg-slate-900/50 p-5 md:grid-cols-[150px_1fr] md:items-center">
-                  <div className="md:border-r md:border-slate-850 md:pr-5"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">JD match</p><p className="mt-1 text-4xl font-extrabold text-emerald-400">{jdMatchResult ? jdMatchResult.matchPct : 86}%</p><p className="mt-1 text-[11px] text-slate-500">Resume vs. this role</p></div>
+                  <div className="md:border-r md:border-slate-800 md:pr-5"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">JD match</p><p className="mt-1 text-4xl font-extrabold text-emerald-400">{jdMatchResult ? jdMatchResult.matchPct : 86}%</p><p className="mt-1 text-[11px] text-slate-500">Resume vs. this role</p></div>
                   <div><p className="text-xs font-semibold text-slate-300">Skills to review</p><div className="mt-2 flex flex-wrap gap-2">{(jdMatchResult ? jdMatchResult.missingCoreSkills : ['GraphQL', 'Kubernetes']).map(skill => <span key={skill} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-400">{skill}</span>)}</div><p className="mt-3 text-[11px] text-slate-500">The matching score compares the resume text with the job description entered on the left.</p></div>
                 </div>
 
@@ -723,7 +723,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <h3 className="font-bold text-white text-base">Actionable Feedback Cards</h3>
-                    <div className="flex items-center space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-850">
+                    <div className="flex items-center space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
                       <button onClick={() => setFeedbackFilter('all')} className={`px-2.5 py-1 text-[11px] font-bold rounded cursor-pointer ${feedbackFilter === 'all' ? 'bg-[#a84c38] text-white' : 'text-slate-400'}`}>All</button>
                       <button onClick={() => setFeedbackFilter('high')} className={`px-2.5 py-1 text-[11px] font-bold rounded cursor-pointer ${feedbackFilter === 'high' ? 'bg-rose-600 text-white' : 'text-slate-400'}`}>High Priority</button>
                       <button onClick={() => setFeedbackFilter('medium')} className={`px-2.5 py-1 text-[11px] font-bold rounded cursor-pointer ${feedbackFilter === 'medium' ? 'bg-amber-600 text-white' : 'text-slate-400'}`}>Warnings</button>
@@ -758,7 +758,7 @@ export const DashboardPage: React.FC = () => {
                             )}
                             <h4 className="font-bold text-white text-sm">{fb.title}</h4>
                           </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-900 border border-slate-850 text-slate-350">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
                             {fb.category}
                           </span>
                         </div>
@@ -788,8 +788,8 @@ export const DashboardPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-white text-base">Paste Target Job Description (JD)</h3>
                     <div className="flex items-center space-x-1">
-                      <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold px-2 py-1 bg-slate-850 rounded text-slate-300 hover:text-white cursor-pointer">SDE JD</button>
-                      <button onClick={() => setJdInput(sampleJDsText.ds)} className="text-[10px] font-bold px-2 py-1 bg-slate-850 rounded text-slate-300 hover:text-white cursor-pointer">DS JD</button>
+                      <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">SDE JD</button>
+                      <button onClick={() => setJdInput(sampleJDsText.ds)} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">DS JD</button>
                     </div>
                   </div>
 
@@ -802,9 +802,9 @@ export const DashboardPage: React.FC = () => {
                   />
 
                   <div className="flex items-center space-x-3 text-[10px] text-slate-500">
-                    <div className="flex-1 h-px bg-slate-850"></div>
+                    <div className="flex-1 h-px bg-slate-800"></div>
                     <span className="font-bold uppercase tracking-wider">or paste JD text</span>
-                    <div className="flex-1 h-px bg-slate-850"></div>
+                    <div className="flex-1 h-px bg-slate-800"></div>
                   </div>
 
                   <textarea
@@ -812,7 +812,7 @@ export const DashboardPage: React.FC = () => {
                     onChange={(e) => setJdInput(e.target.value)}
                     rows={8}
                     placeholder="Paste Job Description text here..."
-                    className="w-full p-3.5 bg-slate-955 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
                   />
 
                   <button
@@ -833,7 +833,7 @@ export const DashboardPage: React.FC = () => {
 
                 {/* Right Column: JD Match Breakdown */}
                 <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-6">
-                  <div className="text-center p-6 rounded-2xl bg-slate-950 border border-slate-850 space-y-2">
+                  <div className="text-center p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Job Match Percentage</span>
                     <div className="text-5xl font-extrabold text-[#a84c38]">
                       {jdMatchResult ? jdMatchResult.matchPct : 86}%
@@ -858,7 +858,7 @@ export const DashboardPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <h4 className="font-bold text-rose-455 mb-2 flex items-center space-x-1">
+                      <h4 className="font-bold text-rose-400 mb-2 flex items-center space-x-1">
                         <AlertTriangle className="w-4 h-4" />
                         <span>Missing Core Skills ({jdMatchResult ? jdMatchResult.missingCoreSkills.length : 2})</span>
                       </h4>
@@ -887,7 +887,7 @@ export const DashboardPage: React.FC = () => {
                     </div>
 
                     {/* Actionable Recommendations */}
-                    <div className="pt-3 border-t border-slate-850 space-y-3">
+                    <div className="pt-3 border-t border-slate-800 space-y-3">
                       <h4 className="font-bold text-white flex items-center space-x-2">
                         <Sparkles className="w-4 h-4 text-indigo-400" />
                         <span>How to Improve Your Resume for This JD:</span>
@@ -897,7 +897,7 @@ export const DashboardPage: React.FC = () => {
                           'Explicitly incorporate missing target skills: GraphQL, Kubernetes into your Skills or Experience section.',
                           'Align your resume summary headline directly with the Senior Full Stack Engineer title.'
                         ]).map((rec, idx) => (
-                          <div key={idx} className="flex items-start space-x-2 p-3 rounded-xl bg-slate-950/80 border border-slate-850">
+                          <div key={idx} className="flex items-start space-x-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                             <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                             <span className="text-xs text-slate-300 leading-relaxed">{rec}</span>
                           </div>
@@ -915,7 +915,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-slate-850 text-slate-450 uppercase tracking-wider text-[10px]">
+                      <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
                         <th className="py-3">Job Title</th>
                         <th className="py-3">Company</th>
                         <th className="py-3">Required Experience</th>
@@ -923,7 +923,7 @@ export const DashboardPage: React.FC = () => {
                         <th className="py-3 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-850 text-slate-300">
+                    <tbody className="divide-y divide-slate-800 text-slate-300">
                       {[
                         { title: "Senior Full Stack Engineer", company: "TechScale Innovations", exp: "5+ yrs", match: "94%", jd: sampleJDsText.sde },
                         { title: "Frontend Engineer", company: "CloudTech Solutions", exp: "3+ yrs", match: "89%", jd: sampleJDsText.sde },
@@ -973,7 +973,7 @@ export const DashboardPage: React.FC = () => {
                     value={bulletInput}
                     onChange={(e) => setBulletInput(e.target.value)}
                     rows={3}
-                    className="w-full p-3 bg-slate-955 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -994,7 +994,7 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={() => setFocusMode('action')}
                       className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'action' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-955 border-slate-800 text-slate-500'
+                        focusMode === 'action' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
                       }`}
                     >
                       <span className="block text-indigo-350 font-extrabold">2. Action Verbs</span>
@@ -1004,7 +1004,7 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={() => setFocusMode('concise')}
                       className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'concise' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-955 border-slate-800 text-slate-500'
+                        focusMode === 'concise' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
                       }`}
                     >
                       <span className="block text-emerald-350 font-extrabold">3. Trim Filler</span>
@@ -1014,7 +1014,7 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={() => setFocusMode('role-aligned')}
                       className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'role-aligned' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-955 border-slate-800 text-slate-500'
+                        focusMode === 'role-aligned' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
                       }`}
                     >
                       <span className="block text-purple-350 font-extrabold">4. Role Alignment</span>
@@ -1078,7 +1078,7 @@ export const DashboardPage: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-400">Validate code repositories and public activity strength.</p>
 
-                <div className="p-4 rounded-2xl bg-slate-955 border border-slate-800 space-y-3 text-xs">
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">GitHub Stars</span>
                     <span className="text-white font-bold">38 Stars</span>
@@ -1102,7 +1102,7 @@ export const DashboardPage: React.FC = () => {
                 <p className="text-xs text-slate-400">Targeted course recommendations to fill identified skill gaps.</p>
 
                 <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-2xl bg-slate-955 border border-slate-800 space-y-1">
+                  <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
                     <div className="flex justify-between text-white font-bold">
                       <span>GraphQL & Microservices Architecture</span>
                       <span className="text-indigo-400">6 Hours</span>
@@ -1110,7 +1110,7 @@ export const DashboardPage: React.FC = () => {
                     <p className="text-slate-500 text-[10px]">Educative.io / Coursera</p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-slate-955 border border-slate-800 space-y-1">
+                  <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
                     <div className="flex justify-between text-white font-bold">
                       <span>Kubernetes Deployment & DevOps Pipelines</span>
                       <span className="text-indigo-400">10 Hours</span>
@@ -1160,7 +1160,7 @@ export const DashboardPage: React.FC = () => {
                     keyPointsToCover: ['EXPLAIN ANALYZE for query plans', 'B-Tree composite indexes', 'Cache eviction strategies (LRU)', 'Cache stampede prevention']
                   }
                 ]).map((q, idx) => (
-                  <div key={q.id || idx} className="p-5 rounded-2xl bg-slate-955 border border-slate-800 space-y-3">
+                  <div key={q.id || idx} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                         {q.category}
@@ -1172,8 +1172,8 @@ export const DashboardPage: React.FC = () => {
 
                     <h4 className="font-bold text-white text-sm">{q.question}</h4>
 
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-850 text-xs space-y-1.5">
-                      <span className="text-slate-450 font-bold block">Key Points to Cover in Answer:</span>
+                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5">
+                      <span className="text-slate-400 font-bold block">Key Points to Cover in Answer:</span>
                       <ul className="list-disc list-inside text-slate-300 space-y-0.5">
                         {q.keyPointsToCover.map((pt, i) => (
                           <li key={i}>{pt}</li>
@@ -1192,43 +1192,43 @@ export const DashboardPage: React.FC = () => {
               <h3 className="text-xl font-serif font-bold text-white border-b border-slate-900 pb-4">Job Applications Tracker</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-slate-955 border border-slate-850 p-4 rounded-xl">
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Total Applications</span>
                   <div className="text-2xl font-extrabold text-white mt-1">24 Submitted</div>
                 </div>
-                <div className="bg-slate-955 border border-slate-855 p-4 rounded-xl">
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Active Pipelines</span>
                   <div className="text-2xl font-extrabold text-[#a84c38] mt-1">6 In-Progress</div>
                 </div>
-                <div className="bg-slate-955 border border-slate-855 p-4 rounded-xl">
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Interviews Slated</span>
-                  <div className="text-2xl font-extrabold text-emerald-450 mt-1">2 Scheduled</div>
+                  <div className="text-2xl font-extrabold text-emerald-400 mt-1">2 Scheduled</div>
                 </div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-850 text-slate-450 uppercase tracking-wider text-[10px]">
+                    <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
                       <th className="py-3">Target Role</th>
                       <th className="py-3">Company</th>
                       <th className="py-3">Applied Date</th>
                       <th className="py-3">Pipeline Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-850 text-slate-300">
+                  <tbody className="divide-y divide-slate-800 text-slate-300">
                     {applications.map(app => (
                       <tr key={app.id} className="hover:bg-slate-950/20">
                         <td className="py-3 font-bold text-white">{app.role}</td>
                         <td className="py-3 text-slate-400">{app.company}</td>
-                        <td className="py-3 text-slate-450">{app.date}</td>
+                        <td className="py-3 text-slate-400">{app.date}</td>
                         <td className="py-3">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                             app.status === 'Interviewing'
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                               : app.status === 'Applied'
                               ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                              : 'bg-rose-500/10 text-rose-455 border-rose-500/20'
+                              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                           }`}>
                             {app.status}
                           </span>
@@ -1255,13 +1255,13 @@ export const DashboardPage: React.FC = () => {
 
                 <div className="text-right">
                   <span className="text-xs text-slate-400 block font-semibold">Your Rank</span>
-                  <span className="text-xl font-extrabold text-amber-405">#1 Spot</span>
+                  <span className="text-xl font-extrabold text-amber-400">#1 Spot</span>
                 </div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="border-b border-slate-850 text-slate-400 uppercase tracking-wider text-[10px]">
+                  <thead className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
                     <tr>
                       <th className="py-3 px-4">Rank</th>
                       <th className="py-3 px-4">Candidate</th>
@@ -1270,9 +1270,9 @@ export const DashboardPage: React.FC = () => {
                       <th className="py-3 px-4">Badges Unlocked</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-850 text-slate-350">
+                  <tbody className="divide-y divide-slate-800 text-slate-300">
                     <tr className="bg-indigo-950/20">
-                      <td className="py-3 px-4 font-bold text-amber-450">#1</td>
+                      <td className="py-3 px-4 font-bold text-amber-400">#1</td>
                       <td className="py-3 px-4 font-bold text-white flex items-center space-x-2">
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="avatar" className="w-6 h-6 rounded-full" />
                         <span>{user?.name || 'Alex Rivera'} (You)</span>
@@ -1328,7 +1328,7 @@ export const DashboardPage: React.FC = () => {
                     type="text"
                     value={profileData.name}
                     onChange={e => setProfileData(current => ({ ...current, name: e.target.value }))}
-                    className="w-full bg-slate-955 border border-slate-800 rounded-xl p-2.5 text-slate-350 outline-none focus:border-[#a84c38]"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
                   />
                 </div>
 
@@ -1338,7 +1338,7 @@ export const DashboardPage: React.FC = () => {
                     type="email"
                     value={profileData.email}
                     onChange={e => setProfileData(current => ({ ...current, email: e.target.value }))}
-                    className="w-full bg-slate-955 border border-slate-800 rounded-xl p-2.5 text-slate-350 outline-none focus:border-[#a84c38]"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
                   />
                 </div>
 
@@ -1349,7 +1349,7 @@ export const DashboardPage: React.FC = () => {
                       type="text"
                       value={profileData.github}
                       onChange={e => setProfileData(current => ({ ...current, github: e.target.value }))}
-                      className="w-full bg-slate-955 border border-slate-800 rounded-xl p-2.5 text-slate-350 outline-none focus:border-[#a84c38]"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1358,12 +1358,12 @@ export const DashboardPage: React.FC = () => {
                       type="text"
                       value={profileData.linkedin}
                       onChange={e => setProfileData(current => ({ ...current, linkedin: e.target.value }))}
-                      className="w-full bg-slate-955 border border-slate-800 rounded-xl p-2.5 text-slate-350 outline-none focus:border-[#a84c38]"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
                     />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-850">
+                <div className="pt-4 border-t border-slate-800">
                   <button
                     type="button"
                     onClick={() => alert("Profile updated locally! (Mock Action)")}
