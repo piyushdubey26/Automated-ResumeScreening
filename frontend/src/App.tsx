@@ -47,7 +47,7 @@ export const App: React.FC = () => {
 
                   {/* PROTECTED SEEKER DASHBOARD */}
                   <Route
-                    path="/dashboard"
+                    path="/dashboard/*"
                     element={
                       <ProtectedRoute>
                         <RoleGuard allowedRoles={['seeker']}>

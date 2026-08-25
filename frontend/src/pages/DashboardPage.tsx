@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { sampleResumesText, sampleJDsText, resumeApi, jobApi } from '../services/api';
 import { FileUpload } from '../components/upload/FileUpload';
@@ -58,6 +59,9 @@ export const DashboardPage: React.FC = () => {
   const KEY_INTERVIEW_SCORE = `resumeai_user_interview_score_${userId}`;
   const KEY_LINKS = `resumeai_user_links_${userId}`;
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Seeker Dashboard Navigation
   const [activeNav, setActiveNav] = useState<
     | 'Dashboard'
@@ -70,6 +74,33 @@ export const DashboardPage: React.FC = () => {
     | 'Leaderboard & Badges'
     | 'Profile'
   >('Dashboard');
+
+  // Synchronize activeNav from URL path
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.endsWith('/resume-review')) setActiveNav('Resume Review');
+    else if (path.endsWith('/job-matches')) setActiveNav('Job Matches');
+    else if (path.endsWith('/bullet-rewriter')) setActiveNav('AI Bullet Rewriter');
+    else if (path.endsWith('/portfolio')) setActiveNav('Portfolio & Learning');
+    else if (path.endsWith('/mock-interview')) setActiveNav('AI Mock Interview');
+    else if (path.endsWith('/applications')) setActiveNav('Applications');
+    else if (path.endsWith('/leaderboard')) setActiveNav('Leaderboard & Badges');
+    else if (path.endsWith('/profile')) setActiveNav('Profile');
+    else setActiveNav('Dashboard');
+  }, [location.pathname]);
+
+  // Route-based workspace switcher
+  const handleNavigate = (nav: typeof activeNav) => {
+    if (nav === 'Dashboard') navigate('/dashboard');
+    else if (nav === 'Resume Review') navigate('/dashboard/resume-review');
+    else if (nav === 'Job Matches') navigate('/dashboard/job-matches');
+    else if (nav === 'AI Bullet Rewriter') navigate('/dashboard/bullet-rewriter');
+    else if (nav === 'Portfolio & Learning') navigate('/dashboard/portfolio');
+    else if (nav === 'AI Mock Interview') navigate('/dashboard/mock-interview');
+    else if (nav === 'Applications') navigate('/dashboard/applications');
+    else if (nav === 'Leaderboard & Badges') navigate('/dashboard/leaderboard');
+    else if (nav === 'Profile') navigate('/dashboard/profile');
+  };
 
   // Clear any legacy un-scoped global demo data keys on mount
   useEffect(() => {
@@ -372,7 +403,7 @@ export const DashboardPage: React.FC = () => {
                 return (
                   <button
                     key={item.name}
-                    onClick={() => setActiveNav(item.name as any)}
+                    onClick={() => handleNavigate(item.name as any)}
                     className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                       isActive
                         ? "bg-[#a84c38]/20 text-[#a84c38] border border-[#a84c38]/20 shadow-md shadow-[#a84c38]/10"
@@ -404,15 +435,7 @@ export const DashboardPage: React.FC = () => {
                 Welcome back, {user?.name || 'Job Seeker'} 👋
               </h1>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                {activeNav === "Dashboard" && "Your career progress at a glance. Complete your first steps to get started."}
-                {activeNav === "Resume Review" && "Score and optimize your resume against role rubrics and custom job descriptions."}
-                {activeNav === "Job Matches" && "Find roles that match your skills, experience, and parsed profile."}
-                {activeNav === "AI Bullet Rewriter" && "Turn weak resume bullets into impact-focused statements."}
-                {activeNav === "Portfolio & Learning" && "Track public signals and curated learning paths to fill skill gaps."}
-                {activeNav === "AI Mock Interview" && "Practice custom questions generated based on your resume and target roles."}
-                {activeNav === "Applications" && "Track and manage your submitted applications and progress."}
-                {activeNav === "Leaderboard & Badges" && "Compete with other job seekers, earn XP, and unlock achievements."}
-                {activeNav === "Profile" && "Manage your target roles, social link connections, and user preferences."}
+                Your career progress at a glance. Improve your resume, discover better matches, and prepare for your next interview.
               </p>
             </div>
             
@@ -451,7 +474,35 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* HORIZONTAL FEATURE TABS NAVIGATION */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-4 border-b border-slate-900 scrollbar-none">
+            {[
+              { name: "Dashboard", label: "Dashboard" },
+              { name: "Resume Review", label: "Resume Review" },
+              { name: "Job Matches", label: "Job Matches" },
+              { name: "AI Bullet Rewriter", label: "AI Bullet Rewriter" },
+              { name: "Portfolio & Learning", label: "Portfolio & Learning" },
+              { name: "AI Mock Interview", label: "AI Mock Interview" },
+              { name: "Applications", label: "Applications" },
+              { name: "Leaderboard & Badges", label: "Leaderboard & Badges" },
+              { name: "Profile", label: "Profile" }
+            ].map(tab => {
+              const isActive = activeNav === tab.name;
+              return (
+                <button
+                  key={tab.name}
+                  onClick={() => handleNavigate(tab.name as any)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                    isActive
+                      ? "bg-[#a84c38] text-white border-[#a84c38] shadow-md shadow-[#a84c38]/15 font-extrabold"
+                      : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
           {/* TAB 1: DASHBOARD OVERVIEW */}
           {activeNav === 'Dashboard' && (
             <div className="space-y-8 animate-fadeIn">
@@ -464,7 +515,7 @@ export const DashboardPage: React.FC = () => {
                     change: resumeRecord ? "Score Calculated" : "Not score calculated",
                     col: resumeRecord ? "text-emerald-400" : "text-slate-500",
                     desc: resumeRecord ? `Based on ${targetRole.toUpperCase()} rubric` : "Upload resume to score",
-                    onClick: () => setActiveNav("Resume Review")
+                    onClick: () => handleNavigate("Resume Review")
                   },
                   {
                     label: "JOB MATCHES",
@@ -472,7 +523,7 @@ export const DashboardPage: React.FC = () => {
                     change: jdMatchResult ? `Top match: ${jdMatchResult.matchPct}%` : "No matches yet",
                     col: jdMatchResult ? "text-purple-400" : "text-slate-500",
                     desc: jdMatchResult ? "Based on target JD" : "Compare against a JD",
-                    onClick: () => setActiveNav("Job Matches")
+                    onClick: () => handleNavigate("Job Matches")
                   },
                   {
                     label: "APPLICATIONS",
@@ -480,7 +531,7 @@ export const DashboardPage: React.FC = () => {
                     change: applications.length > 0 ? `${applications.filter(a => a.status === 'Interviewing' || a.status === 'Applied').length} active` : "No applications yet",
                     col: applications.length > 0 ? "text-[#a84c38]" : "text-slate-500",
                     desc: applications.length > 0 ? "Tracked in workspace" : "Add job applications",
-                    onClick: () => setActiveNav("Applications")
+                    onClick: () => handleNavigate("Applications")
                   },
                   {
                     label: "INTERVIEW READY",
@@ -488,7 +539,7 @@ export const DashboardPage: React.FC = () => {
                     change: interviewScore !== null ? "Mock rating" : "Not practiced yet",
                     col: interviewScore !== null ? "text-indigo-400" : "text-slate-500",
                     desc: interviewScore !== null ? "Based on AI interview" : "Complete a mock interview",
-                    onClick: () => setActiveNav("AI Mock Interview")
+                    onClick: () => handleNavigate("AI Mock Interview")
                   }
                 ].map(stat => (
                   <div
@@ -543,7 +594,7 @@ export const DashboardPage: React.FC = () => {
                         <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">{tool.desc}</p>
                       </div>
                       <button
-                        onClick={() => setActiveNav(tool.tab as any)}
+                        onClick={() => handleNavigate(tool.tab as any)}
                         className="text-left text-xs font-bold text-[#a84c38] hover:text-[#c45a44] transition-colors inline-flex items-center gap-1 cursor-pointer"
                       >
                         {tool.cta}
@@ -593,7 +644,7 @@ export const DashboardPage: React.FC = () => {
                         <p className="text-xs font-semibold text-slate-300">Upload your resume to get your personalized score.</p>
                         <p className="text-[11px] text-slate-500">Score breakdown will analyze structure, metrics, ATS readability, and hard skills.</p>
                         <button
-                          onClick={() => setActiveNav("Resume Review")}
+                          onClick={() => handleNavigate("Resume Review")}
                           className="px-4 py-2 bg-[#a84c38] hover:bg-[#8f3f2d] text-white font-bold text-xs rounded-xl shadow transition-all cursor-pointer inline-flex items-center gap-1.5"
                         >
                           <Upload className="w-3.5 h-3.5" />
@@ -605,7 +656,7 @@ export const DashboardPage: React.FC = () => {
 
                   {resumeRecord && (
                     <button
-                      onClick={() => setActiveNav("Resume Review")}
+                      onClick={() => handleNavigate("Resume Review")}
                       className="w-full mt-6 py-2.5 bg-slate-950 border border-slate-800 hover:border-[#a84c38]/40 hover:bg-slate-900/60 text-xs font-bold text-white rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer"
                     >
                       <span>Improve Resume →</span>
@@ -661,7 +712,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
 
                   <button
-                    onClick={() => setActiveNav("Leaderboard & Badges")}
+                    onClick={() => handleNavigate("Leaderboard & Badges")}
                     className="w-full mt-6 py-2.5 bg-slate-950 border border-slate-800 hover:border-indigo-500/40 hover:bg-slate-900/60 text-xs font-bold text-white rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer"
                   >
                     <span>View Leaderboard →</span>
@@ -975,6 +1026,45 @@ export const DashboardPage: React.FC = () => {
               <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
                 <h3 className="font-bold text-white text-base">Paste Target Job Description</h3>
                 <p className="text-xs text-slate-400">Enter the requirements for any job posting to calculate match percentage and missing skills.</p>
+                
+                {/* Real-time Resume Integration Status Card */}
+                {resumeRecord ? (
+                  <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/40 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Active Workspace Resume
+                      </span>
+                      <button 
+                        onClick={() => handleNavigate('Resume Review')}
+                        className="px-2 py-0.5 rounded bg-slate-950 hover:bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-bold cursor-pointer"
+                      >
+                        Update
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Evaluated for <strong className="text-slate-200">{targetRole.toUpperCase()}</strong> with a personalized baseline score of <strong className="text-slate-200">{resumeRecord.score}/100</strong>.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-900/40 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-amber-400 font-bold">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        No Resume Uploaded
+                      </span>
+                      <button 
+                        onClick={() => handleNavigate('Resume Review')}
+                        className="px-2 py-0.5 rounded bg-amber-900/20 hover:bg-amber-900/30 border border-amber-500/20 text-[10px] text-amber-300 font-bold cursor-pointer"
+                      >
+                        Upload Resume
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      No resume uploaded yet in your workspace. We will use a standard sample resume for comparison.
+                    </p>
+                  </div>
+                )}
                 
                 <FileUpload
                   onTextExtracted={(text) => setJdInput(text)}
