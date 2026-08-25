@@ -172,6 +172,13 @@ export const PricingPage: React.FC = () => {
     );
   };
 
+  const visiblePlans = PLANS.filter((plan) => {
+    if (!user || isAdmin) return true;
+    if (isSeeker) return plan.targetRole === 'seeker';
+    if (isRecruiter) return plan.targetRole === 'recruiter' || plan.targetRole === 'enterprise';
+    return true;
+  });
+
   return (
     <main className="min-h-screen bg-[#f8f7f3] dark:bg-slate-950 px-5 py-16 text-[#1d2b3a] dark:text-slate-100 sm:px-8 lg:py-24">
       <div className="mx-auto max-w-6xl space-y-10">
@@ -220,10 +227,18 @@ export const PricingPage: React.FC = () => {
           </div>
         )}
 
-        <div className="max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[.16em] text-[#a84c38]">Simple plans, clear access</p>
-          <h1 className="mt-4 font-serif text-5xl tracking-[-.04em] sm:text-6xl text-[#1d2b3a] dark:text-[#f4eee5]">Choose the support you need.</h1>
-          <p className="mt-5 text-lg leading-8 text-[#607078] dark:text-slate-400">No confusing credits. Subscriptions are processed with transparent, predictable billing and role entitlements.</p>
+        <div className="max-w-2xl space-y-3">
+          <p className="text-xs font-bold uppercase tracking-[.16em] text-[#a84c38]">
+            {isSeeker ? 'Candidate Plans & Pricing' : isRecruiter ? 'Recruiter & Employer Plans' : 'Simple plans, clear access'}
+          </p>
+          <h1 className="font-serif text-5xl tracking-[-.04em] sm:text-6xl text-[#1d2b3a] dark:text-[#f4eee5]">Choose the support you need.</h1>
+          <p className="text-lg leading-8 text-[#607078] dark:text-slate-400">
+            {isSeeker
+              ? 'Showing tailored candidate plans for your Seeker workspace.'
+              : isRecruiter
+              ? 'Showing employer screening plans for your Recruiter workspace.'
+              : 'No confusing credits. Subscriptions are processed with transparent, predictable billing and role entitlements.'}
+          </p>
         </div>
 
         {notice && (
@@ -235,7 +250,7 @@ export const PricingPage: React.FC = () => {
 
         {/* PLAN CATALOG CARDS */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {PLANS.map((plan) => {
+          {visiblePlans.map((plan) => {
             const isSelected = selectedPlan === plan.id;
 
             return (
