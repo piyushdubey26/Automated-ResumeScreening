@@ -1,80 +1,7 @@
-// Polyfill for older Safari browsers where ReadableStream does not support async iteration or .values()
-if (typeof ReadableStream !== 'undefined') {
-  if (!ReadableStream.prototype.values) {
-    ReadableStream.prototype.values = function () {
-      const reader = this.getReader();
-      return {
-        async next() {
-          return reader.read();
-        },
-        async return() {
-          reader.releaseLock();
-          return { done: true, value: undefined };
-        },
-        [Symbol.asyncIterator]() {
-          return this;
-        },
-      } as any;
-    };
-  }
-  if (!ReadableStream.prototype[Symbol.asyncIterator]) {
-    ReadableStream.prototype[Symbol.asyncIterator] = ReadableStream.prototype.values;
-  }
-}
+import { api } from '../services/api';
 
 /**
- * Extract text from a PDF file using pdfjs-dist
- * Configured for Vite bundler compatibility
- */
-export async function extractTextFromPDF(file: File): Promise<string> {
-  const pdfjsLib = await import('pdfjs-dist');
-  
-  // Set worker source - use CDN for reliable loading in Vite
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-  
-  const arrayBuffer = await file.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-  
-  const pdf = await pdfjsLib.getDocument({
-    data: uint8Array,
-    useSystemFonts: true,
-  }).promise;
-  
-  const textParts: string[] = [];
-  
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .filter((item: any) => 'str' in item)
-      .map((item: any) => item.str)
-      .join(' ');
-    textParts.push(pageText);
-  }
-  
-  return textParts.join('\n\n').trim();
-}
-
-/**
- * Extract text from an image file (JPG/PNG) using Tesseract.js OCR
- */
-export async function extractTextFromImage(file: File): Promise<string> {
-  const Tesseract = await import('tesseract.js');
-  
-  const imageUrl = URL.createObjectURL(file);
-  
-  try {
-    const result = await Tesseract.recognize(imageUrl, 'eng', {
-      logger: () => {}, // suppress logs
-    });
-    return result.data.text;
-  } finally {
-    URL.revokeObjectURL(imageUrl);
-  }
-}
-
-/**
- * Read plain text file
+ * Read plain text file locally in browser
  */
 async function readTextFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -86,23 +13,66 @@ async function readTextFile(file: File): Promise<string> {
 }
 
 /**
- * Auto-detect file type and extract text
+ * Auto-detect file type and extract text.
+ * TXT files are parsed locally in browser.
+ * PDF & Images are uploaded to backend server for parsing/OCR.
  */
 export async function extractTextFromFile(file: File): Promise<string> {
   const ext = file.name.toLowerCase().split('.').pop() || '';
   const mimeType = file.type.toLowerCase();
-  
-  if (ext === 'pdf' || mimeType === 'application/pdf') {
-    return extractTextFromPDF(file);
-  }
-  
-  if (['jpg', 'jpeg', 'png', 'webp', 'bmp'].includes(ext) || mimeType.startsWith('image/')) {
-    return extractTextFromImage(file);
-  }
-  
+
+  // Handle plain text files locally
   if (ext === 'txt' || mimeType.startsWith('text/')) {
     return readTextFile(file);
   }
-  
-  throw new Error(`Unsupported file type: ${ext || mimeType}. Please upload an image, PDF, or TXT file.`);
+
+  // Handle PDF & Images server-side to avoid client-side MIME issues
+  if (
+    ext === 'pdf' ||
+    mimeType === 'application/pdf' ||
+    ['jpg', 'jpeg', 'png', 'webp', 'bmp'].includes(ext) ||
+    mimeType.startsWith('image/')
+  ) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await api.post('/resumes/extract-text', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Handle HTML redirects or errors returned as HTML
+      if (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE html>')) {
+        throw new Error('Resume upload service is temporarily unavailable. Please try again.');
+      }
+
+      if (response.data && response.data.success) {
+        return response.data.text;
+      }
+      throw new Error(response.data?.error || 'Failed to extract text from file.');
+    } catch (err: any) {
+      console.error('Server extraction failed:', err);
+      
+      // Handle HTML error responses from server
+      const status = err.response?.status;
+      if (status === 401) {
+        throw new Error('Authentication required. Please log in first.');
+      }
+      
+      const responseData = err.response?.data;
+      if (typeof responseData === 'string' && responseData.includes('<!DOCTYPE html>')) {
+        throw new Error('Resume upload service is temporarily unavailable. Please try again.');
+      }
+      
+      throw new Error(
+        responseData?.error || 
+        err.message || 
+        'Resume upload service is unavailable. Please try again.'
+      );
+    }
+  }
+
+  throw new Error(`Unsupported file type: ${ext || mimeType}. Please upload a PDF, JPG, PNG, or TXT file.`);
 }

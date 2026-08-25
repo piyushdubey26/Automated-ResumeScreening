@@ -1,24 +1,47 @@
+import { Request, Response } from 'express';
 import { mockDb, ResumeRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
 import { AIRewriteService } from '../services/aiRewriteService';
 import { AIInterviewService } from '../services/aiInterviewService';
+import { extractTextFromBuffer } from '../utils/fileExtractor';
 
-export const uploadAndParseResume = (req: Request, res: Response) => {
+export const uploadAndParseResume = async (req: Request, res: Response) => {
   try {
     const { text, filename, targetRole } = req.body;
     const reqFile = (req as any).file;
-    const rawText = text || reqFile?.buffer?.toString('utf-8') || `Alex Rivera
-Email: alex.rivera@example.com | GitHub: github.com/arivera
-Architected microservices in Node.js, Express, React, PostgreSQL, Docker. Reduced latency by 42%.`;
-
     const role = targetRole || 'sde';
+
+    let rawText = text || '';
+
+    // Enforce authentication
+    const authUserId = req.user?.userId;
+    if (!authUserId) {
+      return res.status(401).json({ success: false, error: 'Authentication required. Please log in.' });
+    }
+
+    if (!rawText && reqFile) {
+      // Validate file size (max 10MB)
+      if (reqFile.size > 10 * 1024 * 1024) {
+        return res.status(400).json({ success: false, error: 'File size must be under 10MB' });
+      }
+      try {
+        rawText = await extractTextFromBuffer(reqFile.buffer, reqFile.originalname || 'resume.pdf', reqFile.mimetype);
+      } catch (err: any) {
+        return res.status(400).json({ success: false, error: err.message || 'Failed to extract text from file' });
+      }
+    }
+
+    if (!rawText || rawText.trim().length < 10) {
+      return res.status(400).json({ success: false, error: 'Could not extract enough text from this file. Try a different format or paste text manually.' });
+    }
+
     const parsed = ParserService.parseText(rawText);
     const scoreResult = ScoringEngine.evaluate(parsed, role);
 
     const newResume: ResumeRecord = {
       id: `resume-${Date.now()}`,
-      userId: (req as any).user?.id || 'user-seeker-1',
+      userId: authUserId,
       filename: filename || reqFile?.originalname || 'Uploaded_Resume.pdf',
       targetRole: role,
       rawText,
@@ -39,13 +62,14 @@ Architected microservices in Node.js, Express, React, PostgreSQL, Docker. Reduce
     saveDb();
 
     return res.status(201).json({
+      success: true,
       message: 'Resume parsed and scored successfully',
       resumeId: newResume.id,
       resume: newResume
     });
   } catch (err: any) {
     console.error('Error parsing resume:', err);
-    return res.status(500).json({ error: 'Failed to parse resume' });
+    return res.status(500).json({ success: false, error: 'Failed to parse resume' });
   }
 };
 

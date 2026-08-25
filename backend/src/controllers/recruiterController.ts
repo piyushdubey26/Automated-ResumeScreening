@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { mockDb, RecruiterCandidateRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';

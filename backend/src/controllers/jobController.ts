@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { mockDb, JobDescriptionRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { JDMatchEngine } from '../services/jdMatchEngine';
