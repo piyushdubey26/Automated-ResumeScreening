@@ -38,14 +38,14 @@ api.interceptors.request.use((config) => {
 });
 
 const fallbackUser: User = {
-  id: 'user-seeker-1',
-  name: 'Alex Rivera',
-  email: 'alex.rivera@example.com',
+  id: 'guest-user',
+  name: 'New Seeker',
+  email: 'seeker@example.com',
   rolePreference: 'sde',
   userType: 'seeker',
-  badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'],
-  points: 1450,
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+  badges: [],
+  points: 0,
+  usage: { resume_reviews: 0 },
   createdAt: new Date().toISOString()
 };
 
@@ -67,30 +67,7 @@ const getLocalDB = (): LocalDB => {
   
   // Initial seed data
   const initial: LocalDB = {
-    users: [
-      {
-        id: 'user-seeker-1',
-        name: 'Alex Rivera',
-        email: 'alex.rivera@example.com',
-        rolePreference: 'sde',
-        userType: 'seeker',
-        badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'],
-        points: 1450,
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'user-recruiter-1',
-        name: 'Sarah Jenkins (Recruiter)',
-        email: 'recruiter@techscale.com',
-        rolePreference: 'sde',
-        userType: 'recruiter',
-        badges: ['Top Talent Scout'],
-        points: 3200,
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-        createdAt: new Date().toISOString()
-      }
-    ],
+    users: [],
     resumes: []
   };
   localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(initial));

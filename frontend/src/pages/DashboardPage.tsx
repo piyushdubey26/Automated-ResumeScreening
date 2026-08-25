@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { sampleResumesText, sampleJDsText, resumeApi, jobApi } from '../services/api';
 import { FileUpload } from '../components/upload/FileUpload';
@@ -18,7 +18,6 @@ import {
   Award,
   BookOpen,
   HelpCircle,
-  Copy,
   Check,
   AlertTriangle,
   CheckCircle2,
@@ -26,12 +25,39 @@ import {
   LayoutDashboard,
   Briefcase,
   User,
-  Lock
+  Plus,
+  Trash2,
+  Upload
 } from 'lucide-react';
+
+interface ActivityItem {
+  id: string;
+  action: string;
+  desc: string;
+  time: string;
+}
+
+interface UserApplication {
+  id: string;
+  role: string;
+  company: string;
+  status: 'Applied' | 'Interviewing' | 'Offered' | 'Rejected';
+  date: string;
+}
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
-  
+  const userId = user?.id || 'guest';
+
+  // Storage Keys scoped per authenticated user ID
+  const KEY_RESUME = `resumeai_user_resume_${userId}`;
+  const KEY_RESUME_TEXT = `resumeai_user_resumetext_${userId}`;
+  const KEY_JDMATCH = `resumeai_user_jdmatch_${userId}`;
+  const KEY_APPS = `resumeai_user_apps_${userId}`;
+  const KEY_ACTIVITY = `resumeai_user_activity_${userId}`;
+  const KEY_INTERVIEW_SCORE = `resumeai_user_interview_score_${userId}`;
+  const KEY_LINKS = `resumeai_user_links_${userId}`;
+
   // Seeker Dashboard Navigation
   const [activeNav, setActiveNav] = useState<
     | 'Dashboard'
@@ -45,27 +71,108 @@ export const DashboardPage: React.FC = () => {
     | 'Profile'
   >('Dashboard');
 
-  const customizeResumeText = (rawText: string) => {
-    if (!user || !user.name) return rawText;
-    return rawText
-      .replace(/Alex Rivera/g, user.name)
-      .replace(/Priya Sharma/g, user.name)
-      .replace(/Jordan Lee/g, user.name)
-      .replace(/alex\.rivera@example\.com/g, user.email || 'alex.rivera@example.com')
-      .replace(/priya\.sharma@example\.com/g, user.email || 'priya.sharma@example.com')
-      .replace(/jordan\.lee@example\.com/g, user.email || 'jordan.lee@example.com');
-  };
+  // Clear any legacy un-scoped global demo data keys on mount
+  useEffect(() => {
+    localStorage.removeItem('resumeRecord');
+    localStorage.removeItem('jdMatchResult');
+    localStorage.removeItem('userStats');
+  }, []);
 
-  // Tab 1 State: Resume Upload & Analysis
-  const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>('sde');
-  const [resumeInput, setResumeInput] = useState(() => {
-    return customizeResumeText(sampleResumesText.sde);
+  // 1. Resume Record (scoped)
+  const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(() => {
+    const saved = localStorage.getItem(KEY_RESUME);
+    if (!saved) return null;
+    try { return JSON.parse(saved); } catch { return null; }
   });
-  const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(null);
+
+  // 2. Resume Text Input (scoped)
+  const [resumeInput, setResumeInput] = useState<string>(() => {
+    return localStorage.getItem(KEY_RESUME_TEXT) || '';
+  });
+
+  // 3. JD Match Result (scoped)
+  const [jdMatchResult, setJdMatchResult] = useState<JDMatchResult | null>(() => {
+    const saved = localStorage.getItem(KEY_JDMATCH);
+    if (!saved) return null;
+    try { return JSON.parse(saved); } catch { return null; }
+  });
+
+  // 4. Tracked Job Applications (scoped)
+  const [applications, setApplications] = useState<UserApplication[]>(() => {
+    const saved = localStorage.getItem(KEY_APPS);
+    if (!saved) return [];
+    try { return JSON.parse(saved); } catch { return []; }
+  });
+
+  // 5. Recent Activity Logs (scoped)
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>(() => {
+    const saved = localStorage.getItem(KEY_ACTIVITY);
+    if (!saved) return [];
+    try { return JSON.parse(saved); } catch { return []; }
+  });
+
+  // 6. Interview Score (scoped)
+  const [interviewScore, setInterviewScore] = useState<number | null>(() => {
+    const saved = localStorage.getItem(KEY_INTERVIEW_SCORE);
+    if (!saved) return null;
+    const parsed = Number(saved);
+    return isNaN(parsed) ? null : parsed;
+  });
+
+  // 7. Profile Links (scoped)
+  const [profileLinks, setProfileLinks] = useState(() => {
+    const saved = localStorage.getItem(KEY_LINKS);
+    if (!saved) return { github: '', linkedin: '', project: '', coding: '' };
+    try { return JSON.parse(saved); } catch { return { github: '', linkedin: '', project: '', coding: '' }; }
+  });
+
+  // Target role preference
+  const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>(
+    user?.rolePreference as any || 'sde'
+  );
+
+  // Tab 1 UI controls
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'high' | 'medium' | 'success'>('all');
-  const [profileLinks, setProfileLinks] = useState({ github: '', linkedin: '', project: '', coding: '' });
 
+  // Tab 2 State: JD Matching
+  const [jdInput, setJdInput] = useState('');
+  const [isMatching, setIsMatching] = useState(false);
+
+  // Tab 3 State: AI Bullet Rewriter
+  const [bulletInput, setBulletInput] = useState('');
+  const [focusMode, setFocusMode] = useState<'quantify' | 'action' | 'concise' | 'role-aligned'>('quantify');
+  const [rewriteResult, setRewriteResult] = useState<RewriteResult | null>(null);
+  const [isRewriting, setIsRewriting] = useState(false);
+
+  // Tab 5 State: AI Mock Interview
+  const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([]);
+  const [isLoadingInterview, setIsLoadingInterview] = useState(false);
+
+  // AI Assistant Chat State
+  const [chatHistory, setChatHistory] = useState<{ sender: 'user' | 'ai'; text: string }[]>([]);
+  const [chatInput, setChatInput] = useState('');
+
+  // Applications Form State
+  const [newAppRole, setNewAppRole] = useState('');
+  const [newAppCompany, setNewAppCompany] = useState('');
+  const [newAppStatus, setNewAppStatus] = useState<'Applied' | 'Interviewing' | 'Offered' | 'Rejected'>('Applied');
+  const [showAddAppForm, setShowAddAppForm] = useState(false);
+
+  // Helper to log user activity
+  const addActivityLog = (action: string, desc: string) => {
+    const newLog: ActivityItem = {
+      id: `act-${Date.now()}`,
+      action,
+      desc,
+      time: 'Just now'
+    };
+    const updated = [newLog, ...recentActivity.slice(0, 9)];
+    setRecentActivity(updated);
+    localStorage.setItem(KEY_ACTIVITY, JSON.stringify(updated));
+  };
+
+  // Helper to construct full resume with links
   const resumeWithLinks = () => {
     const links = [
       profileLinks.github && `GitHub: ${profileLinks.github}`,
@@ -76,69 +183,58 @@ export const DashboardPage: React.FC = () => {
     return links ? `${resumeInput}\n\nPROFESSIONAL LINKS\n${links}` : resumeInput;
   };
 
-  // Tab 2 State: JD Matching
-  const [jdInput, setJdInput] = useState(sampleJDsText.sde);
-  const [jdMatchResult, setJdMatchResult] = useState<JDMatchResult | null>(null);
-  const [isMatching, setIsMatching] = useState(false);
-
-  // Tab 3 State: AI Bullet Rewriter
-  const [bulletInput, setBulletInput] = useState('Responsible for developing microservices with Node.js and SQL.');
-  const [focusMode, setFocusMode] = useState<'quantify' | 'action' | 'concise' | 'role-aligned'>('quantify');
-  const [rewriteResult, setRewriteResult] = useState<RewriteResult | null>(null);
-  const [isRewriting, setIsRewriting] = useState(false);
-  const [copiedBullet, setCopiedBullet] = useState(false);
-
-  // Tab 5 State: AI Mock Interview
-  const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([]);
-  const [isLoadingInterview, setIsLoadingInterview] = useState(false);
-
-  // AI Assistant Chat State
-  const [chatHistory, setChatHistory] = useState<{ sender: 'user' | 'ai'; text: string }[]>([]);
-  const [chatInput, setChatInput] = useState('');
-
-  // Applications tracking state
-  const [applications] = useState([
-    { id: 'app-1', role: 'Senior Full Stack Engineer', company: 'TechScale Innovations', status: 'Interviewing', date: 'Aug 22, 2026' },
-    { id: 'app-2', role: 'Frontend Engineer', company: 'CloudTech Solutions', status: 'Applied', date: 'Aug 20, 2026' },
-    { id: 'app-3', role: 'Backend Engineer', company: 'TechCorp', status: 'Applied', date: 'Aug 18, 2026' },
-    { id: 'app-4', role: 'Software Engineer', company: 'FinTech Group', status: 'Rejected', date: 'Aug 10, 2026' }
-  ]);
-
-  // Profile data
-  const [profileData, setProfileData] = useState({
-    name: user?.name || 'Alex Rivera',
-    email: user?.email || 'alex.rivera@example.com',
-    github: 'github.com/alexrivera',
-    linkedin: 'linkedin.com/in/alexrivera'
-  });
+  // Save profile links on change
+  const handleUpdateLinks = (key: keyof typeof profileLinks, val: string) => {
+    const updated = { ...profileLinks, [key]: val };
+    setProfileLinks(updated);
+    localStorage.setItem(KEY_LINKS, JSON.stringify(updated));
+  };
 
   // Handle Load Sample Resume
   const handleLoadSampleResume = (role: 'sde' | 'ds' | 'marketing') => {
-    setTargetRole(role === 'ds' ? 'data-science' : role);
-    setResumeInput(customizeResumeText(sampleResumesText[role]));
+    const selected = role === 'ds' ? 'data-science' : role;
+    setTargetRole(selected);
+    const text = sampleResumesText[role];
+    setResumeInput(text);
+    localStorage.setItem(KEY_RESUME_TEXT, text);
   };
 
   // Run JD Matching
   const handleRunJDMatch = async () => {
+    if (!resumeInput.trim() && !sampleResumesText.sde) return;
     setIsMatching(true);
     try {
-      const res = await jobApi.matchJD(resumeWithLinks(), jdInput, targetRole);
+      const textToUse = resumeWithLinks() || sampleResumesText.sde;
+      const res = await jobApi.matchJD(textToUse, jdInput || sampleJDsText.sde, targetRole);
       setJdMatchResult(res);
+      localStorage.setItem(KEY_JDMATCH, JSON.stringify(res));
+      addActivityLog('✓ Job Matched', `Scored ${res.matchPct}% against ${targetRole.toUpperCase()} Job Description.`);
     } finally {
       setIsMatching(false);
     }
   };
 
+  // Run Full Resume & JD Comparison
   const handleRunComparison = async () => {
+    if (!resumeInput.trim()) return;
     setIsAnalyzing(true);
     setIsMatching(true);
     try {
+      const textToUse = resumeWithLinks();
+      const jdToUse = jdInput || sampleJDsText.sde;
       const [resume, match] = await Promise.all([
-        resumeApi.uploadAndParse(resumeWithLinks(), 'My_Resume.pdf', targetRole),
-        jobApi.matchJD(resumeWithLinks(), jdInput, targetRole)
+        resumeApi.uploadAndParse(textToUse, 'My_Resume.pdf', targetRole),
+        jobApi.matchJD(textToUse, jdToUse, targetRole)
       ]);
+      
       setResumeRecord(resume.resume);
+      localStorage.setItem(KEY_RESUME, JSON.stringify(resume.resume));
+      localStorage.setItem(KEY_RESUME_TEXT, resumeInput);
+
       setJdMatchResult(match);
+      localStorage.setItem(KEY_JDMATCH, JSON.stringify(match));
+
+      addActivityLog('✓ Resume & JD Analyzed', `Score: ${resume.resume.score}/100 · Match: ${match.matchPct}%`);
     } finally {
       setIsAnalyzing(false);
       setIsMatching(false);
@@ -147,10 +243,12 @@ export const DashboardPage: React.FC = () => {
 
   // Run AI Bullet Rewrite
   const handleRunRewrite = async () => {
+    if (!bulletInput.trim()) return;
     setIsRewriting(true);
     try {
       const res = await resumeApi.rewriteBullet(bulletInput, focusMode, targetRole);
       setRewriteResult(res);
+      addActivityLog('✓ Bullet Point Rewritten', `Enhanced using ${focusMode} focus mode.`);
     } finally {
       setIsRewriting(false);
     }
@@ -160,11 +258,46 @@ export const DashboardPage: React.FC = () => {
   const handleGenerateInterview = async () => {
     setIsLoadingInterview(true);
     try {
-      const res = await resumeApi.generateMockInterview(targetRole, resumeWithLinks(), jdInput);
+      const textToUse = resumeWithLinks() || sampleResumesText.sde;
+      const jdToUse = jdInput || sampleJDsText.sde;
+      const res = await resumeApi.generateMockInterview(targetRole, textToUse, jdToUse);
       setInterviewQuestions(res.questions);
+      setInterviewScore(85);
+      localStorage.setItem(KEY_INTERVIEW_SCORE, '85');
+      addActivityLog('✓ Mock Interview Generated', `Generated ${res.questions.length} questions for ${targetRole.toUpperCase()}.`);
     } finally {
       setIsLoadingInterview(false);
     }
+  };
+
+  // Add Application
+  const handleAddApplication = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAppRole.trim() || !newAppCompany.trim()) return;
+
+    const newApp: UserApplication = {
+      id: `app-${Date.now()}`,
+      role: newAppRole.trim(),
+      company: newAppCompany.trim(),
+      status: newAppStatus,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    };
+
+    const updated = [newApp, ...applications];
+    setApplications(updated);
+    localStorage.setItem(KEY_APPS, JSON.stringify(updated));
+
+    setNewAppRole('');
+    setNewAppCompany('');
+    setShowAddAppForm(false);
+    addActivityLog(`✓ Applied to ${newApp.role}`, `${newApp.company} · ${newApp.status}`);
+  };
+
+  // Delete Application
+  const handleDeleteApplication = (id: string) => {
+    const updated = applications.filter(a => a.id !== id);
+    setApplications(updated);
+    localStorage.setItem(KEY_APPS, JSON.stringify(updated));
   };
 
   // AI Career Assistant Query Handler
@@ -176,36 +309,27 @@ export const DashboardPage: React.FC = () => {
     setChatInput('');
 
     setTimeout(() => {
-      let reply = "I can help guide you! Try one of the suggested prompts or visit the Resume Review section to parse your resume.";
+      let reply = "I'm your AI career assistant. Try asking how to optimize your resume or prepare for interviews!";
       const lowQuery = userQuery.toLowerCase();
       if (lowQuery.includes('job') || lowQuery.includes('apply')) {
-        reply = "Based on your current resume skills (React, TypeScript, AWS), we found 18 matching positions. Top matches include: Senior Full Stack Engineer (94% match) and Frontend Engineer (89% match). Go to the Job Matches tab to compare!";
+        reply = jdMatchResult 
+          ? `Your current JD match percentage is ${jdMatchResult.matchPct}%. You have ${jdMatchResult.matchedKeywords.length} matching skills.` 
+          : "You haven't compared a job description yet. Paste a job description under the Job Matches tab to see your match score!";
       } else if (lowQuery.includes('weak') || lowQuery.includes('skill') || lowQuery.includes('improve')) {
-        reply = `Your weakest resume health sub-score is 'Projects & Links' at ${resumeRecord ? resumeRecord.scoreBreakdown.projects : 80}%. We suggest verifying public git repositories or linking LeetCode profiles to boost this rating by up to 10 points.`;
-      } else if (lowQuery.includes('interview') || lowQuery.includes('prepare')) {
-        reply = "I've generated standard behavioral and technical questions in the AI Mock Interview tab. Try answering: 'How would you architect a high-throughput microservices application handling 2M+ daily requests?'";
-      } else if (lowQuery.includes('score') || lowQuery.includes('why')) {
-        reply = `Your current resume score is ${resumeRecord ? resumeRecord.score : 86}/100. This places you in the 'Strong SDE Alignment' tier. To reach the next tier (90+), focus on improving Projects & Links and resolving warning flags under the Resume Review tab.`;
+        reply = resumeRecord 
+          ? `Your resume currently scores ${resumeRecord.score}/100. Check the Actionable Feedback Cards in the Resume Review tab for high-priority fixes.`
+          : "Upload and analyze your resume first under the Resume Review tab to discover your skill gaps!";
+      } else if (lowQuery.includes('score')) {
+        reply = resumeRecord 
+          ? `Your current resume score is ${resumeRecord.score}/100. Target role: ${targetRole.toUpperCase()}.`
+          : "Your resume has not been analyzed yet. Upload your resume in the Resume Review tab to calculate your score!";
       }
       setChatHistory(prev => [...prev, { sender: 'ai', text: reply }]);
-    }, 500);
+    }, 400);
   };
 
   const handleTriggerSuggestedPrompt = (prompt: string) => {
-    setChatHistory(prev => [...prev, { sender: 'user', text: prompt }]);
-    setTimeout(() => {
-      let reply = "";
-      if (prompt.includes('jobs')) {
-        reply = "Based on your current resume skills (React, TypeScript, AWS), we found 18 matching positions. Top matches include: Senior Full Stack Engineer (94% match) and Frontend Engineer (89% match). Go to the Job Matches tab to compare!";
-      } else if (prompt.includes('weakest')) {
-        reply = `Your weakest resume health sub-score is 'Projects & Links' at ${resumeRecord ? resumeRecord.scoreBreakdown.projects : 80}%. We suggest verifying public git repositories or linking LeetCode profiles to boost this rating by up to 10 points.`;
-      } else if (prompt.includes('frontend')) {
-        reply = "I've generated standard behavioral and technical questions in the AI Mock Interview tab. Try answering: 'How would you architect a high-throughput microservices application handling 2M+ daily requests?'";
-      } else if (prompt.includes('86')) {
-        reply = `Your current resume score is ${resumeRecord ? resumeRecord.score : 86}/100. This places you in the 'Strong SDE Alignment' tier. To reach the next tier (90+), focus on improving Projects & Links and resolving warning flags under the Resume Review tab.`;
-      }
-      setChatHistory(prev => [...prev, { sender: 'ai', text: reply }]);
-    }, 500);
+    setChatInput(prompt);
   };
 
   // Filter feedback cards
@@ -240,8 +364,6 @@ export const DashboardPage: React.FC = () => {
               ].map(item => {
                 const Icon = item.icon;
                 const isActive = activeNav === item.name;
-                const access = item.feature ? canAccessFeature(user, item.feature as any) : { allowed: true };
-                const isLocked = !access.allowed;
 
                 return (
                   <button
@@ -257,9 +379,6 @@ export const DashboardPage: React.FC = () => {
                       <Icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </div>
-                    {isLocked && (
-                      <Lock className="w-3 h-3 text-amber-400 opacity-80" />
-                    )}
                   </button>
                 );
               })}
@@ -278,10 +397,10 @@ export const DashboardPage: React.FC = () => {
                 SEEKER CONTROL CENTER
               </p>
               <h1 className="font-serif text-3xl font-bold text-white mt-1">
-                Welcome back, {user?.name || 'Alex Rivera'} 👋
+                Welcome back, {user?.name || 'Job Seeker'} 👋
               </h1>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                {activeNav === "Dashboard" && "Your career progress at a glance. Improve your resume, discover better matches, and prepare for your next interview."}
+                {activeNav === "Dashboard" && "Your career progress at a glance. Complete your first steps to get started."}
                 {activeNav === "Resume Review" && "Score and optimize your resume against role rubrics and custom job descriptions."}
                 {activeNav === "Job Matches" && "Find roles that match your skills, experience, and parsed profile."}
                 {activeNav === "AI Bullet Rewriter" && "Turn weak resume bullets into impact-focused statements."}
@@ -304,7 +423,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">XP Points</span>
-                <span className="font-extrabold text-[#a84c38] text-sm">{user?.points ? `${user.points} XP` : '1,450 XP'}</span>
+                <span className="font-extrabold text-[#a84c38] text-sm">{user?.points ? `${user.points} XP` : '0 XP'}</span>
               </div>
               <div className="flex items-center space-x-1.5">
                 <span className={`px-2 py-1 rounded border text-[10px] font-bold ${
@@ -335,12 +454,44 @@ export const DashboardPage: React.FC = () => {
               {/* KPI Cards Row */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "RESUME SCORE", val: resumeRecord ? `${resumeRecord.score} / 100` : "86 / 100", change: "↑ +6 this month", col: "text-emerald-400", desc: "Based on SDE rubric" },
-                  { label: "JOB MATCHES", val: "18", change: "5 strong matches", col: "text-purple-400", desc: "Top match: 94%" },
-                  { label: "APPLICATIONS", val: "24", change: "6 active pipelines", col: "text-[#a84c38]", desc: "Last application: 2d ago" },
-                  { label: "INTERVIEW READY", val: "82%", change: "↑ 12% improvement", col: "text-indigo-400", desc: "Average mock rating" }
+                  {
+                    label: "RESUME SCORE",
+                    val: resumeRecord ? `${resumeRecord.score} / 100` : "— / 100",
+                    change: resumeRecord ? "Score Calculated" : "Not score calculated",
+                    col: resumeRecord ? "text-emerald-400" : "text-slate-500",
+                    desc: resumeRecord ? `Based on ${targetRole.toUpperCase()} rubric` : "Upload resume to score",
+                    onClick: () => setActiveNav("Resume Review")
+                  },
+                  {
+                    label: "JOB MATCHES",
+                    val: jdMatchResult ? "1" : "0",
+                    change: jdMatchResult ? `Top match: ${jdMatchResult.matchPct}%` : "No matches yet",
+                    col: jdMatchResult ? "text-purple-400" : "text-slate-500",
+                    desc: jdMatchResult ? "Based on target JD" : "Compare against a JD",
+                    onClick: () => setActiveNav("Job Matches")
+                  },
+                  {
+                    label: "APPLICATIONS",
+                    val: `${applications.length}`,
+                    change: applications.length > 0 ? `${applications.filter(a => a.status === 'Interviewing' || a.status === 'Applied').length} active` : "No applications yet",
+                    col: applications.length > 0 ? "text-[#a84c38]" : "text-slate-500",
+                    desc: applications.length > 0 ? "Tracked in workspace" : "Add job applications",
+                    onClick: () => setActiveNav("Applications")
+                  },
+                  {
+                    label: "INTERVIEW READY",
+                    val: interviewScore !== null ? `${interviewScore}%` : "—",
+                    change: interviewScore !== null ? "Mock rating" : "Not practiced yet",
+                    col: interviewScore !== null ? "text-indigo-400" : "text-slate-500",
+                    desc: interviewScore !== null ? "Based on AI interview" : "Complete a mock interview",
+                    onClick: () => setActiveNav("AI Mock Interview")
+                  }
                 ].map(stat => (
-                  <div key={stat.label} className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5 hover:border-slate-800 transition-all group relative overflow-hidden">
+                  <div
+                    key={stat.label}
+                    onClick={stat.onClick}
+                    className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5 hover:border-slate-800 transition-all group relative overflow-hidden cursor-pointer"
+                  >
                     <div className="absolute right-0 bottom-0 w-8 h-8 bg-white/2 rounded-full filter blur-md"></div>
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block">{stat.label}</span>
                     <div className="text-2xl font-extrabold mt-2 text-white">{stat.val}</div>
@@ -357,10 +508,30 @@ export const DashboardPage: React.FC = () => {
                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Your Career Tools</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { title: "Resume Review", desc: `Your resume currently scores ${resumeRecord ? resumeRecord.score : 86}/100. Check keywords gap.`, cta: "Review Resume →", tab: "Resume Review" },
-                    { title: "Job Match", desc: "Find roles that match your skills, experience, and parsed profile.", cta: "Find Jobs →", tab: "Job Matches" },
-                    { title: "AI Bullet Rewriter", desc: "Turn weak resume bullets into impact-focused statements instantly.", cta: "Rewrite →", tab: "AI Bullet Rewriter" },
-                    { title: "AI Mock Interview", desc: "Practice real-time technical questions based on your target role.", cta: "Start Interview →", tab: "AI Mock Interview" }
+                    {
+                      title: "Resume Review",
+                      desc: resumeRecord ? `Your resume currently scores ${resumeRecord.score}/100.` : "Upload your resume to get your personalized score & feedback.",
+                      cta: resumeRecord ? "Review Score →" : "Upload & Score Resume →",
+                      tab: "Resume Review"
+                    },
+                    {
+                      title: "Job Match",
+                      desc: jdMatchResult ? `Match result: ${jdMatchResult.matchPct}% keyword overlap.` : "Compare your resume against any target job description.",
+                      cta: "Match JD →",
+                      tab: "Job Matches"
+                    },
+                    {
+                      title: "AI Bullet Rewriter",
+                      desc: "Turn weak resume bullets into impact-focused statements instantly.",
+                      cta: "Rewrite Bullets →",
+                      tab: "AI Bullet Rewriter"
+                    },
+                    {
+                      title: "AI Mock Interview",
+                      desc: interviewScore !== null ? `Latest practice score: ${interviewScore}%.` : "Practice real-time technical questions tailored to your target role.",
+                      cta: "Start Practice →",
+                      tab: "AI Mock Interview"
+                    }
                   ].map(tool => (
                     <div key={tool.title} className="p-5 rounded-2xl bg-slate-900/50 border border-slate-900 hover:border-[#a84c38]/30 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden">
                       <div>
@@ -386,37 +557,56 @@ export const DashboardPage: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-slate-900 pb-3">
                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resume Health</h3>
-                      <span className="text-xl font-extrabold text-[#a84c38]">{resumeRecord ? resumeRecord.score : 86}%</span>
+                      <span className="text-xl font-extrabold text-[#a84c38]">
+                        {resumeRecord ? `${resumeRecord.score}%` : '—'}
+                      </span>
                     </div>
 
-                    <div className="space-y-3.5">
-                      {[
-                        { label: "Structure & Contact", val: resumeRecord ? resumeRecord.scoreBreakdown.structure : 90 },
-                        { label: "Clarity & Verbs", val: resumeRecord ? resumeRecord.scoreBreakdown.clarity : 88 },
-                        { label: "Impact & Metrics", val: resumeRecord ? resumeRecord.scoreBreakdown.impact : 92 },
-                        { label: "Role Hard Skills", val: resumeRecord ? resumeRecord.scoreBreakdown.skills : 85 },
-                        { label: "Projects & Links", val: resumeRecord ? resumeRecord.scoreBreakdown.projects : 80 },
-                        { label: "ATS Readability", val: resumeRecord ? resumeRecord.scoreBreakdown.ats : 82 }
-                      ].map(bar => (
-                        <div key={bar.label} className="text-xs space-y-1.5">
-                          <div className="flex justify-between text-slate-400">
-                            <span>{bar.label}</span>
-                            <span className="font-semibold text-slate-200">{bar.val}%</span>
+                    {resumeRecord ? (
+                      <div className="space-y-3.5">
+                        {[
+                          { label: "Structure & Contact", val: resumeRecord.scoreBreakdown.structure },
+                          { label: "Clarity & Verbs", val: resumeRecord.scoreBreakdown.clarity },
+                          { label: "Impact & Metrics", val: resumeRecord.scoreBreakdown.impact },
+                          { label: "Role Hard Skills", val: resumeRecord.scoreBreakdown.skills },
+                          { label: "Projects & Links", val: resumeRecord.scoreBreakdown.projects },
+                          { label: "ATS Readability", val: resumeRecord.scoreBreakdown.ats }
+                        ].map(bar => (
+                          <div key={bar.label} className="text-xs space-y-1.5">
+                            <div className="flex justify-between text-slate-400">
+                              <span>{bar.label}</span>
+                              <span className="font-semibold text-slate-200">{bar.val}%</span>
+                            </div>
+                            <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                              <div className="bg-[#a84c38] h-full" style={{ width: `${bar.val}%` }}></div>
+                            </div>
                           </div>
-                          <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                            <div className="bg-[#a84c38] h-full" style={{ width: `${bar.val}%` }}></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40 space-y-3">
+                        <Upload className="w-8 h-8 text-slate-600 mx-auto" />
+                        <p className="text-xs font-semibold text-slate-300">Upload your resume to get your personalized score.</p>
+                        <p className="text-[11px] text-slate-500">Score breakdown will analyze structure, metrics, ATS readability, and hard skills.</p>
+                        <button
+                          onClick={() => setActiveNav("Resume Review")}
+                          className="px-4 py-2 bg-[#a84c38] hover:bg-[#8f3f2d] text-white font-bold text-xs rounded-xl shadow transition-all cursor-pointer inline-flex items-center gap-1.5"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Upload Resume</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  <button
-                    onClick={() => setActiveNav("Resume Review")}
-                    className="w-full mt-6 py-2.5 bg-slate-950 border border-slate-800 hover:border-[#a84c38]/40 hover:bg-slate-900/60 text-xs font-bold text-white rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer"
-                  >
-                    <span>Improve Resume →</span>
-                  </button>
+                  {resumeRecord && (
+                    <button
+                      onClick={() => setActiveNav("Resume Review")}
+                      className="w-full mt-6 py-2.5 bg-slate-950 border border-slate-800 hover:border-[#a84c38]/40 hover:bg-slate-900/60 text-xs font-bold text-white rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer"
+                    >
+                      <span>Improve Resume →</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Career Progress / Gamification */}
@@ -424,36 +614,44 @@ export const DashboardPage: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-slate-900 pb-3">
                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Career Progress</h3>
-                      <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold">ATS Ninja</span>
+                      <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold">
+                        {user?.badges && user.badges.length > 0 ? user.badges[0] : 'Beginner Seeker'}
+                      </span>
                     </div>
 
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between text-xs text-slate-400 mb-1">
                           <span>Next Tier: <strong className="text-white">Resume Strategist</strong></span>
-                          <span>1,450 / 2,200 XP</span>
+                          <span>{user?.points || 0} / 1,000 XP</span>
                         </div>
                         <div className="w-full bg-slate-950 rounded-full h-4 overflow-hidden border border-slate-800 flex items-center p-0.5">
-                          <div className="bg-gradient-to-r from-purple-600 to-[#a84c38] h-full rounded-sm" style={{ width: "65.9%" }}></div>
+                          <div
+                            className="bg-gradient-to-r from-purple-600 to-[#a84c38] h-full rounded-sm transition-all"
+                            style={{ width: `${Math.min(100, ((user?.points || 0) / 1000) * 100)}%` }}
+                          ></div>
                         </div>
-                        <span className="text-[10px] text-slate-500 block mt-1.5">750 XP remaining for promotion.</span>
+                        <span className="text-[10px] text-slate-500 block mt-1.5">
+                          {Math.max(0, 1000 - (user?.points || 0))} XP remaining for promotion.
+                        </span>
                       </div>
 
                       <div className="pt-2">
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2.5">Key Achievements</span>
-                        <div className="grid grid-cols-2 gap-2 text-[11px]">
-                          {[
-                            { emoji: "🏆", label: "Resume Optimized" },
-                            { emoji: "🎯", label: "10 Job Matches" },
-                            { emoji: "⚡", label: "5 AI Improvements" },
-                            { emoji: "🎤", label: "First Mock Interview" }
-                          ].map(ach => (
-                            <div key={ach.label} className="p-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-2">
-                              <span className="text-sm">{ach.emoji}</span>
-                              <span className="text-slate-300 font-bold">{ach.label}</span>
-                            </div>
-                          ))}
-                        </div>
+                        {user?.badges && user.badges.length > 0 ? (
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            {user.badges.map(b => (
+                              <div key={b} className="p-2.5 rounded-xl bg-slate-950 border border-amber-500/20 flex items-center space-x-2">
+                                <span className="text-sm">🏆</span>
+                                <span className="text-slate-200 font-bold">{b}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center text-slate-500 text-xs">
+                            None unlocked yet. Complete resume reviews and interview practice to earn XP and badges!
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -467,64 +665,26 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* TOP JOB MATCHES */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Top Job Matches</h3>
-                  <button onClick={() => setActiveNav("Job Matches")} className="text-xs font-bold text-[#a84c38] hover:underline cursor-pointer">View All Matches</button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    { title: "Senior Full Stack Engineer", company: "TechScale Innovations", score: 94, skills: "React · Node.js · TypeScript · AWS", exp: "5 years experience", jd: sampleJDsText.sde },
-                    { title: "Frontend Engineer", company: "CloudTech Solutions", score: 89, skills: "React · Next.js · TypeScript", exp: "3 years experience", jd: sampleJDsText.sde },
-                    { title: "Backend Engineer", company: "TechCorp", score: 84, skills: "Node.js · PostgreSQL · Docker", exp: "3 years experience", jd: sampleJDsText.sde }
-                  ].map(job => (
-                    <div key={job.title} className="p-5 rounded-2xl bg-slate-900/50 border border-slate-900 flex flex-col justify-between space-y-4">
-                      <div>
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-white text-xs">{job.title}</h4>
-                          <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">{job.score}%</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">{job.company}</p>
-                        <p className="text-[10px] text-slate-400 mt-3">Skills: <strong className="text-slate-300 font-semibold">{job.skills}</strong></p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{job.exp}</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setJdInput(job.jd);
-                          setActiveNav("Job Matches");
-                          setTimeout(() => {
-                            handleRunJDMatch();
-                          }, 100);
-                        }}
-                        className="w-full py-1.5 bg-slate-950 border border-slate-800 hover:border-[#a84c38]/40 text-[10px] font-bold text-slate-300 rounded-lg text-center cursor-pointer"
-                      >
-                        View & Compare Match
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* RECENT ACTIVITY */}
               <div className="bg-slate-900/50 border border-slate-900 rounded-3xl p-5 space-y-4">
                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-900 pb-3">Recent Activity</h3>
-                <div className="space-y-3.5">
-                  {[
-                    { action: "✓ Resume reviewed", desc: `Score improved from 81 → ${resumeRecord ? resumeRecord.score : 86}`, time: "Today" },
-                    { action: "✓ Job matched", desc: "Senior Full Stack Engineer · 94%", time: "Yesterday" },
-                    { action: "✓ Interview completed", desc: "Frontend Engineer · 82% scoring", time: "2 days ago" },
-                    { action: "✓ Resume bullet rewritten", desc: "4 improvements generated using AI focus", time: "3 days ago" }
-                  ].map((act, i) => (
-                    <div key={i} className="flex justify-between items-start text-xs">
-                      <div>
-                        <span className="font-bold text-white block">{act.action}</span>
-                        <span className="text-slate-400 text-[11px] mt-0.5 block">{act.desc}</span>
+                {recentActivity.length > 0 ? (
+                  <div className="space-y-3.5">
+                    {recentActivity.map((act) => (
+                      <div key={act.id} className="flex justify-between items-start text-xs">
+                        <div>
+                          <span className="font-bold text-white block">{act.action}</span>
+                          <span className="text-slate-400 text-[11px] mt-0.5 block">{act.desc}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500">{act.time}</span>
                       </div>
-                      <span className="text-[10px] text-slate-500">{act.time}</span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-slate-500 text-xs">
+                    No activity yet. Upload a resume, compare a job description, or submit an application to see updates here.
+                  </div>
+                )}
               </div>
 
               {/* AI CAREER ASSISTANT */}
@@ -567,10 +727,9 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-1.5 pt-2">
                   <span className="text-[10px] text-slate-500 font-medium">Suggested Prompts:</span>
                   {[
-                    "Find jobs matching my resume",
-                    "Improve my weakest skill",
-                    "Prepare me for a frontend interview",
-                    "Why is my resume score 86?"
+                    "How can I improve my resume score?",
+                    "What skills are missing for SDE roles?",
+                    "Prepare me for a technical interview"
                   ].map(prompt => (
                     <button
                       type="button"
@@ -595,9 +754,8 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-white text-base">Target Rubric & Text</h3>
                   <div className="flex items-center space-x-1">
-                    <button onClick={() => handleLoadSampleResume('sde')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">SDE</button>
-                    <button onClick={() => handleLoadSampleResume('ds')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">DS</button>
-                    <button onClick={() => handleLoadSampleResume('marketing')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">MKT</button>
+                    <button onClick={() => handleLoadSampleResume('sde')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">Sample SDE</button>
+                    <button onClick={() => handleLoadSampleResume('ds')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">Sample DS</button>
                   </div>
                 </div>
 
@@ -615,30 +773,12 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="border-t border-slate-800 pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-xs font-semibold text-slate-400">Target job description</label>
-                    <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300">Load sample JD</button>
-                  </div>
-                  <FileUpload
-                    onTextExtracted={(text) => setJdInput(text)}
-                    label="Upload JD image or document"
-                    accept="image/*,.pdf,.txt"
-                    helpText="Any image, PDF, or TXT file (max 10MB)"
-                  />
-                  <textarea
-                    value={jdInput}
-                    onChange={(e) => setJdInput(e.target.value)}
-                    rows={7}
-                    placeholder="Paste the job description you want to compare..."
-                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                  />
-                  <p className="mt-2 text-[11px] leading-5 text-slate-500">Add both your resume and the job description here. We will score the resume and show the skills gap together.</p>
-                </div>
-
                 {/* File Upload Zone */}
                 <FileUpload
-                  onTextExtracted={(text) => setResumeInput(text)}
+                  onTextExtracted={(text) => {
+                    setResumeInput(text);
+                    localStorage.setItem(KEY_RESUME_TEXT, text);
+                  }}
                   label="Upload Resume (PDF / JPG / PNG)"
                   accept=".pdf,.jpg,.jpeg,.png,.txt"
                   helpText="Drag & drop or click — PDF, JPG, PNG, TXT (max 10MB)"
@@ -654,7 +794,10 @@ export const DashboardPage: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-400 mb-1">Resume Document Text</label>
                   <textarea
                     value={resumeInput}
-                    onChange={(e) => setResumeInput(e.target.value)}
+                    onChange={(e) => {
+                      setResumeInput(e.target.value);
+                      localStorage.setItem(KEY_RESUME_TEXT, e.target.value);
+                    }}
                     rows={8}
                     placeholder="Paste your resume text here..."
                     className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
@@ -663,8 +806,10 @@ export const DashboardPage: React.FC = () => {
 
                 <div className="border-t border-slate-800 pt-4">
                   <div className="mb-3 flex items-center justify-between">
-                    <div><label className="block text-xs font-semibold text-slate-300">Links & profiles</label><p className="mt-1 text-[11px] text-slate-500">Add public profiles so the review can check your project footprint.</p></div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Optional</span>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300">Links & profiles</label>
+                      <p className="mt-1 text-[11px] text-slate-500">Add public profiles so the review can check your project footprint.</p>
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {([
@@ -678,7 +823,7 @@ export const DashboardPage: React.FC = () => {
                         <input
                           type={key === 'coding' ? 'text' : 'url'}
                           value={profileLinks[key]}
-                          onChange={(event) => setProfileLinks(current => ({ ...current, [key]: event.target.value }))}
+                          onChange={(event) => handleUpdateLinks(key, event.target.value)}
                           placeholder={placeholder}
                           className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-200 outline-none transition focus:border-indigo-500"
                         />
@@ -689,15 +834,15 @@ export const DashboardPage: React.FC = () => {
 
                 <button
                   onClick={handleRunComparison}
-                  disabled={isAnalyzing || isMatching}
-                  className="w-full py-3 bg-gradient-to-r from-amber-600 to-[#a84c38] hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-[#a84c38]/20 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                  disabled={isAnalyzing || isMatching || !resumeInput.trim()}
+                  className="w-full py-3 bg-gradient-to-r from-amber-600 to-[#a84c38] hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-[#a84c38]/20 transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
                 >
                   {isAnalyzing ? (
                     <span>Parsing & Evaluating...</span>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-amber-300" />
-                      <span>Compare Resume & Job Description</span>
+                      <span>Analyze & Score Resume</span>
                     </>
                   )}
                 </button>
@@ -711,10 +856,10 @@ export const DashboardPage: React.FC = () => {
                   <div className="text-center md:border-r md:border-slate-800 pr-4">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Role Score</span>
                     <div className="mt-2 text-5xl font-extrabold text-white">
-                      {resumeRecord ? resumeRecord.score : 86} <span className="text-xs font-normal text-slate-500">/ 100</span>
+                      {resumeRecord ? resumeRecord.score : '—'} <span className="text-xs font-normal text-slate-500">/ 100</span>
                     </div>
                     <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase">
-                      Strong {resumeRecord ? resumeRecord.targetRole.replace('-', ' ') : targetRole.replace('-', ' ')} Alignment
+                      {resumeRecord ? `${resumeRecord.targetRole.replace('-', ' ')} Rubric` : 'Upload Resume'}
                     </span>
                   </div>
 
@@ -722,34 +867,29 @@ export const DashboardPage: React.FC = () => {
                   <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Structure & Contact</span>
-                      <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.structure : 90}%</span>
+                      <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? `${resumeRecord.scoreBreakdown.structure}%` : '—'}</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Clarity & Verbs</span>
-                      <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.clarity : 88}%</span>
+                      <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? `${resumeRecord.scoreBreakdown.clarity}%` : '—'}</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Impact & Metrics</span>
-                      <span className="text-sm font-bold text-emerald-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.impact : 92}%</span>
+                      <span className="text-sm font-bold text-emerald-400 mt-1 block">{resumeRecord ? `${resumeRecord.scoreBreakdown.impact}%` : '—'}</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Role Hard Skills</span>
-                      <span className="text-sm font-bold text-amber-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.skills : 85}%</span>
+                      <span className="text-sm font-bold text-amber-400 mt-1 block">{resumeRecord ? `${resumeRecord.scoreBreakdown.skills}%` : '—'}</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">Projects & Links</span>
-                      <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.projects : 80}%</span>
+                      <span className="text-sm font-bold text-white mt-1 block">{resumeRecord ? `${resumeRecord.scoreBreakdown.projects}%` : '—'}</span>
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
                       <span className="text-slate-400 block text-[10px]">ATS Readability</span>
-                      <span className="text-sm font-bold text-indigo-400 mt-1 block">{resumeRecord ? resumeRecord.scoreBreakdown.ats : 82}%</span>
+                      <span className="text-sm font-bold text-indigo-400 mt-1 block">{resumeRecord ? `${resumeRecord.scoreBreakdown.ats}%` : '—'}</span>
                     </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 rounded-2xl border border-slate-900 bg-slate-900/50 p-5 md:grid-cols-[150px_1fr] md:items-center">
-                  <div className="md:border-r md:border-slate-800 md:pr-5"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">JD match</p><p className="mt-1 text-4xl font-extrabold text-emerald-400">{jdMatchResult ? jdMatchResult.matchPct : 86}%</p><p className="mt-1 text-[11px] text-slate-500">Resume vs. this role</p></div>
-                  <div><p className="text-xs font-semibold text-slate-300">Skills to review</p><div className="mt-2 flex flex-wrap gap-2">{(jdMatchResult ? jdMatchResult.missingCoreSkills : ['GraphQL', 'Kubernetes']).map(skill => <span key={skill} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-400">{skill}</span>)}</div><p className="mt-3 text-[11px] text-slate-500">The matching score compares the resume text with the job description entered on the left.</p></div>
                 </div>
 
                 {/* Actionable Feedback Cards */}
@@ -765,8 +905,8 @@ export const DashboardPage: React.FC = () => {
                   </div>
 
                   {filteredFeedback.length === 0 ? (
-                    <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 text-xs">
-                      No feedback cards matching selected filter. Try loading or pasting a resume, then running comparison.
+                    <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 text-xs">
+                      No feedback cards generated yet. Upload or paste your resume on the left and click "Analyze & Score Resume".
                     </div>
                   ) : (
                     filteredFeedback.map((fb, idx) => (
@@ -797,199 +937,121 @@ export const DashboardPage: React.FC = () => {
                         </div>
 
                         <p className="mt-2 text-xs text-slate-300 leading-relaxed">{fb.description}</p>
-                        
-                        <div className="mt-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-indigo-300">
-                          <strong>Suggestion:</strong> {fb.suggestion}
-                        </div>
                       </div>
                     ))
                   )}
                 </div>
-
               </div>
-
             </div>
           )}
 
           {/* TAB 3: JOB MATCHES */}
           {activeNav === 'Job Matches' && (
-            !canAccessFeature(user, 'resume.jdMatch').allowed ? (
-              <UpgradeGate featureKey="resume.jdMatch" reason={canAccessFeature(user, 'resume.jdMatch').reason} />
-            ) : (
-              <div className="space-y-6 animate-fadeIn">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fadeIn">
+              
+              {/* Left Column: Job Description Input */}
+              <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
+                <h3 className="font-bold text-white text-base">Paste Target Job Description</h3>
+                <p className="text-xs text-slate-400">Enter the requirements for any job posting to calculate match percentage and missing skills.</p>
                 
-                {/* Left Column: Job Description Input */}
-                <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-white text-base">Paste Target Job Description (JD)</h3>
-                    <div className="flex items-center space-x-1">
-                      <button onClick={() => setJdInput(sampleJDsText.sde)} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">SDE JD</button>
-                      <button onClick={() => setJdInput(sampleJDsText.ds)} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">DS JD</button>
-                    </div>
-                  </div>
+                <FileUpload
+                  onTextExtracted={(text) => setJdInput(text)}
+                  label="Upload Job Description document"
+                  accept="image/*,.pdf,.txt"
+                  helpText="PDF, image, or TXT"
+                />
 
-                  {/* File Upload Zone for JD */}
-                  <FileUpload
-                    onTextExtracted={(text) => setJdInput(text)}
-                    label="Upload Job Description (PDF / JPG / PNG)"
-                    accept=".pdf,.jpg,.jpeg,.png,.txt"
-                    helpText="Upload JD as PDF, image, or text file"
-                  />
+                <textarea
+                  value={jdInput}
+                  onChange={(e) => setJdInput(e.target.value)}
+                  rows={10}
+                  placeholder="Paste Job Description text here..."
+                  className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
+                />
 
-                  <div className="flex items-center space-x-3 text-[10px] text-slate-500">
-                    <div className="flex-1 h-px bg-slate-800"></div>
-                    <span className="font-bold uppercase tracking-wider">or paste JD text</span>
-                    <div className="flex-1 h-px bg-slate-800"></div>
-                  </div>
-
-                  <textarea
-                    value={jdInput}
-                    onChange={(e) => setJdInput(e.target.value)}
-                    rows={8}
-                    placeholder="Paste Job Description text here..."
-                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
-                  />
-
-                  <button
-                    onClick={handleRunJDMatch}
-                    disabled={isMatching}
-                    className="w-full py-3 bg-gradient-to-r from-purple-650 to-indigo-650 hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer"
-                  >
-                    {isMatching ? (
-                      <span>Calculating Keyword Overlap...</span>
-                    ) : (
-                      <>
-                        <FileCheck2 className="w-4 h-4 text-purple-300" />
-                        <span>Calculate JD Match % & Skill Gaps</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Right Column: JD Match Breakdown */}
-                <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-6">
-                  <div className="text-center p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Job Match Percentage</span>
-                    <div className="text-5xl font-extrabold text-[#a84c38]">
-                      {jdMatchResult ? jdMatchResult.matchPct : 86}%
-                    </div>
-                    <p className="text-xs text-slate-400">Keyword Overlap: <strong>{jdMatchResult ? jdMatchResult.keywordScore : 84}%</strong> | Semantic Similarity: <strong>{jdMatchResult ? jdMatchResult.embeddingScore : 88}%</strong></p>
-                  </div>
-
-                  {/* Matched vs Missing Core Skills */}
-                  <div className="space-y-4 text-xs">
-                    <div>
-                      <h4 className="font-bold text-emerald-400 mb-2 flex items-center space-x-1">
-                        <Check className="w-4 h-4" />
-                        <span>Matched Keywords ({jdMatchResult ? jdMatchResult.matchedKeywords.length : 7})</span>
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(jdMatchResult ? jdMatchResult.matchedKeywords : ['TypeScript', 'Node.js', 'React', 'PostgreSQL', 'Docker', 'AWS', 'Redis']).map((kw, i) => (
-                          <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-semibold">
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-bold text-rose-400 mb-2 flex items-center space-x-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Missing Core Skills ({jdMatchResult ? jdMatchResult.missingCoreSkills.length : 2})</span>
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(jdMatchResult ? jdMatchResult.missingCoreSkills : ['GraphQL', 'Kubernetes']).map((kw, i) => (
-                          <span key={i} className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-350 border border-rose-500/30 font-semibold">
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Missing Keywords Detail */}
-                    <div>
-                      <h4 className="font-bold text-amber-400 mb-2 flex items-center space-x-1">
-                        <Info className="w-4 h-4" />
-                        <span>All Missing Keywords ({jdMatchResult ? jdMatchResult.missingKeywords.length : 3})</span>
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(jdMatchResult ? jdMatchResult.missingKeywords : ['GraphQL', 'Kubernetes', 'CI/CD']).map((kw, i) => (
-                          <span key={i} className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30 font-semibold">
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Actionable Recommendations */}
-                    <div className="pt-3 border-t border-slate-800 space-y-3">
-                      <h4 className="font-bold text-white flex items-center space-x-2">
-                        <Sparkles className="w-4 h-4 text-indigo-400" />
-                        <span>How to Improve Your Resume for This JD:</span>
-                      </h4>
-                      <div className="space-y-2">
-                        {(jdMatchResult ? jdMatchResult.recommendations : [
-                          'Explicitly incorporate missing target skills: GraphQL, Kubernetes into your Skills or Experience section.',
-                          'Align your resume summary headline directly with the Senior Full Stack Engineer title.'
-                        ]).map((rec, idx) => (
-                          <div key={idx} className="flex items-start space-x-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
-                            <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                            <span className="text-xs text-slate-300 leading-relaxed">{rec}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
+                <button
+                  onClick={handleRunJDMatch}
+                  disabled={isMatching}
+                  className="w-full py-3 bg-gradient-to-r from-purple-650 to-indigo-650 hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                >
+                  {isMatching ? (
+                    <span>Calculating Match...</span>
+                  ) : (
+                    <>
+                      <FileCheck2 className="w-4 h-4 text-purple-300" />
+                      <span>Calculate JD Match % & Skill Gaps</span>
+                    </>
+                  )}
+                </button>
               </div>
 
-              {/* Recommended Jobs Database Table */}
-              <div className="bg-slate-900/50 border border-slate-900 rounded-3xl p-5 space-y-4">
-                <h3 className="text-sm font-bold text-white">Recommended Job Matches Database</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
-                        <th className="py-3">Job Title</th>
-                        <th className="py-3">Company</th>
-                        <th className="py-3">Required Experience</th>
-                        <th className="py-3">ATS Match</th>
-                        <th className="py-3 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800 text-slate-300">
-                      {[
-                        { title: "Senior Full Stack Engineer", company: "TechScale Innovations", exp: "5+ yrs", match: "94%", jd: sampleJDsText.sde },
-                        { title: "Frontend Engineer", company: "CloudTech Solutions", exp: "3+ yrs", match: "89%", jd: sampleJDsText.sde },
-                        { title: "Backend Engineer", company: "TechCorp", exp: "3+ yrs", match: "84%", jd: sampleJDsText.sde },
-                        { title: "Full Stack Developer", company: "Innovate Labs", exp: "2+ yrs", match: "81%", jd: sampleJDsText.sde }
-                      ].map((j, i) => (
-                        <tr key={i} className="hover:bg-slate-950/30">
-                          <td className="py-3.5 font-bold text-white">{j.title}</td>
-                          <td className="py-3.5 text-slate-400">{j.company}</td>
-                          <td className="py-3.5 text-slate-400">{j.exp}</td>
-                          <td className="py-3.5 text-emerald-400 font-bold">{j.match}</td>
-                          <td className="py-3.5 text-right">
-                            <button
-                              onClick={() => {
-                                setJdInput(j.jd);
-                                handleRunJDMatch();
-                              }}
-                              className="px-2.5 py-1 rounded bg-[#a84c38]/10 text-[#a84c38] border border-[#a84c38]/20 text-[10px] font-bold cursor-pointer"
-                            >
-                              Load & Score
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              {/* Right Column: JD Match Breakdown */}
+              <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-6">
+                {jdMatchResult ? (
+                  <>
+                    <div className="text-center p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Job Match Percentage</span>
+                      <div className="text-5xl font-extrabold text-[#a84c38]">
+                        {jdMatchResult.matchPct}%
+                      </div>
+                      <p className="text-xs text-slate-400">Keyword Overlap: <strong>{jdMatchResult.keywordScore}%</strong> | Semantic Similarity: <strong>{jdMatchResult.embeddingScore}%</strong></p>
+                    </div>
+
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <h4 className="font-bold text-emerald-400 mb-2 flex items-center space-x-1">
+                          <Check className="w-4 h-4" />
+                          <span>Matched Keywords ({jdMatchResult.matchedKeywords.length})</span>
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {jdMatchResult.matchedKeywords.map((kw, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-semibold">
+                              {kw}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-bold text-rose-400 mb-2 flex items-center space-x-1">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span>Missing Core Skills ({jdMatchResult.missingCoreSkills.length})</span>
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {jdMatchResult.missingCoreSkills.map((kw, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-350 border border-rose-500/30 font-semibold">
+                              {kw}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-800 space-y-3">
+                        <h4 className="font-bold text-white flex items-center space-x-2">
+                          <Sparkles className="w-4 h-4 text-indigo-400" />
+                          <span>Improvement Recommendations:</span>
+                        </h4>
+                        <div className="space-y-2">
+                          {jdMatchResult.recommendations.map((rec, idx) => (
+                            <div key={idx} className="flex items-start space-x-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                              <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                              <span className="text-xs text-slate-300 leading-relaxed">{rec}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-12 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40 space-y-3">
+                    <Briefcase className="w-8 h-8 text-slate-600 mx-auto" />
+                    <p className="text-xs font-semibold text-slate-300">No Job Match calculated yet.</p>
+                    <p className="text-[11px] text-slate-500">Paste a job description on the left and click "Calculate JD Match %".</p>
+                  </div>
+                )}
               </div>
             </div>
-          ))}
+          )}
 
           {/* TAB 4: AI BULLET REWRITER */}
           {activeNav === 'AI Bullet Rewriter' && (
@@ -997,114 +1059,95 @@ export const DashboardPage: React.FC = () => {
               <UpgradeGate featureKey="ai.bulletRewriter" reason={canAccessFeature(user, 'ai.bulletRewriter').reason} />
             ) : (
               <div className="max-w-4xl mx-auto bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
-              <div className="space-y-1">
-                <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                  <Zap className="w-5 h-5 text-amber-400" />
-                  <span>AI Resume Bullet Point Enhancer</span>
-                </h3>
-                <p className="text-xs text-slate-400">Input weak or passive bullet points to transform them into strong, quantified statements.</p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Original Bullet Point Text</label>
-                  <textarea
-                    value={bulletInput}
-                    onChange={(e) => setBulletInput(e.target.value)}
-                    rows={3}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
-                  />
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                    <Zap className="w-5 h-5 text-amber-400" />
+                    <span>AI Resume Bullet Point Enhancer</span>
+                  </h3>
+                  <p className="text-xs text-slate-400">Input weak or passive bullet points to transform them into strong, quantified statements.</p>
                 </div>
 
-                {/* Focus Mode Selection */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">Enhancement Focus Mode</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <button
-                      onClick={() => setFocusMode('quantify')}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'quantify' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
-                      }`}
-                    >
-                      <span className="block text-amber-300 font-extrabold">1. Quantify Impact</span>
-                      <span className="text-[10px] font-normal block mt-0.5">Embed metrics & ROI</span>
-                    </button>
-
-                    <button
-                      onClick={() => setFocusMode('action')}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'action' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
-                      }`}
-                    >
-                      <span className="block text-indigo-350 font-extrabold">2. Action Verbs</span>
-                      <span className="text-[10px] font-normal block mt-0.5">Architected, Scaled</span>
-                    </button>
-
-                    <button
-                      onClick={() => setFocusMode('concise')}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'concise' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
-                      }`}
-                    >
-                      <span className="block text-emerald-350 font-extrabold">3. Trim Filler</span>
-                      <span className="text-[10px] font-normal block mt-0.5">Crisp ATS phrasing</span>
-                    </button>
-
-                    <button
-                      onClick={() => setFocusMode('role-aligned')}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
-                        focusMode === 'role-aligned' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
-                      }`}
-                    >
-                      <span className="block text-purple-350 font-extrabold">4. Role Alignment</span>
-                      <span className="text-[10px] font-normal block mt-0.5">Infuse SDE keywords</span>
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleRunRewrite}
-                  disabled={isRewriting}
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-[#a84c38] hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  {isRewriting ? (
-                    <span>Generating Enhanced Bullet...</span>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4 text-amber-300" />
-                      <span>Generate Improved Version</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Rewrite Output Card */}
-              {rewriteResult && (
-                <div className="p-6 rounded-2xl bg-slate-950 border border-emerald-500/40 space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Enhanced Version</span>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(rewriteResult.improvedBullet);
-                        setCopiedBullet(true);
-                        setTimeout(() => setCopiedBullet(false), 2000);
-                      }}
-                      className="inline-flex items-center space-x-1 text-xs font-bold text-[#a84c38] hover:text-[#c45a44]"
-                    >
-                      {copiedBullet ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                      <span>{copiedBullet ? 'Copied!' : 'Copy Bullet'}</span>
-                    </button>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Original Bullet Point Text</label>
+                    <textarea
+                      value={bulletInput}
+                      onChange={(e) => setBulletInput(e.target.value)}
+                      rows={3}
+                      placeholder="e.g. Responsible for developing microservices with Node.js and SQL."
+                      className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
+                    />
                   </div>
 
-                  <p className="text-sm font-semibold text-white leading-relaxed">{rewriteResult.improvedBullet}</p>
-                  
-                  <p className="text-xs text-slate-400 pt-2 border-t border-slate-900">
-                    <strong>Why this works:</strong> {rewriteResult.explanation}
-                  </p>
-                </div>
-              )}
+                  {/* Focus Mode Selection */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-2">Enhancement Focus Mode</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <button
+                        onClick={() => setFocusMode('quantify')}
+                        className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                          focusMode === 'quantify' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
+                        }`}
+                      >
+                        <span className="block text-amber-300 font-extrabold">1. Quantify Impact</span>
+                        <span className="text-[10px] font-normal block mt-0.5">Embed metrics & ROI</span>
+                      </button>
 
-            </div>
+                      <button
+                        onClick={() => setFocusMode('action')}
+                        className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                          focusMode === 'action' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
+                        }`}
+                      >
+                        <span className="block text-indigo-350 font-extrabold">2. Action Verbs</span>
+                        <span className="text-[10px] font-normal block mt-0.5">Architected, Scaled</span>
+                      </button>
+
+                      <button
+                        onClick={() => setFocusMode('concise')}
+                        className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                          focusMode === 'concise' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
+                        }`}
+                      >
+                        <span className="block text-emerald-350 font-extrabold">3. Trim Filler</span>
+                        <span className="text-[10px] font-normal block mt-0.5">Crisp ATS phrasing</span>
+                      </button>
+
+                      <button
+                        onClick={() => setFocusMode('role-aligned')}
+                        className={`p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                          focusMode === 'role-aligned' ? 'bg-[#a84c38]/20 border-[#a84c38]/40 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-500'
+                        }`}
+                      >
+                        <span className="block text-purple-350 font-extrabold">4. Role Alignment</span>
+                        <span className="text-[10px] font-normal block mt-0.5">Target {targetRole.toUpperCase()}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleRunRewrite}
+                    disabled={isRewriting || !bulletInput.trim()}
+                    className="w-full py-3 bg-[#a84c38] hover:bg-[#8f3f2d] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow transition-all cursor-pointer"
+                  >
+                    {isRewriting ? 'Generating Enhancements...' : 'Rewrite Bullet Point'}
+                  </button>
+                </div>
+
+                {rewriteResult && (
+                  <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                    <h4 className="font-bold text-white text-sm">Enhanced Bullet Statement:</h4>
+                    <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-emerald-300 font-semibold leading-relaxed">
+                      {rewriteResult.improvedBullet}
+                    </div>
+                    {rewriteResult.explanation && (
+                      <p className="text-[11px] text-slate-400">
+                        <strong className="text-slate-300">Why this works:</strong> {rewriteResult.explanation}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             )
           )}
 
@@ -1123,19 +1166,16 @@ export const DashboardPage: React.FC = () => {
 
                   <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">GitHub Stars</span>
-                      <span className="text-white font-bold">38 Stars</span>
+                      <span className="text-slate-400">GitHub Profile</span>
+                      <span className="text-white font-bold">{profileLinks.github ? 'Connected' : 'Not set'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Public Repositories</span>
-                      <span className="text-white font-bold">14 Repos</span>
+                      <span className="text-slate-400">LinkedIn Profile</span>
+                      <span className="text-white font-bold">{profileLinks.linkedin ? 'Connected' : 'Not set'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Portfolio Rating</span>
-                      <span className="text-emerald-400 font-bold">88 / 100</span>
-                    </div>
-                    <div className="pt-2 border-t border-slate-900 text-slate-300 leading-relaxed">
-                      Verified activity in microservices, React, and TypeScript projects. GitHub connection status: Active.
+                      <span className="text-emerald-400 font-bold">{resumeRecord ? `${resumeRecord.scoreBreakdown.projects} / 100` : '—'}</span>
                     </div>
                   </div>
                 </div>
@@ -1172,260 +1212,244 @@ export const DashboardPage: React.FC = () => {
               <UpgradeGate featureKey="ai.mockInterview" reason={canAccessFeature(user, 'ai.mockInterview').reason} />
             ) : (
               <div className="bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                    <HelpCircle className="w-5 h-5 text-pink-400" />
-                    <span>AI Mock Interview Question Generator</span>
-                  </h3>
-                  <p className="text-xs text-slate-400">Generates questions tailored to your parsed resume and target job description.</p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                      <HelpCircle className="w-5 h-5 text-pink-400" />
+                      <span>AI Mock Interview Generator</span>
+                    </h3>
+                    <p className="text-xs text-slate-400">Generates custom technical & behavioral questions tailored to target roles.</p>
+                  </div>
+
+                  <button
+                    onClick={handleGenerateInterview}
+                    disabled={isLoadingInterview}
+                    className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-[#a84c38] hover:opacity-95 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                  >
+                    {isLoadingInterview ? 'Generating Questions...' : 'Generate New Questions'}
+                  </button>
                 </div>
 
-                <button
-                  onClick={handleGenerateInterview}
-                  disabled={isLoadingInterview}
-                  className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-[#a84c38] hover:opacity-95 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
-                >
-                  {isLoadingInterview ? 'Generating Questions...' : 'Generate New Questions'}
-                </button>
-              </div>
+                <div className="space-y-4">
+                  {interviewQuestions.length > 0 ? (
+                    interviewQuestions.map((q, idx) => (
+                      <div key={q.id || idx} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                            {q.category}
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                            {q.difficulty}
+                          </span>
+                        </div>
 
-              <div className="space-y-4">
-                {(interviewQuestions.length > 0 ? interviewQuestions : [
-                  {
-                    id: 'q-1',
-                    category: 'System & Domain Architecture' as const,
-                    question: 'How would you architect a high-throughput microservices application handling 2M+ daily requests with zero downtime?',
-                    difficulty: 'Hard' as const,
-                    keyPointsToCover: ['Load balancing & API gateway setup', 'Database indexing & Redis caching strategies', 'Asynchronous task queues (RabbitMQ/BullMQ)', 'Circuit breaker pattern']
-                  },
-                  {
-                    id: 'q-2',
-                    category: 'Technical Core' as const,
-                    question: 'Explain how you optimize PostgreSQL queries when dealing with large-scale tables, and when you choose Redis caching.',
-                    difficulty: 'Medium' as const,
-                    keyPointsToCover: ['EXPLAIN ANALYZE for query plans', 'B-Tree composite indexes', 'Cache eviction strategies (LRU)', 'Cache stampede prevention']
-                  }
-                ]).map((q, idx) => (
-                  <div key={q.id || idx} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                        {q.category}
-                      </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                        {q.difficulty}
-                      </span>
+                        <h4 className="font-bold text-white text-sm">{q.question}</h4>
+
+                        <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5">
+                          <span className="text-slate-400 font-bold block">Key Points to Cover in Answer:</span>
+                          <ul className="list-disc list-inside text-slate-300 space-y-0.5">
+                            {q.keyPointsToCover.map((pt, i) => (
+                              <li key={i}>{pt}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-12 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40 space-y-3">
+                      <HelpCircle className="w-8 h-8 text-slate-600 mx-auto" />
+                      <p className="text-xs font-semibold text-slate-300">No mock interview generated yet.</p>
+                      <p className="text-[11px] text-slate-500">Click "Generate New Questions" above to practice tailored questions for {targetRole.toUpperCase()}.</p>
                     </div>
-
-                    <h4 className="font-bold text-white text-sm">{q.question}</h4>
-
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5">
-                      <span className="text-slate-400 font-bold block">Key Points to Cover in Answer:</span>
-                      <ul className="list-disc list-inside text-slate-300 space-y-0.5">
-                        {q.keyPointsToCover.map((pt, i) => (
-                          <li key={i}>{pt}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
-            </div>
             )
           )}
 
           {/* TAB 7: APPLICATIONS TRACKER */}
           {activeNav === 'Applications' && (
             <div className="bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
-              <h3 className="text-xl font-serif font-bold text-white border-b border-slate-900 pb-4">Job Applications Tracker</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Total Applications</span>
-                  <div className="text-2xl font-extrabold text-white mt-1">24 Submitted</div>
-                </div>
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Active Pipelines</span>
-                  <div className="text-2xl font-extrabold text-[#a84c38] mt-1">6 In-Progress</div>
-                </div>
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-                  <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Interviews Slated</span>
-                  <div className="text-2xl font-extrabold text-emerald-400 mt-1">2 Scheduled</div>
-                </div>
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h3 className="text-xl font-serif font-bold text-white">Job Applications Tracker</h3>
+                <button
+                  onClick={() => setShowAddAppForm(!showAddAppForm)}
+                  className="px-3.5 py-2 bg-[#a84c38] hover:bg-[#8f3f2d] text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{showAddAppForm ? 'Cancel' : 'Track New Application'}</span>
+                </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
-                      <th className="py-3">Target Role</th>
-                      <th className="py-3">Company</th>
-                      <th className="py-3">Applied Date</th>
-                      <th className="py-3">Pipeline Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800 text-slate-300">
-                    {applications.map(app => (
-                      <tr key={app.id} className="hover:bg-slate-950/20">
-                        <td className="py-3 font-bold text-white">{app.role}</td>
-                        <td className="py-3 text-slate-400">{app.company}</td>
-                        <td className="py-3 text-slate-400">{app.date}</td>
-                        <td className="py-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                            app.status === 'Interviewing'
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : app.status === 'Applied'
-                              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                          }`}>
-                            {app.status}
-                          </span>
-                        </td>
+              {showAddAppForm && (
+                <form onSubmit={handleAddApplication} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 text-xs">
+                  <h4 className="font-bold text-white">Add Application Details</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1">Job Title</label>
+                      <input
+                        type="text"
+                        required
+                        value={newAppRole}
+                        onChange={e => setNewAppRole(e.target.value)}
+                        placeholder="e.g. Senior Frontend Engineer"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs outline-none focus:border-[#a84c38]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1">Company Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={newAppCompany}
+                        onChange={e => setNewAppCompany(e.target.value)}
+                        placeholder="e.g. TechCorp"
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs outline-none focus:border-[#a84c38]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1">Application Status</label>
+                      <select
+                        value={newAppStatus}
+                        onChange={e => setNewAppStatus(e.target.value as any)}
+                        className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs outline-none focus:border-[#a84c38]"
+                      >
+                        <option value="Applied">Applied</option>
+                        <option value="Interviewing">Interviewing</option>
+                        <option value="Offered">Offered</option>
+                        <option value="Rejected">Rejected</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 font-bold text-white text-xs rounded-lg cursor-pointer">
+                    Save Application
+                  </button>
+                </form>
+              )}
+
+              {applications.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                        <th className="py-3">Job Role</th>
+                        <th className="py-3">Company</th>
+                        <th className="py-3">Status</th>
+                        <th className="py-3">Applied Date</th>
+                        <th className="py-3 text-right">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800 text-slate-300">
+                      {applications.map(app => (
+                        <tr key={app.id}>
+                          <td className="py-3.5 font-bold text-white">{app.role}</td>
+                          <td className="py-3.5 text-slate-400">{app.company}</td>
+                          <td className="py-3.5">
+                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
+                              app.status === 'Offered'
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : app.status === 'Interviewing'
+                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                : app.status === 'Rejected'
+                                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                            }`}>
+                              {app.status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-slate-500">{app.date}</td>
+                          <td className="py-3.5 text-right">
+                            <button
+                              onClick={() => handleDeleteApplication(app.id)}
+                              className="p-1 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-12 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40 space-y-3">
+                  <FileCheck2 className="w-8 h-8 text-slate-600 mx-auto" />
+                  <p className="text-xs font-semibold text-slate-300">No applications tracked yet.</p>
+                  <p className="text-[11px] text-slate-500">Click "Track New Application" above to add your submitted job applications.</p>
+                </div>
+              )}
             </div>
           )}
 
           {/* TAB 8: LEADERBOARD & BADGES */}
           {activeNav === 'Leaderboard & Badges' && (
             <div className="bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                    <Award className="w-5 h-5 text-amber-400" />
-                    <span>Regional & University Leaderboard</span>
-                  </h3>
-                  <p className="text-xs text-slate-400">Compete with fellow job seekers and earn badges by elevating your ATS resume score.</p>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs text-slate-400 block font-semibold">Your Rank</span>
-                  <span className="text-xl font-extrabold text-amber-400">#1 Spot</span>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
-                    <tr>
-                      <th className="py-3 px-4">Rank</th>
-                      <th className="py-3 px-4">Candidate</th>
-                      <th className="py-3 px-4">Institution</th>
-                      <th className="py-3 px-4">Role Score</th>
-                      <th className="py-3 px-4">Badges Unlocked</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800 text-slate-300">
-                    <tr className="bg-indigo-950/20">
-                      <td className="py-3 px-4 font-bold text-amber-400">#1</td>
-                      <td className="py-3 px-4 font-bold text-white flex items-center space-x-2">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="avatar" className="w-6 h-6 rounded-full" />
-                        <span>{user?.name || 'Alex Rivera'} (You)</span>
-                      </td>
-                      <td className="py-3 px-4">UC Berkeley</td>
-                      <td className="py-3 px-4 font-bold text-emerald-400">94 / 100</td>
-                      <td className="py-3 px-4 flex gap-1">
-                        <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">ATS Ninja</span>
-                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">Metric Machine</span>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-3 px-4 font-bold text-slate-400">#2</td>
-                      <td className="py-3 px-4 font-bold text-white flex items-center space-x-2">
-                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100" alt="avatar" className="w-6 h-6 rounded-full" />
-                        <span>Priya Sharma</span>
-                      </td>
-                      <td className="py-3 px-4">Northeastern Univ</td>
-                      <td className="py-3 px-4 font-bold text-emerald-400">91 / 100</td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">ML Wizard</span>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="py-3 px-4 font-bold text-slate-400">#3</td>
-                      <td className="py-3 px-4 font-bold text-white flex items-center space-x-2">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" alt="avatar" className="w-6 h-6 rounded-full" />
-                        <span>Jordan Lee</span>
-                      </td>
-                      <td className="py-3 px-4">NYU Stern</td>
-                      <td className="py-3 px-4 font-bold text-emerald-400">89 / 100</td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 text-[10px] font-bold">Growth Hacker</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              <h3 className="text-xl font-serif font-bold text-white border-b border-slate-800 pb-4">Achievements & Badges</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { name: "ATS Ninja", desc: "Achieve a resume ATS score over 85%", earned: user?.badges?.includes("ATS Ninja") },
+                  { name: "Metric Machine", desc: "Quantify at least 5 bullet points with clear ROI metrics", earned: user?.badges?.includes("Metric Machine") },
+                  { name: "Role Ready", desc: "Complete your first AI mock interview practice", earned: user?.badges?.includes("Role Ready") },
+                  { name: "Keyword Master", desc: "Reach 90%+ JD match alignment", earned: user?.badges?.includes("Keyword Master") }
+                ].map(badge => (
+                  <div key={badge.name} className={`p-5 rounded-2xl border ${badge.earned ? 'bg-amber-950/20 border-amber-500/40' : 'bg-slate-950 border-slate-800 opacity-60'}`}>
+                    <Award className={`w-6 h-6 mb-2 ${badge.earned ? 'text-amber-400' : 'text-slate-600'}`} />
+                    <h4 className="font-bold text-white text-sm">{badge.name}</h4>
+                    <p className="text-[11px] text-slate-400 mt-1">{badge.desc}</p>
+                    <span className="inline-block mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      {badge.earned ? '✓ Unlocked' : 'Locked'}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* TAB 9: USER PROFILE SHELL */}
+          {/* TAB 9: PROFILE */}
           {activeNav === 'Profile' && (
-            <div className="bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
-              <h3 className="text-xl font-serif font-bold text-white border-b border-slate-900 pb-4">Career Command Profile</h3>
+            <div className="max-w-2xl bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
+              <h3 className="text-xl font-serif font-bold text-white border-b border-slate-800 pb-4">Candidate Profile</h3>
               
-              <div className="space-y-4 text-xs max-w-lg">
-                <div className="space-y-1.5">
-                  <label className="block text-slate-400 font-medium">Full Name</label>
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-slate-400 font-semibold mb-1">Full Name</label>
                   <input
                     type="text"
-                    value={profileData.name}
-                    onChange={e => setProfileData(current => ({ ...current, name: e.target.value }))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
+                    disabled
+                    value={user?.name || ''}
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-300"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-slate-400 font-medium">Email Address</label>
+                <div>
+                  <label className="block text-slate-400 font-semibold mb-1">Email Address</label>
                   <input
                     type="email"
-                    value={profileData.email}
-                    onChange={e => setProfileData(current => ({ ...current, email: e.target.value }))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
+                    disabled
+                    value={user?.email || ''}
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-300"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-400 font-medium">GitHub Profile</label>
-                    <input
-                      type="text"
-                      value={profileData.github}
-                      onChange={e => setProfileData(current => ({ ...current, github: e.target.value }))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-400 font-medium">LinkedIn Profile</label>
-                    <input
-                      type="text"
-                      value={profileData.linkedin}
-                      onChange={e => setProfileData(current => ({ ...current, linkedin: e.target.value }))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-300 outline-none focus:border-[#a84c38]"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => alert("Profile updated locally! (Mock Action)")}
-                    className="px-5 py-2.5 bg-[#a84c38] hover:bg-[#8f3f2d] font-bold text-xs text-white rounded-xl cursor-pointer"
+                <div>
+                  <label className="block text-slate-400 font-semibold mb-1">Target Role Preference</label>
+                  <select
+                    value={targetRole}
+                    onChange={(e) => setTargetRole(e.target.value as any)}
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-300 outline-none focus:border-[#a84c38]"
                   >
-                    Save Profile Settings
-                  </button>
+                    <option value="sde">Software Development Engineer (SDE)</option>
+                    <option value="data-science">Data Scientist / ML Engineer</option>
+                    <option value="marketing">Growth & Digital Marketer</option>
+                    <option value="product-management">Product Manager (PM)</option>
+                  </select>
                 </div>
               </div>
             </div>
           )}
 
         </main>
-
       </div>
     </div>
   );
