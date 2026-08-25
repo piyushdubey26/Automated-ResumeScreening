@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, FileText, Search, Users } from 'lucide-react';
+import { ArrowRight, Check, FileText, Search, Users, Shield } from 'lucide-react';
 import { sampleResumesText, resumeApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const LandingPage: React.FC = () => {
-  const { user, isAuthenticated, demoLogin } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [demoRole, setDemoRole] = useState<'sde' | 'ds' | 'marketing'>('sde');
   const [demoText, setDemoText] = useState(sampleResumesText.sde);
@@ -50,8 +50,30 @@ export const LandingPage: React.FC = () => {
               : "Get a practical read on your resume, see how it fits a role, and improve the parts that matter before you apply."}
           </p>
           
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            {isRecruiterMode ? (
+          <div className="mt-9 flex flex-wrap gap-3 sm:items-center">
+            {user?.userType === 'admin' ? (
+              <>
+                <button 
+                  onClick={() => navigate('/admin')} 
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-[#a84c38] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#8e3f2e] cursor-pointer shadow-lg shadow-[#a84c38]/20"
+                >
+                  <Shield className="h-4 w-4" />
+                  <span>Open Admin Control Center</span>
+                </button>
+                <button 
+                  onClick={() => navigate('/dashboard')} 
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-[#cfcac0] dark:border-slate-800 px-4 py-3 text-sm font-semibold text-[#294452] dark:text-slate-200 transition hover:bg-slate-800/40 cursor-pointer"
+                >
+                  View Seeker Experience
+                </button>
+                <button 
+                  onClick={() => navigate('/recruiter')} 
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-[#cfcac0] dark:border-slate-800 px-4 py-3 text-sm font-semibold text-[#294452] dark:text-slate-200 transition hover:bg-slate-800/40 cursor-pointer"
+                >
+                  View Recruiter Experience
+                </button>
+              </>
+            ) : isRecruiterMode ? (
               <>
                 <button 
                   onClick={() => navigate('/recruiter', { state: { openCreateJob: true } })} 
@@ -66,10 +88,15 @@ export const LandingPage: React.FC = () => {
                   View Candidates
                 </button>
               </>
+            ) : isAuthenticated ? (
+              <>
+                <button onClick={() => navigate('/dashboard')} className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1d3848] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#294c60] cursor-pointer">Review a resume <ArrowRight className="h-4 w-4" /></button>
+                <button onClick={() => navigate('/features')} className="inline-flex items-center justify-center gap-2 rounded-md border border-[#cfcac0] px-5 py-3 text-sm font-semibold text-[#294452] transition hover:border-[#7d8c8f] hover:bg-white cursor-pointer">Explore Features</button>
+              </>
             ) : (
               <>
-                <button onClick={() => { demoLogin('seeker'); navigate('/dashboard'); }} className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1d3848] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#294c60] cursor-pointer">Review a resume <ArrowRight className="h-4 w-4" /></button>
-                <button onClick={() => { demoLogin('recruiter'); navigate('/recruiter'); }} className="inline-flex items-center justify-center gap-2 rounded-md border border-[#cfcac0] px-5 py-3 text-sm font-semibold text-[#294452] transition hover:border-[#7d8c8f] hover:bg-white cursor-pointer">I’m hiring <Users className="h-4 w-4" /></button>
+                <button onClick={() => navigate('/register')} className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1d3848] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#294c60] cursor-pointer">Review a resume <ArrowRight className="h-4 w-4" /></button>
+                <button onClick={() => navigate('/register')} className="inline-flex items-center justify-center gap-2 rounded-md border border-[#cfcac0] px-5 py-3 text-sm font-semibold text-[#294452] transition hover:border-[#7d8c8f] hover:bg-white cursor-pointer">I’m hiring <Users className="h-4 w-4" /></button>
               </>
             )}
           </div>
