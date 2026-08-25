@@ -2,6 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   rolePreference: 'sde' | 'data-science' | 'marketing' | 'product-management';
   userType: 'seeker' | 'recruiter' | 'admin';
   badges: string[];

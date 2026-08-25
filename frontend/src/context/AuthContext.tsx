@@ -8,7 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password?: string) => Promise<void>;
-  signup: (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter') => Promise<void>;
+  signup: (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => Promise<void>;
   logout: () => void;
   demoLogin: (role: 'seeker' | 'recruiter' | 'admin') => Promise<void>;
   switchMode: (newMode: 'seeker' | 'recruiter' | 'admin') => void;
@@ -86,10 +86,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signup = async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter') => {
+  const signup = async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => {
     setIsLoading(true);
     try {
-      const data = await authApi.signup(name, email, rolePreference, userType);
+      const data = await authApi.signup(name, email, rolePreference, userType, password);
       const formatted = formatUser(data.user);
       localStorage.setItem('resumeai_token', data.token);
       if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));

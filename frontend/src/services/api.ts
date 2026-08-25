@@ -221,8 +221,11 @@ export const authApi = {
           id: `user-${Date.now()}`,
           name: displayName,
           email,
+          password: password || 'password123',
           rolePreference: 'sde',
           userType,
+          plan: userType === 'recruiter' ? 'recruiter' : 'free',
+          subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free',
           badges: ['New Explorer'],
           points: 500,
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
@@ -230,22 +233,34 @@ export const authApi = {
         };
         db.users.push(user);
         saveLocalDB(db);
+      } else if (user.password && password && user.password !== password) {
+        throw new Error('Incorrect password for this account. Try again or reset password.');
       }
       return { token: 'mock-jwt-token', user };
     }
   },
-  signup: async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter') => {
+  signup: async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => {
     try {
-      const res = await api.post('/auth/signup', { name, email, rolePreference, userType });
+      const res = await api.post('/auth/signup', { name, email, rolePreference, userType, password });
       return res.data;
     } catch {
+      const lowerEmail = email.toLowerCase().trim();
       const db = getLocalDB();
-      const user: User = {
+      
+      const existing = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
+      if (existing) {
+        throw new Error('An account already exists with this email address. Please sign in instead.');
+      }
+
+      const user: User & { password?: string } = {
         id: `user-${Date.now()}`,
         name,
         email,
+        password: password || 'password123',
         rolePreference: rolePreference as any,
         userType,
+        plan: userType === 'recruiter' ? 'recruiter' : 'free',
+        subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free',
         badges: ['New Explorer'],
         points: 500,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
