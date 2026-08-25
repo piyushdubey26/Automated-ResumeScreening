@@ -190,13 +190,17 @@ export const DashboardPage: React.FC = () => {
     localStorage.setItem(KEY_LINKS, JSON.stringify(updated));
   };
 
-  // Handle Load Sample Resume
+  // Handle Load Sample Resume or Rubric Switch
   const handleLoadSampleResume = (role: 'sde' | 'ds' | 'marketing') => {
     const selected = role === 'ds' ? 'data-science' : role;
     setTargetRole(selected);
-    const text = sampleResumesText[role];
-    setResumeInput(text);
-    localStorage.setItem(KEY_RESUME_TEXT, text);
+    
+    // Only load sample text if the user does NOT currently have their own uploaded/pasted resume
+    if (!resumeInput.trim()) {
+      const text = sampleResumesText[role];
+      setResumeInput(text);
+      localStorage.setItem(KEY_RESUME_TEXT, text);
+    }
   };
 
   // Run JD Matching
@@ -754,8 +758,26 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-white text-base">Target Rubric & Text</h3>
                   <div className="flex items-center space-x-1">
-                    <button onClick={() => handleLoadSampleResume('sde')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">Sample SDE</button>
-                    <button onClick={() => handleLoadSampleResume('ds')} className="text-[10px] font-bold px-2 py-1 bg-slate-800 rounded text-slate-300 hover:text-white cursor-pointer">Sample DS</button>
+                    <button
+                      onClick={() => handleLoadSampleResume('sde')}
+                      className={`text-[10px] font-bold px-2 py-1 rounded transition-all cursor-pointer ${
+                        targetRole === 'sde'
+                          ? 'bg-[#a84c38] text-white'
+                          : 'bg-slate-800 text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      SDE Rubric
+                    </button>
+                    <button
+                      onClick={() => handleLoadSampleResume('ds')}
+                      className={`text-[10px] font-bold px-2 py-1 rounded transition-all cursor-pointer ${
+                        targetRole === 'data-science'
+                          ? 'bg-[#a84c38] text-white'
+                          : 'bg-slate-800 text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      DS Rubric
+                    </button>
                   </div>
                 </div>
 
