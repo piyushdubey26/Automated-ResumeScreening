@@ -34,24 +34,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         try {
           const res = await authApi.getMe();
-          // If backend returns a user, update it
-          if (res.user && res.user.name !== 'Alex Rivera') {
+          if (res.user) {
             const formatted = formatUser(res.user);
             setUser(formatted);
             if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
-          } else {
-            // Otherwise, see if we have a locally saved user
-            const savedUser = localStorage.getItem('resumeai_user');
-            if (savedUser) {
-              setUser(JSON.parse(savedUser));
-            } else {
-              setUser(formatUser(res.user));
-            }
           }
         } catch {
           const savedUser = localStorage.getItem('resumeai_user');
           if (savedUser) {
-            setUser(JSON.parse(savedUser));
+            try {
+              setUser(formatUser(JSON.parse(savedUser)));
+            } catch {}
           } else {
             localStorage.removeItem('resumeai_token');
             setToken(null);

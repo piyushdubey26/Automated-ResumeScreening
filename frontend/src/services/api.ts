@@ -282,6 +282,12 @@ export const authApi = {
       const res = await api.get('/auth/me');
       return res.data;
     } catch {
+      const saved = localStorage.getItem('resumeai_user');
+      if (saved) {
+        try {
+          return { user: JSON.parse(saved) };
+        } catch {}
+      }
       return { user: fallbackUser };
     }
   }
