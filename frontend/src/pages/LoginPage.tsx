@@ -6,7 +6,6 @@ import { Sparkles, ArrowRight, KeyRound, X } from 'lucide-react';
 export const LoginPage: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const redirectTarget = searchParams.get('redirect');
   const initialEmail = searchParams.get('email') || '';
 
   const [email, setEmail] = useState(initialEmail);
@@ -27,18 +26,6 @@ export const LoginPage: React.FC = () => {
     }
   }, [initialEmail]);
 
-  const handleRedirect = (role?: string) => {
-    if (redirectTarget) {
-      navigate(redirectTarget);
-    } else if (role === 'admin' || email.toLowerCase() === 'piyushdubey447@gmail.com') {
-      navigate('/admin');
-    } else if (role === 'recruiter' || email.includes('recruiter')) {
-      navigate('/recruiter');
-    } else {
-      navigate('/dashboard');
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
@@ -48,7 +35,18 @@ export const LoginPage: React.FC = () => {
     setError('');
     try {
       await login(email, password);
-      handleRedirect();
+      // Retrieve the current user state to determine proper role destination
+      const savedUser = localStorage.getItem('resumeai_user');
+      const user = savedUser ? JSON.parse(savedUser) : null;
+      const lowerEmail = email.toLowerCase().trim();
+
+      if (user?.userType === 'admin' || lowerEmail === 'piyushdubey447@gmail.com') {
+        navigate('/admin');
+      } else if (user?.userType === 'recruiter') {
+        navigate('/recruiter');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please check your credentials.');
     }
