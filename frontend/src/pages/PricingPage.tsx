@@ -30,7 +30,7 @@ export const PricingPage: React.FC = () => {
     <div className="mx-auto max-w-6xl">
       <div className="max-w-2xl">
         <p className="text-xs font-bold uppercase tracking-[.16em] text-[#a84c38]">Simple plans, clear access</p>
-        <h1 className="mt-4 font-serif text-5xl tracking-[-.04em] sm:text-6xl text-slate-900 dark:text-white">Choose the support you need.</h1>
+        <h1 className="mt-4 font-serif text-5xl tracking-[-.04em] sm:text-6xl text-[#1d2b3a] dark:text-[#f4eee5]">Choose the support you need.</h1>
         <p className="mt-5 text-lg leading-8 text-[#607078] dark:text-slate-400">No confusing credits. The Pro request is reviewed by an administrator before paid access is activated.</p>
       </div>
       {notice && <div className="mt-8 flex items-start gap-3 border border-[#d9c8b5] bg-[#fff7ee] p-4 text-sm text-[#6d4c2d]"><Clock3 className="mt-0.5 h-4 w-4 shrink-0" />{notice}</div>}
@@ -42,7 +42,7 @@ export const PricingPage: React.FC = () => {
         </>}
         {(!isSeeker || !user) && <Plan id="recruiter" selected={selectedPlan === 'recruiter'} onSelect={setSelectedPlan} eyebrow="For hiring teams" name="Recruiter" price="$49" period="per month" description="A focused workspace for screening and prioritising applicants." features={['Bulk resume uploads', 'Candidate ranking and filters', 'Exportable shortlists']} action={<a href="/recruiter" className="plan-button-secondary">Go to recruiter hub</a>} />}
       </div>
-      <div className="mt-10 flex items-start gap-3 border-t border-[#ded9cf] pt-6 text-sm text-[#667177]"><ShieldCheck className="h-5 w-5 shrink-0 text-[#4d8b68]" /><p><strong className="text-[#304954]">Admin approval:</strong> when a seeker requests Pro, the request appears in the Admin dashboard. An admin can approve or decline it; the plan state is saved in this demo’s browser data.</p></div>
+      <div className="mt-10 flex items-start gap-3 border-t border-[#ded9cf] dark:border-slate-800 pt-6 text-sm text-[#667177] dark:text-slate-400"><ShieldCheck className="h-5 w-5 shrink-0 text-[#4d8b68]" /><p><strong className="text-[#304954] dark:text-slate-200">Admin approval:</strong> when a seeker requests Pro, the request appears in the Admin dashboard. An admin can approve or decline it; the plan state is saved in this demo’s browser data.</p></div>
     </div>
   </main>;
 };

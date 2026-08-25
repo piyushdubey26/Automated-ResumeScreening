@@ -430,14 +430,30 @@ html.dark .min-h-screen {
   outline: 2px solid #a84c38;
   outline-offset: 3px;
 }
+html.dark .plan-card-default,
+html.dark .plan-card-default h2,
+html.dark .plan-card-default p,
+html.dark .plan-card-default span,
+html.dark .plan-card-default li {
+  color: #f4eee5 !important;
+}
 html.dark .plan-card-default {
   border-color: #393735 !important;
   background: rgba(27, 27, 26, .9) !important;
-  color: #f4eee5 !important;
 }
 html.dark .plan-card-selected {
   border-color: #c56a50 !important;
   background: #25343a !important;
+}
+html.dark .plan-button-secondary {
+  color: #f4eee5 !important;
+  border-color: #56737b !important;
+  background: transparent !important;
+}
+html.dark .plan-button-secondary:hover {
+  background: #a84c38 !important;
+  color: #ffffff !important;
+  border-color: #a84c38 !important;
 }
 
 /* Replace the remaining electric-indigo action states with the brand rust accent. */
