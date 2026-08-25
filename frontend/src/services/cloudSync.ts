@@ -132,7 +132,17 @@ export const cloudSync = {
         users.unshift(user);
       }
 
-      const dbData = { users, updatedAt: new Date().toISOString() };
+      // Preserve resumes when saving user to avoid conflicting database structures
+      const saved = localStorage.getItem(LOCAL_DB_KEY);
+      let resumes: any[] = [];
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.resumes) resumes = parsed.resumes;
+        } catch {}
+      }
+
+      const dbData = { users, resumes, updatedAt: new Date().toISOString() };
       localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(dbData));
       window.dispatchEvent(new Event('resumeai-db-updated'));
       window.dispatchEvent(new Event('resumeai-subscription-updated'));
@@ -215,7 +225,18 @@ export const cloudSync = {
           currentLocal.forEach(u => map.set(u.email.toLowerCase(), u));
 
           const merged = Array.from(map.values());
-          localStorage.setItem(LOCAL_DB_KEY, JSON.stringify({ users: merged }));
+          
+          // Preserve resumes when pulling from cloud to avoid deleting uploaded resumes
+          const saved = localStorage.getItem(LOCAL_DB_KEY);
+          let resumes: any[] = [];
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (parsed.resumes) resumes = parsed.resumes;
+            } catch {}
+          }
+
+          localStorage.setItem(LOCAL_DB_KEY, JSON.stringify({ users: merged, resumes }));
           window.dispatchEvent(new Event('resumeai-db-updated'));
           return merged;
         }

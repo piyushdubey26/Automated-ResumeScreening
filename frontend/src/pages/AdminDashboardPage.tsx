@@ -199,16 +199,68 @@ export const AdminDashboardPage: React.FC = () => {
   const seekers = usersDb.filter(u => u.userType === "seeker");
   const recruiters = usersDb.filter(u => u.userType === "recruiter");
 
-  // Quick count stats
+  // Dynamic stats calculation from real database records
+  const getActiveJobsCount = () => {
+    try {
+      const saved = localStorage.getItem('resumeai_recruiter_jobs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed.length;
+      }
+    } catch {}
+    return 0;
+  };
+
+  const getResumesCount = () => {
+    let count = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('resumeai_user_resume_')) {
+          const val = localStorage.getItem(key);
+          if (val && val !== 'null' && val !== 'undefined') {
+            count++;
+          }
+        }
+      }
+    } catch {}
+    return count;
+  };
+
+  const getScreeningsCount = () => {
+    try {
+      const saved = localStorage.getItem('resumeai_recruiter_candidates');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed.length;
+      }
+    } catch {}
+    return 0;
+  };
+
+  const getShortlistedCount = () => {
+    try {
+      const saved = localStorage.getItem('resumeai_recruiter_candidates');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((c: any) => c.status === 'Shortlisted').length;
+        }
+      }
+    } catch {}
+    return 0;
+  };
+
+  // Quick count stats calculated dynamically
   const kpiStats = {
-    totalUsers: 12482,
-    recruiters: 1284,
-    candidates: 11198,
-    activeJobs: 428,
-    resumes: 48291,
-    screenings: 31842,
-    shortlisted: 4291,
-    requests: 86432
+    totalUsers: usersDb.length,
+    recruiters: recruiters.length,
+    candidates: seekers.length,
+    activeJobs: getActiveJobsCount(),
+    resumes: getResumesCount(),
+    screenings: getScreeningsCount(),
+    shortlisted: getShortlistedCount(),
+    requests: usersDb.filter(u => u.subscriptionStatus === 'pending').length
   };
 
   // Mock security logs
@@ -575,99 +627,149 @@ export const AdminDashboardPage: React.FC = () => {
                     <tr className="bg-slate-900/60 border-b border-slate-900 text-slate-500 uppercase tracking-wider text-[10px]">
                       <th className="px-5 py-4">User</th>
                       <th className="px-5 py-4">Role</th>
+                      <th className="px-5 py-4">Plan</th>
                       <th className="px-5 py-4">Status</th>
                       <th className="px-5 py-4">Joined Date</th>
                       <th className="px-5 py-4">Last Active</th>
+                      <th className="px-5 py-4">Resume</th>
+                      <th className="px-5 py-4">Applications</th>
                       <th className="px-5 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-900">
-                    {filteredUsers.map(user => (
-                      <tr key={user.id} className="hover:bg-slate-900/20 transition-colors">
-                        <td className="px-5 py-3.5 font-semibold text-slate-200">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-slate-300">
-                              {user.name.charAt(0).toUpperCase()}
+                    {filteredUsers.map(user => {
+                      const planName = user.userType === 'admin' 
+                        ? 'Enterprise Admin' 
+                        : user.userType === 'recruiter' 
+                        ? 'Recruiter Hub' 
+                        : user.plan === 'career-max' 
+                        ? 'Career Max' 
+                        : user.plan === 'pro' 
+                        ? 'Job Seeker Pro' 
+                        : 'Free Seeker';
+
+                      const resumeKey = `resumeai_user_resume_${user.id}`;
+                      const savedResume = localStorage.getItem(resumeKey);
+                      let resumeStatus = 'Not uploaded';
+                      if (savedResume) {
+                        try {
+                          const parsed = JSON.parse(savedResume);
+                          if (parsed) resumeStatus = 'Uploaded';
+                        } catch {}
+                      }
+
+                      const appsKey = `resumeai_user_apps_${user.id}`;
+                      const savedApps = localStorage.getItem(appsKey);
+                      let appsCount = 0;
+                      if (savedApps) {
+                        try {
+                          const parsed = JSON.parse(savedApps);
+                          if (Array.isArray(parsed)) appsCount = parsed.length;
+                        } catch {}
+                      }
+
+                      return (
+                        <tr key={user.id} className="hover:bg-slate-900/20 transition-colors">
+                          <td className="px-5 py-3.5 font-semibold text-slate-200">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-slate-300">
+                                {user.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-200 text-xs">{user.name}</p>
+                                <p className="text-[10px] text-slate-500 mt-0.5">{user.email}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-bold text-slate-200 text-xs">{user.name}</p>
-                              <p className="text-[10px] text-slate-500 mt-0.5">{user.email}</p>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase ${
+                              user.userType === 'admin'
+                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                : user.userType === 'recruiter'
+                                ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                                : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                            }`}>
+                              {user.userType === 'seeker' ? 'Candidate' : user.userType}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className="text-slate-300 font-medium">{planName}</span>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              user.status === "Active"
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : user.status === "Pending"
+                                ? "bg-amber-500/10 text-amber-400"
+                                : "bg-rose-500/10 text-rose-400"
+                            }`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${
+                                user.status === "Active" ? "bg-emerald-400" : user.status === "Pending" ? "bg-amber-400" : "bg-rose-400"
+                              }`} />
+                              {user.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-400">
+                            {new Date(user.joinedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-400">{user.lastActive}</td>
+                          <td className="px-5 py-3.5">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              resumeStatus === 'Uploaded' 
+                                ? 'bg-emerald-500/10 text-emerald-400' 
+                                : 'bg-slate-800 text-slate-500'
+                            }`}>
+                              {resumeStatus}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-350 font-bold">
+                            {appsCount}
+                          </td>
+                          <td className="px-5 py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setDetailModalOpen(true);
+                                }}
+                                className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300"
+                                title="View Details"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setEditModalUser(user)}
+                                className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300"
+                                title="Edit Details"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setConfirmModal({ type: "suspend", userId: user.id })}
+                                className={`p-1 rounded ${
+                                  user.status === "Suspended"
+                                    ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/10 hover:bg-emerald-900/30"
+                                    : "bg-rose-950/40 text-rose-400 border border-rose-500/10 hover:bg-rose-900/30"
+                                }`}
+                                title={user.status === "Suspended" ? "Activate User" : "Suspend User"}
+                              >
+                                <Ban className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setConfirmModal({ type: "delete", userId: user.id })}
+                                className="p-1 rounded bg-slate-800 hover:bg-rose-950/30 hover:text-rose-400 text-slate-500"
+                                title="Delete User"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase ${
-                            user.userType === 'admin'
-                              ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                              : user.userType === 'recruiter'
-                              ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                              : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
-                          }`}>
-                            {user.userType === 'seeker' ? 'Candidate' : user.userType}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            user.status === "Active"
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : user.status === "Pending"
-                              ? "bg-amber-500/10 text-amber-400"
-                              : "bg-rose-500/10 text-rose-400"
-                          }`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${
-                              user.status === "Active" ? "bg-emerald-400" : user.status === "Pending" ? "bg-amber-400" : "bg-rose-400"
-                            }`} />
-                            {user.status}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-slate-400">
-                          {new Date(user.joinedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                        </td>
-                        <td className="px-5 py-3.5 text-slate-400">{user.lastActive}</td>
-                        <td className="px-5 py-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setDetailModalOpen(true);
-                              }}
-                              className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300"
-                              title="View Details"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setEditModalUser(user)}
-                              className="p-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300"
-                              title="Edit Details"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setConfirmModal({ type: "suspend", userId: user.id })}
-                              className={`p-1 rounded ${
-                                user.status === "Suspended"
-                                  ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/10 hover:bg-emerald-900/30"
-                                  : "bg-rose-950/40 text-rose-400 border border-rose-500/10 hover:bg-rose-900/30"
-                              }`}
-                              title={user.status === "Suspended" ? "Activate User" : "Suspend User"}
-                            >
-                              <Ban className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setConfirmModal({ type: "delete", userId: user.id })}
-                              className="p-1 rounded bg-slate-800 hover:bg-rose-950/30 hover:text-rose-400 text-slate-500"
-                              title="Delete User"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {filteredUsers.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
+                        <td colSpan={9} className="px-5 py-12 text-center text-slate-500">
                           <div className="max-w-xs mx-auto space-y-2">
                             <Users className="w-8 h-8 text-slate-600 mx-auto" />
                             <p className="font-semibold text-slate-400">No users found</p>
