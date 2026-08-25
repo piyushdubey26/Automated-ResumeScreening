@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
   const handleRedirect = (role?: string) => {
     if (redirectTarget) {
       navigate(redirectTarget);
-    } else if (role === 'admin' || email.includes('admin')) {
+    } else if (role === 'admin' || email.toLowerCase() === 'piyushdubey447@gmail.com') {
       navigate('/admin');
     } else if (role === 'recruiter' || email.includes('recruiter')) {
       navigate('/recruiter');
@@ -32,11 +32,12 @@ export const LoginPage: React.FC = () => {
       setError('Please provide an email address.');
       return;
     }
+    setError('');
     try {
       await login(email, password);
       handleRedirect();
-    } catch {
-      setError('Authentication failed. Try demo login.');
+    } catch (err: any) {
+      setError(err?.message || 'Authentication failed. Please check your credentials.');
     }
   };
 

@@ -172,27 +172,57 @@ export const authApi = {
       const res = await api.post('/auth/login', { email, password });
       return res.data;
     } catch {
-      const isRecruiter = email.includes('recruiter');
-      const isAdmin = email.includes('admin');
-      // Derive display name from email: piyush.dubey@gmail.com → Piyush Dubey
-      const rawName = email.split('@')[0].replace(/[._-]/g, ' ');
-      const displayName = isAdmin
-        ? 'Platform Admin'
-        : isRecruiter
-        ? 'Recruiter Admin'
-        : rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-      const userType = isAdmin ? 'admin' : isRecruiter ? 'recruiter' : 'seeker';
+      const lowerEmail = email.toLowerCase().trim();
       
+      // Enforce strict password validation for primary Admin account
+      if (lowerEmail === 'piyushdubey447@gmail.com') {
+        if (password && password !== 'piyush26') {
+          throw new Error('Invalid password for Admin account (piyushdubey447@gmail.com)');
+        }
+      }
+
       const db = getLocalDB();
-      let user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
+      let user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
+
+      // Primary Admin account provisioning
+      if (lowerEmail === 'piyushdubey447@gmail.com') {
+        if (!user) {
+          user = {
+            id: 'admin-piyush',
+            name: 'Piyush Dubey',
+            email: 'piyushdubey447@gmail.com',
+            rolePreference: 'sde',
+            userType: 'admin',
+            plan: 'enterprise',
+            subscriptionStatus: 'approved',
+            badges: ['Platform Founder', 'Admin'],
+            points: 10000,
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=PiyushDubey',
+            createdAt: new Date().toISOString()
+          };
+          db.users.push(user);
+          saveLocalDB(db);
+        } else {
+          user.userType = 'admin';
+          saveLocalDB(db);
+        }
+        return { token: 'mock-admin-jwt-token', user };
+      }
+
+      // For non-Piyush accounts, preserve assigned userType (which can be admin if promoted by Piyush in Admin Dashboard)
+      const isRecruiter = lowerEmail.includes('recruiter');
+      const userType: 'seeker' | 'recruiter' | 'admin' = user?.userType || (isRecruiter ? 'recruiter' : 'seeker');
+
+      const rawName = lowerEmail.split('@')[0].replace(/[._-]/g, ' ');
+      const displayName = rawName.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
       if (!user) {
         user = {
           id: `user-${Date.now()}`,
           name: displayName,
           email,
           rolePreference: 'sde',
-          userType: userType as User['userType'],
+          userType,
           badges: ['New Explorer'],
           points: 500,
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
