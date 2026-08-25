@@ -1,5 +1,29 @@
-import pdfParse from 'pdf-parse';
 import Tesseract from 'tesseract.js';
+
+async function parsePdfBuffer(buffer: Buffer): Promise<string> {
+  const pdfModule = require('pdf-parse');
+
+  if (typeof pdfModule === 'function') {
+    const result = await pdfModule(buffer);
+    return result.text || '';
+  }
+
+  if (pdfModule && typeof pdfModule.default === 'function') {
+    const result = await pdfModule.default(buffer);
+    return result.text || '';
+  }
+
+  if (pdfModule && typeof pdfModule.PDFParse === 'function') {
+    const instance = new pdfModule.PDFParse({ data: new Uint8Array(buffer) });
+    const result = await instance.getText();
+    if (typeof instance.destroy === 'function') {
+      await instance.destroy();
+    }
+    return result.text || (typeof result === 'string' ? result : '');
+  }
+
+  throw new Error('PDF parsing library is unavailable.');
+}
 
 /**
  * Extract text from a file buffer on the server.
@@ -13,8 +37,7 @@ export async function extractTextFromBuffer(
   const cleanMime = mimeType.toLowerCase();
 
   if (ext === 'pdf' || cleanMime === 'application/pdf') {
-    const parsed = await (pdfParse as any)(buffer);
-    return parsed.text || '';
+    return await parsePdfBuffer(buffer);
   }
 
   if (
