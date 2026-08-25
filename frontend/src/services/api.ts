@@ -21,7 +21,16 @@ const SKILLS_BY_ROLE = {
 const ACTION_VERBS = ['achieved', 'analyzed', 'architected', 'built', 'created', 'designed', 'developed', 'engineered', 'formulated', 'implemented', 'improved', 'increased', 'led', 'managed', 'optimized', 'reduced', 'scaled'];
 
 const getApiBase = () => {
-  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE;
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+  const isRemoteDomain = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+  let envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE;
+
+  // Ignore localhost/127.0.0.1 environment settings if loaded on a remote domain or HTTPS site
+  if ((isHttps || isRemoteDomain) && envUrl && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+    envUrl = '';
+  }
+
   if (envUrl) {
     return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
   }
@@ -29,8 +38,8 @@ const getApiBase = () => {
   if (typeof window !== 'undefined') {
     const { protocol, hostname } = window.location;
     
-    // In production deployments (e.g. Vercel, Netlify, Custom Domain over HTTPS)
-    if (protocol === 'https:') {
+    // In production deployments (e.g. Vercel, Netlify, Custom Domain)
+    if (protocol === 'https:' || (hostname !== 'localhost' && hostname !== '127.0.0.1' && !/^(\d+\.){3}\d+$/.test(hostname))) {
       return '/api';
     }
 
@@ -43,7 +52,7 @@ const getApiBase = () => {
     return `${protocol}//localhost:8000/api`;
   }
 
-  return 'http://localhost:8000/api';
+  return '/api';
 };
 
 const API_BASE = getApiBase();
