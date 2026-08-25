@@ -20,7 +20,21 @@ const SKILLS_BY_ROLE = {
 
 const ACTION_VERBS = ['achieved', 'analyzed', 'architected', 'built', 'created', 'designed', 'developed', 'engineered', 'formulated', 'implemented', 'improved', 'increased', 'led', 'managed', 'optimized', 'reduced', 'scaled'];
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+const getApiBase = () => {
+  const envBase = import.meta.env.VITE_API_BASE;
+  if (envBase) return envBase;
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    // Check if the frontend is accessed via local network IP (e.g. 192.168.x.x)
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && /^(\d+\.){3}\d+$/.test(hostname)) {
+      return `http://${hostname}:8000/api`;
+    }
+  }
+  return 'http://localhost:8000/api';
+};
+
+const API_BASE = getApiBase();
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -144,196 +158,7 @@ Requirements:
 - Experience with MLOps (Docker, AWS SageMaker) and A/B testing.`
 };
 
-export const authApi = {
-  login: async (email: string, password?: string) => {
-    try {
-      const res = await api.post('/auth/login', { email, password });
-      return res.data;
-    } catch {
-      const lowerEmail = (email || '').toLowerCase().trim();
-      if (!lowerEmail) {
-        throw new Error('Please enter your email address.');
-      }
-      if (!password) {
-        throw new Error('Please enter your password.');
-      }
 
-      // 1. Primary Admin account verification
-      if (lowerEmail === 'piyushdubey447@gmail.com') {
-        if (password !== 'piyush26') {
-          throw new Error('Invalid email or password.');
-        }
-        const db = getLocalDB();
-        let user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
-        if (!user) {
-          user = {
-            id: 'admin-piyush',
-            name: 'Piyush Dubey',
-            email: 'piyushdubey447@gmail.com',
-            rolePreference: 'sde',
-            userType: 'admin',
-            plan: 'enterprise',
-            subscriptionStatus: 'approved',
-            badges: ['Platform Founder', 'Admin'],
-            points: 10000,
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=PiyushDubey',
-            createdAt: new Date().toISOString()
-          };
-          db.users.push(user);
-          saveLocalDB(db);
-        }
-        const userClean = { ...user };
-        delete userClean.password;
-        return { token: 'mock-admin-jwt-token', user: userClean };
-      }
-
-      // 2. Regular user authentication check
-      const db = getLocalDB();
-      let user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
-
-      // Account provisioning for existing user sakshi@gmail.com
-      if (lowerEmail === 'sakshi@gmail.com') {
-        if (!user) {
-          user = {
-            id: 'user-sakshi',
-            name: 'Sakshi',
-            email: 'sakshi@gmail.com',
-            password: 'Sakshi22@',
-            rolePreference: 'sde',
-            userType: 'seeker',
-            plan: 'career-max',
-            subscriptionStatus: 'approved',
-            badges: [],
-            points: 0,
-            createdAt: new Date().toISOString()
-          };
-          db.users.push(user);
-          saveLocalDB(db);
-        } else {
-          // Sync exact password requested by candidate Sakshi
-          user.password = 'Sakshi22@';
-          saveLocalDB(db);
-        }
-      }
-
-      // Account must exist (NO auto-creation on login)
-      if (!user) {
-        throw new Error('Invalid email or password.');
-      }
-
-      // STRICT EXACT PASSWORD EQUALITY CHECK
-      if (user.password !== password) {
-        throw new Error('Invalid email or password.');
-      }
-
-      // Strip password from returned payload
-      const userClean = { ...user };
-      delete userClean.password;
-
-      cloudSync.saveUser({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        userType: user.userType,
-        rolePreference: user.rolePreference,
-        status: 'Active',
-        plan: user.plan || 'free',
-        subscriptionStatus: user.subscriptionStatus || 'free',
-        joinedDate: user.createdAt || new Date().toISOString(),
-        lastActive: 'Just now'
-      });
-
-      return { token: `mock-jwt-token-${Date.now()}`, user: userClean };
-    }
-  },
-  resetPassword: async (email: string, newPassword?: string) => {
-    try {
-      const res = await api.post('/auth/reset-password', { email, newPassword });
-      return res.data;
-    } catch {
-      const lowerEmail = (email || '').toLowerCase().trim();
-      const db = getLocalDB();
-      const user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
-      if (!user) {
-        throw new Error('No registered account found with this email address.');
-      }
-      user.password = newPassword || 'Sakshi22@';
-      saveLocalDB(db);
-      return { success: true, message: 'Password reset successfully. You can now sign in with your new password.' };
-    }
-  },
-  signup: async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => {
-    try {
-      const res = await api.post('/auth/signup', { name, email, rolePreference, userType, password });
-      return res.data;
-    } catch {
-      const lowerEmail = (email || '').toLowerCase().trim();
-      if (!lowerEmail) {
-        throw new Error('Please provide an email address.');
-      }
-      if (!password || password.length < 4) {
-        throw new Error('Password must be at least 4 characters long.');
-      }
-
-      const db = getLocalDB();
-      
-      const existing = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
-      if (existing) {
-        throw new Error('An account already exists with this email address. Please sign in instead.');
-      }
-
-      const user: User & { password?: string } = {
-        id: `user-${Date.now()}`,
-        name: name.trim(),
-        email: email.trim(),
-        password: password,
-        rolePreference: rolePreference as any,
-        userType,
-        plan: userType === 'recruiter' ? 'recruiter' : 'free',
-        subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free',
-        badges: [],
-        points: 0,
-        usage: { resume_reviews: 0 },
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-        createdAt: new Date().toISOString()
-      };
-      db.users.push(user);
-      saveLocalDB(db);
-
-      cloudSync.saveUser({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        userType: user.userType,
-        rolePreference: user.rolePreference,
-        status: 'Active',
-        plan: user.plan || 'free',
-        subscriptionStatus: user.subscriptionStatus || 'free',
-        joinedDate: user.createdAt,
-        lastActive: 'Just now'
-      });
-
-      const userClean = { ...user };
-      delete userClean.password;
-
-      return { token: `mock-jwt-token-${Date.now()}`, user: userClean };
-    }
-  },
-  getMe: async () => {
-    try {
-      const res = await api.get('/auth/me');
-      return res.data;
-    } catch {
-      const saved = localStorage.getItem('resumeai_user');
-      if (saved) {
-        try {
-          return { user: JSON.parse(saved) };
-        } catch {}
-      }
-      return { user: fallbackUser };
-    }
-  }
-};
 
 export const TECH_ALIASES: Record<string, string[]> = {
   'javascript': ['js', 'javascript', 'javascript.js'],
@@ -661,162 +486,105 @@ export const evaluateResumeHealth = (text: string, targetRole: string) => {
   };
 };
 
+export const authApi = {
+  login: async (email: string, password?: string) => {
+    const res = await api.post('/auth/login', { email, password });
+    return res.data;
+  },
+  resetPassword: async (email: string, newPassword?: string) => {
+    const res = await api.post('/auth/reset-password', { email, newPassword });
+    return res.data;
+  },
+  signup: async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => {
+    const res = await api.post('/auth/signup', { name, email, rolePreference, userType, password });
+    return res.data;
+  },
+  getMe: async () => {
+    const res = await api.get('/auth/me');
+    return res.data;
+  },
+  updateProfile: async (profileData: { rolePreference?: string; profileLinks?: any; points?: number; badges?: string[]; interviewScore?: number | null }) => {
+    const res = await api.put('/auth/profile', profileData);
+    return res.data;
+  },
+  getAllUsers: async () => {
+    const res = await api.get('/auth/users');
+    return res.data;
+  },
+  updateSubscription: async (userId: string, plan: string, subscriptionStatus: string) => {
+    const res = await api.put(`/auth/users/${userId}/subscription`, { plan, subscriptionStatus });
+    return res.data;
+  },
+  getSubscription: async () => {
+    const res = await api.get('/auth/subscription');
+    return res.data;
+  },
+  purchaseSubscription: async (planId: string) => {
+    const res = await api.post('/auth/subscription/purchase', { planId });
+    return res.data;
+  },
+  cancelSubscription: async () => {
+    const res = await api.post('/auth/subscription/cancel');
+    return res.data;
+  },
+  reactivateSubscription: async () => {
+    const res = await api.post('/auth/subscription/reactivate');
+    return res.data;
+  }
+};
+
 export const resumeApi = {
   uploadAndParse: async (text: string, filename?: string, targetRole: string = 'sde'): Promise<{ resume: ResumeRecord }> => {
-    try {
-      const res = await api.post('/resumes/upload', { text, filename, targetRole });
-      return res.data;
-    } catch {
-      const { score, scoreBreakdown, feedback, foundSkills } = evaluateResumeHealth(text, targetRole);
-      
-      const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-      const githubMatch = text.match(/(github\.com\/[a-zA-Z0-9_-]+)/i);
-      const linkedinMatch = text.match(/(linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      const derivedName = lines[0] && lines[0].length < 40 ? lines[0] : 'Uploaded Candidate';
-
-      const mockRecord: ResumeRecord = {
-        id: `resume-${Date.now()}`,
-        userId: 'user-seeker-1',
-        filename: filename || 'Uploaded_Resume.pdf',
-        targetRole,
-        rawText: text,
-        parsedSections: {
-          contact: {
-            name: derivedName,
-            email: emailMatch ? emailMatch[0] : undefined,
-            github: githubMatch ? githubMatch[0] : undefined,
-            linkedin: linkedinMatch ? linkedinMatch[0] : undefined
-          },
-          skills: foundSkills,
-          experience: lines.filter(l => l.toLowerCase().includes('respons') || l.toLowerCase().includes('build') || l.toLowerCase().includes('develop') || l.toLowerCase().includes('manag')),
-          projects: lines.filter(l => l.toLowerCase().includes('project') || l.toLowerCase().includes('resumeai')),
-          education: lines.filter(l => l.toLowerCase().includes('university') || l.toLowerCase().includes('college') || l.toLowerCase().includes('degree') || l.toLowerCase().includes('b.s.') || l.toLowerCase().includes('btech'))
-        },
-        score,
-        scoreBreakdown,
-        feedback,
-        createdAt: new Date().toISOString()
-      };
-
-      const db = getLocalDB();
-      db.resumes.push(mockRecord);
-      saveLocalDB(db);
-
-      return { resume: mockRecord };
-    }
+    const res = await api.post('/resumes/upload', { text, filename, targetRole });
+    return res.data;
+  },
+  getLatest: async (): Promise<{ resume: ResumeRecord }> => {
+    const res = await api.get('/resumes/latest');
+    return res.data;
   },
   rewriteBullet: async (bulletText: string, focusMode: string, targetRole: string): Promise<RewriteResult> => {
-    try {
-      const res = await api.post('/resumes/rewrite', { bulletText, focusMode, targetRole });
-      return res.data;
-    } catch {
-      let improved = bulletText.replace(/^(developed|built|worked on|made)\s*/i, 'Architected and engineered ');
-      if (focusMode === 'quantify' && !/\d+/.test(improved)) {
-        improved += ', driving a 38% efficiency increase and 99.9% uptime.';
-      }
-      return {
-        originalBullet: bulletText,
-        improvedBullet: improved,
-        explanation: 'Enhanced verb power and added quantifiable impact metrics.',
-        strengthScore: 94
-      };
-    }
+    const res = await api.post('/resumes/rewrite', { bulletText, focusMode, targetRole });
+    return res.data;
   },
   generateMockInterview: async (targetRole: string, resumeText?: string, jdText?: string): Promise<{ questions: InterviewQuestion[] }> => {
-    try {
-      const res = await api.post('/resumes/mock-interview', { targetRole, resumeText, jdText });
-      return res.data;
-    } catch {
-      return {
-        questions: [
-          {
-            id: 'q-1',
-            category: 'System & Domain Architecture',
-            question: 'How would you architect a high-throughput microservices application handling 2M+ daily requests?',
-            difficulty: 'Hard',
-            keyPointsToCover: ['Load balancing & API gateways', 'Database indexing & Redis caching', 'Asynchronous queues', 'Circuit breaker pattern']
-          },
-          {
-            id: 'q-2',
-            category: 'Technical Core',
-            question: 'Explain how you optimize PostgreSQL queries when dealing with large-scale tables, and when you choose Redis caching.',
-            difficulty: 'Medium',
-            keyPointsToCover: ['EXPLAIN ANALYZE', 'Composite indexes', 'Cache eviction (LRU)', 'Cache stampede prevention']
-          }
-        ]
-      };
-    }
+    const res = await api.post('/resumes/mock-interview', { targetRole, resumeText, jdText });
+    return res.data;
+  },
+  getApplications: async (): Promise<{ applications: UserApplication[] }> => {
+    const res = await api.get('/resumes/applications');
+    return res.data;
+  },
+  addApplication: async (application: { role: string; company: string; status: string; notes?: string }): Promise<{ success: boolean; application: UserApplication }> => {
+    const res = await api.post('/resumes/applications', application);
+    return res.data;
+  },
+  deleteApplication: async (id: string): Promise<{ success: boolean }> => {
+    const res = await api.delete(`/resumes/applications/${id}`);
+    return res.data;
   }
 };
 
 export const jobApi = {
   matchJD: async (resumeText: string, jdText: string, targetRole: string = 'sde'): Promise<JDMatchResult> => {
-    try {
-      const res = await api.post('/jobs/match', { resumeText, jdText, targetRole });
-      return res.data;
-    } catch {
-      return evaluateResumeAgainstJD(resumeText, jdText, targetRole);
-    }
+    const res = await api.post('/jobs/match', { resumeText, jdText, targetRole });
+    return res.data;
+  },
+  getLatestMatch: async (): Promise<JDMatchResult> => {
+    const res = await api.get('/jobs/latest-match');
+    return res.data;
   }
 };
 
 export const recruiterApi = {
   bulkScreen: async (candidates: any[], jdText?: string, targetRole: string = 'sde'): Promise<{ shortlist: RecruiterCandidate[] }> => {
-    try {
-      const res = await api.post('/recruiter/bulk-screen', { candidates, jdText, targetRole });
-      return res.data;
-    } catch {
-      let candidateName = 'Alex Rivera';
-      let candidateEmail = 'alex.rivera@example.com';
-      try {
-        const savedUserStr = localStorage.getItem('resumeai_user');
-        if (savedUserStr) {
-          const savedUser = JSON.parse(savedUserStr);
-          if (savedUser && savedUser.name) {
-            candidateName = savedUser.name;
-            candidateEmail = savedUser.email;
-          }
-        }
-      } catch {}
-
-      const mockShortlist: RecruiterCandidate[] = [
-        { id: 'c-1', recruiterJobId: 'j-1', candidateName: candidateName, candidateEmail: candidateEmail, targetRole: 'sde', resumeText: 'Full Stack Engineer. Built Node.js, React, Docker microservices.', overallScore: 88, jdMatchPct: 92, status: 'Shortlisted', appliedAt: new Date().toISOString() },
-        { id: 'c-2', recruiterJobId: 'j-1', candidateName: 'Priya Sharma', candidateEmail: 'priya@example.com', targetRole: 'data-science', resumeText: 'Data Scientist in Python, PyTorch, SQL, Spark.', overallScore: 84, jdMatchPct: 86, status: 'Shortlisted', appliedAt: new Date().toISOString() },
-        { id: 'c-3', recruiterJobId: 'j-1', candidateName: 'David Chen', candidateEmail: 'david@example.com', targetRole: 'sde', resumeText: 'Backend Developer in Python & MySQL.', overallScore: 76, jdMatchPct: 74, status: 'Under Review', appliedAt: new Date().toISOString() },
-        { id: 'c-4', recruiterJobId: 'j-1', candidateName: 'Maria Garcia', candidateEmail: 'maria@example.com', targetRole: 'sde', resumeText: 'Frontend Developer in Vue.js and HTML/CSS.', overallScore: 64, jdMatchPct: 58, status: 'Rejected', appliedAt: new Date().toISOString() }
-      ];
-      return { shortlist: mockShortlist };
-    }
+    const res = await api.post('/recruiter/bulk-screen', { candidates, jdText, targetRole });
+    return res.data;
   }
 };
 
 export const ecosystemApi = {
   getLeaderboard: async (): Promise<{ leaderboard: LeaderboardEntry[] }> => {
-    try {
-      const res = await api.get('/ecosystem/leaderboard');
-      return res.data;
-    } catch {
-      let candidateName = 'Alex Rivera';
-      try {
-        const savedUserStr = localStorage.getItem('resumeai_user');
-        if (savedUserStr) {
-          const savedUser = JSON.parse(savedUserStr);
-          if (savedUser && savedUser.name) {
-            candidateName = savedUser.name;
-          }
-        }
-      } catch {}
-
-      return {
-        leaderboard: [
-          { rank: 1, name: candidateName, institution: 'UC Berkeley', score: 94, badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'], avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
-          { rank: 2, name: 'Priya Sharma', institution: 'Northeastern Univ', score: 91, badges: ['ML Wizard', 'Data Master'], avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100' },
-          { rank: 3, name: 'Jordan Lee', institution: 'NYU Stern', score: 89, badges: ['Growth Hacker', 'CRO Pro'], avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
-          { rank: 4, name: 'Samantha Wu', institution: 'Stanford Univ', score: 88, badges: ['Full Stack Ace'], avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
-          { rank: 5, name: 'Marcus Brody', institution: 'MIT', score: 86, badges: ['System Architect'], avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' }
-        ]
-      };
-    }
+    const res = await api.get('/ecosystem/leaderboard');
+    return res.data;
   }
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { mockDb, ResumeRecord, saveDb } from '../utils/mockDb';
+import { getActiveSubscription } from '../utils/auth';
+import { mockDb, ResumeRecord, UserApplication, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
 import { AIRewriteService } from '../services/aiRewriteService';
@@ -23,7 +24,7 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
     if (!rawText && reqFile) {
       // Validate file size (max 10MB)
       if (reqFile.size > 10 * 1024 * 1024) {
-        return res.status(400).json({ success: false, error: 'File size must be under 10MB' });
+        return res.status(400).json({ success: false, error: 'File must be 10MB or smaller.' });
       }
       try {
         rawText = await extractTextFromBuffer(reqFile.buffer, reqFile.originalname || 'resume.pdf', reqFile.mimetype);
@@ -34,6 +35,23 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
 
     if (!rawText || rawText.trim().length < 10) {
       return res.status(400).json({ success: false, error: 'Could not extract enough text from this file. Try a different format or paste text manually.' });
+    }
+
+    const userRecord = mockDb.users.find(u => u.id === authUserId);
+    if (!userRecord) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const activeSub = getActiveSubscription(authUserId);
+    if (!activeSub) {
+      const usage = userRecord.monthlyUsage || 0;
+      if (usage >= 5) {
+        return res.status(403).json({
+          success: false,
+          error: 'Monthly free limit reached (5 reviews). Please upgrade to a paid plan for unlimited access.'
+        });
+      }
+      userRecord.monthlyUsage = usage + 1;
     }
 
     const parsed = ParserService.parseText(rawText);
@@ -82,6 +100,18 @@ export const getResumeById = (req: Request, res: Response) => {
   return res.json({ resume });
 };
 
+export const getLatestResume = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const resume = mockDb.resumes.find(r => r.userId === authUserId);
+  if (!resume) {
+    return res.status(404).json({ error: 'No resume found' });
+  }
+  return res.json({ resume });
+};
+
 export const getResumeFeedback = (req: Request, res: Response) => {
   const { id } = req.params;
   const resume = mockDb.resumes.find(r => r.id === id) || mockDb.resumes[0];
@@ -89,6 +119,15 @@ export const getResumeFeedback = (req: Request, res: Response) => {
 };
 
 export const rewriteBullet = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const activeSub = getActiveSubscription(authUserId);
+  if (!activeSub) {
+    return res.status(403).json({ error: 'Upgrade required: AI Bullet Rewriter is a premium feature.' });
+  }
+
   const { bulletText, focusMode, targetRole } = req.body;
   const result = AIRewriteService.rewriteBullet({
     bulletText: bulletText || 'Developed microservices with Node.js and SQL.',
@@ -99,6 +138,15 @@ export const rewriteBullet = (req: Request, res: Response) => {
 };
 
 export const generateMockInterview = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const activeSub = getActiveSubscription(authUserId);
+  if (!activeSub) {
+    return res.status(403).json({ error: 'Upgrade required: AI Mock Interview is a premium feature.' });
+  }
+
   const { targetRole, resumeText, jdText } = req.body;
   const questions = AIInterviewService.generateQuestions(
     targetRole || 'sde',
@@ -106,4 +154,55 @@ export const generateMockInterview = (req: Request, res: Response) => {
     jdText || ''
   );
   return res.json({ questions });
+};
+
+export const getApplications = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const apps = mockDb.applications.filter(a => a.userId === authUserId);
+  return res.json({ applications: apps });
+};
+
+export const addApplication = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const activeSub = getActiveSubscription(authUserId);
+  if (!activeSub) {
+    return res.status(403).json({ error: 'Upgrade required: Tracking job applications is a premium feature.' });
+  }
+  const { role, company, status, notes } = req.body;
+  if (!role || !company) {
+    return res.status(400).json({ error: 'Role and company are required' });
+  }
+  const newApp: UserApplication = {
+    id: `app-${Date.now()}`,
+    userId: authUserId,
+    company,
+    role,
+    status: status || 'Applied',
+    appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    notes
+  };
+  mockDb.applications.unshift(newApp);
+  saveDb();
+  return res.status(201).json({ success: true, application: newApp });
+};
+
+export const deleteApplication = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const { id } = req.params;
+  const index = mockDb.applications.findIndex(a => a.id === id && a.userId === authUserId);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Application not found' });
+  }
+  mockDb.applications.splice(index, 1);
+  saveDb();
+  return res.json({ success: true });
 };

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_access_token';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback_secret_for_refresh_token';
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_resumeai_token_2026';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'supersecret_resumeai_token_2026_refresh';
 
 export interface TokenPayload {
   userId: string;
@@ -10,7 +10,7 @@ export interface TokenPayload {
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
@@ -42,4 +42,42 @@ export const clearRefreshTokenCookie = (res: Response) => {
     sameSite: 'strict',
     path: '/api/auth/refresh',
   });
+};
+
+export function addOneMonth(date: Date): Date {
+  const result = new Date(date.getTime());
+  const expectedMonth = (date.getMonth() + 1) % 12;
+  result.setMonth(date.getMonth() + 1);
+  if (result.getMonth() !== expectedMonth) {
+    result.setDate(0);
+  }
+  return result;
+}
+
+export const getActiveSubscription = (userId: string) => {
+  const { mockDb, saveDb } = require('./mockDb');
+  const sub = mockDb.subscriptions.find((s: any) => s.userId === userId);
+  if (!sub) return null;
+  
+  const now = new Date();
+  const expiresAt = new Date(sub.expiresAt);
+  
+  if (sub.status === 'active' && now < expiresAt) {
+    return sub;
+  }
+  
+  if (sub.status === 'active' && now >= expiresAt) {
+    sub.status = 'expired';
+    sub.autoRenew = false;
+    
+    const user = mockDb.users.find((u: any) => u.id === userId);
+    if (user) {
+      user.plan = 'free';
+      user.subscriptionStatus = 'free';
+    }
+    
+    saveDb();
+  }
+  
+  return null;
 };

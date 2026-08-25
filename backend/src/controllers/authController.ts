@@ -1,80 +1,264 @@
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import { mockDb, User, saveDb } from '../utils/mockDb';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_resumeai_token_2026';
+import { generateAccessToken, addOneMonth, getActiveSubscription } from '../utils/auth';
 
 export const signup = (req: Request, res: Response) => {
   const { name, email, password, rolePreference, userType } = req.body;
-  if (!email || !name) {
-    return res.status(400).json({ error: 'Name and email are required' });
+  if (!email || !name || !password) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
   }
 
   const existing = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (existing) {
-    const token = jwt.sign({ id: existing.id, email: existing.email, userType: existing.userType }, JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ token, user: existing });
+    return res.status(400).json({ error: 'An account already exists with this email address' });
   }
 
   const newUser: User = {
     id: `user-${Date.now()}`,
-    name,
-    email,
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
+    password: password,
     rolePreference: rolePreference || 'sde',
     userType: userType || 'seeker',
     badges: ['New Explorer', 'ATS Ready'],
     points: 500,
     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    profileLinks: { github: '', linkedin: '', project: '', coding: '' },
+    interviewScore: null,
+    monthlyUsage: 0,
+    plan: userType === 'recruiter' ? 'recruiter' : 'free',
+    subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free'
   };
 
   mockDb.users.push(newUser);
   saveDb();
-  const token = jwt.sign({ id: newUser.id, email: newUser.email, userType: newUser.userType }, JWT_SECRET, { expiresIn: '7d' });
-  return res.status(201).json({ token, user: newUser });
+
+  const token = generateAccessToken({ userId: newUser.id, role: newUser.userType });
+  const userResponse = { ...newUser };
+  delete userResponse.password;
+
+  return res.status(201).json({ token, user: userResponse });
 };
 
 export const login = (req: Request, res: Response) => {
-  const { email } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  let user = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-  // Auto-create demo user if not found for seamless testing
+  const user = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (!user) {
-    user = {
-      id: `user-${Date.now()}`,
-      name: email.split('@')[0],
-      email,
-      rolePreference: 'sde',
-      userType: email.includes('recruiter') ? 'recruiter' : 'seeker',
-      badges: ['Demo User'],
-      points: 1000,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`,
-      createdAt: new Date().toISOString()
-    };
-    mockDb.users.push(user);
-    saveDb();
+    return res.status(401).json({ error: 'Invalid email or password' });
   }
 
-  const token = jwt.sign({ id: user.id, email: user.email, userType: user.userType }, JWT_SECRET, { expiresIn: '7d' });
-  return res.json({ token, user });
+  // Verify password
+  if (user.password !== password) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+
+  const token = generateAccessToken({ userId: user.id, role: user.userType });
+  const userResponse = { ...user };
+  delete userResponse.password;
+
+  return res.json({ token, user: userResponse });
 };
 
 export const getMe = (req: Request, res: Response) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.json({ user: mockDb.users[0] });
+  if (!req.user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  const user = mockDb.users.find(u => u.id === req.user?.userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  const userResponse = { ...user };
+  delete userResponse.password;
+  return res.json({ user: userResponse });
+};
+
+export const updateProfile = (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  const user = mockDb.users.find(u => u.id === req.user?.userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
   }
 
-  try {
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    const user = mockDb.users.find(u => u.id === decoded.id) || mockDb.users[0];
-    return res.json({ user });
-  } catch (err) {
-    return res.json({ user: mockDb.users[0] });
+  const { rolePreference, profileLinks, points, badges, interviewScore } = req.body;
+
+  if (rolePreference) user.rolePreference = rolePreference;
+  if (profileLinks) user.profileLinks = { ...user.profileLinks, ...profileLinks };
+  if (typeof points === 'number') user.points = points;
+  if (badges) user.badges = badges;
+  if (interviewScore !== undefined) user.interviewScore = interviewScore;
+
+  saveDb();
+
+  const userResponse = { ...user };
+  delete userResponse.password;
+  return res.json({ user: userResponse });
+};
+
+export const getAllUsers = (req: Request, res: Response) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
+
+  const usersResponse = mockDb.users.map(u => {
+    const userCopy = { ...u };
+    delete userCopy.password;
+    return userCopy;
+  });
+
+  return res.json({ users: usersResponse });
+};
+
+export const updateSubscription = (req: Request, res: Response) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+
+  const { userId } = req.params;
+  const { plan, subscriptionStatus } = req.body;
+
+  const user = mockDb.users.find(u => u.id === userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (plan) user.plan = plan;
+  if (subscriptionStatus) user.subscriptionStatus = subscriptionStatus;
+
+  saveDb();
+  const userResponse = { ...user };
+  delete userResponse.password;
+  return res.json({ user: userResponse });
+};
+
+export const getUserSubscription = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  // Trigger auto expiry check
+  getActiveSubscription(authUserId);
+
+  const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
+  return res.json({ subscription: sub || null });
+};
+
+export const purchaseSubscription = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { planId } = req.body;
+  if (!planId) {
+    return res.status(400).json({ error: 'Plan ID is required' });
+  }
+
+  const user = mockDb.users.find(u => u.id === authUserId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const now = new Date();
+  const expiresAt = addOneMonth(now);
+
+  const planName = planId === 'job_seeker_pro' ? 'Job Seeker Pro' : 'Career Max';
+
+  let sub = mockDb.subscriptions.find(s => s.userId === authUserId);
+
+  if (sub) {
+    sub.planId = planId;
+    sub.planName = planName;
+    sub.status = 'active';
+    sub.startedAt = now.toISOString();
+    sub.expiresAt = expiresAt.toISOString();
+    sub.autoRenew = true;
+    sub.updatedAt = now.toISOString();
+  } else {
+    sub = {
+      id: `sub-${Date.now()}`,
+      userId: authUserId,
+      planId,
+      planName,
+      status: 'active',
+      billingInterval: 'monthly',
+      startedAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      autoRenew: true,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    };
+    mockDb.subscriptions.push(sub);
+  }
+
+  user.plan = planId;
+  user.subscriptionStatus = 'approved';
+
+  saveDb();
+
+  return res.json({ subscription: sub });
+};
+
+export const cancelSubscription = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
+  if (!sub) {
+    return res.status(404).json({ error: 'No subscription found' });
+  }
+
+  sub.autoRenew = false;
+  sub.updatedAt = new Date().toISOString();
+
+  saveDb();
+
+  return res.json({ subscription: sub });
+};
+
+export const reactivateSubscription = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
+  if (!sub) {
+    return res.status(404).json({ error: 'No subscription found' });
+  }
+
+  const user = mockDb.users.find(u => u.id === authUserId);
+
+  const now = new Date();
+  if (sub.status === 'expired' || now >= new Date(sub.expiresAt)) {
+    const expiresAt = addOneMonth(now);
+    sub.status = 'active';
+    sub.startedAt = now.toISOString();
+    sub.expiresAt = expiresAt.toISOString();
+    sub.autoRenew = true;
+    if (user) {
+      user.plan = sub.planId;
+      user.subscriptionStatus = 'approved';
+    }
+  } else {
+    sub.autoRenew = true;
+    if (user) {
+      user.plan = sub.planId;
+      user.subscriptionStatus = 'approved';
+    }
+  }
+  sub.updatedAt = now.toISOString();
+
+  saveDb();
+
+  return res.json({ subscription: sub });
 };

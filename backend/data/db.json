@@ -1,6 +1,36 @@
 {
   "users": [
     {
+      "id": "admin-piyush",
+      "name": "Piyush Dubey",
+      "email": "piyushdubey447@gmail.com",
+      "password": "piyush26",
+      "rolePreference": "sde",
+      "userType": "admin",
+      "badges": [
+        "Platform Founder",
+        "Admin"
+      ],
+      "points": 10000,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Piyush%20Dubey",
+      "createdAt": "2026-08-25T13:31:04.614Z"
+    },
+    {
+      "id": "user-sakshi",
+      "name": "Sakshi",
+      "email": "sakshi@gmail.com",
+      "password": "Sakshi22@",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
+      "createdAt": "2026-08-25T13:31:04.615Z"
+    },
+    {
       "id": "user-seeker-1",
       "name": "Alex Rivera",
       "email": "alex.rivera@example.com",
@@ -170,5 +200,9 @@
       "status": "Rejected",
       "appliedAt": "2026-08-13T19:46:28.608Z"
     }
-  ]
+  ],
+  "applications": [],
+  "jdMatches": [],
+  "activities": [],
+  "subscriptions": []
 }

@@ -2,12 +2,72 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   rolePreference: 'sde' | 'data-science' | 'marketing' | 'product-management';
-  userType: 'seeker' | 'recruiter';
+  userType: 'seeker' | 'recruiter' | 'admin';
   badges: string[];
   points: number;
   avatar?: string;
   createdAt: string;
+  profileLinks?: { github?: string; linkedin?: string; project?: string; coding?: string };
+  interviewScore?: number | null;
+  monthlyUsage?: number;
+  plan?: string;
+  subscriptionStatus?: string;
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  planId: string;
+  planName: string;
+  status: 'active' | 'expired';
+  billingInterval: 'monthly';
+  startedAt: string;
+  expiresAt: string;
+  autoRenew: boolean;
+  createdAt: string;
+  updatedAt: string;
+  customerId?: string;
+  subscriptionId?: string;
+  priceId?: string;
+}
+
+export interface UserApplication {
+  id: string;
+  userId: string;
+  company: string;
+  role: string;
+  status: 'Applied' | 'Interviewing' | 'Offer' | 'Rejected';
+  appliedDate: string;
+  notes?: string;
+}
+
+export interface JDMatchRecord {
+  id: string;
+  userId: string;
+  resumeId: string;
+  jdId: string;
+  jdText: string;
+  targetRole: string;
+  matchPct: number;
+  keywordScore: number;
+  embeddingScore: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  missingCoreSkills: string[];
+  impactGapScore: number;
+  recommendations: string[];
+  createdAt: string;
+}
+
+export interface ActivityItem {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  timestamp: string;
+  points: number;
 }
 
 export interface FeedbackCard {
@@ -87,9 +147,34 @@ export interface RecruiterCandidateRecord {
 // Initial Seed Users
 const users: User[] = [
   {
+    id: 'admin-piyush',
+    name: 'Piyush Dubey',
+    email: 'piyushdubey447@gmail.com',
+    password: 'piyush26',
+    rolePreference: 'sde',
+    userType: 'admin',
+    badges: ['Platform Founder', 'Admin'],
+    points: 10000,
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Piyush%20Dubey',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'user-sakshi',
+    name: 'Sakshi',
+    email: 'sakshi@gmail.com',
+    password: 'Sakshi22@',
+    rolePreference: 'sde',
+    userType: 'seeker',
+    badges: ['New Explorer', 'ATS Ready'],
+    points: 500,
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi',
+    createdAt: new Date().toISOString()
+  },
+  {
     id: 'user-seeker-1',
     name: 'Alex Rivera',
     email: 'alex.rivera@example.com',
+    password: 'password123',
     rolePreference: 'sde',
     userType: 'seeker',
     badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'],
@@ -101,6 +186,7 @@ const users: User[] = [
     id: 'user-recruiter-1',
     name: 'Sarah Jenkins (Recruiter)',
     email: 'recruiter@techscale.com',
+    password: 'password123',
     rolePreference: 'sde',
     userType: 'recruiter',
     badges: ['Top Talent Scout'],
@@ -238,7 +324,11 @@ export const mockDb = {
   users,
   resumes,
   jobDescriptions,
-  recruiterCandidates
+  recruiterCandidates,
+  applications: [] as UserApplication[],
+  jdMatches: [] as JDMatchRecord[],
+  activities: [] as ActivityItem[],
+  subscriptions: [] as Subscription[]
 };
 
 // Simple local JSON database path
@@ -263,10 +353,21 @@ const loadDb = () => {
     if (fs.existsSync(DB_FILE)) {
       const fileData = fs.readFileSync(DB_FILE, 'utf8');
       const parsed = JSON.parse(fileData);
-      if (parsed.users) mockDb.users = parsed.users;
+      if (parsed.users) {
+        const userMap = new Map<string, User>();
+        // Load hardcoded seed users first
+        users.forEach(u => userMap.set(u.email.toLowerCase(), u));
+        // Merge loaded users
+        parsed.users.forEach((u: any) => userMap.set(u.email.toLowerCase(), u));
+        mockDb.users = Array.from(userMap.values());
+      }
       if (parsed.resumes) mockDb.resumes = parsed.resumes;
       if (parsed.jobDescriptions) mockDb.jobDescriptions = parsed.jobDescriptions;
       if (parsed.recruiterCandidates) mockDb.recruiterCandidates = parsed.recruiterCandidates;
+      if (parsed.applications) mockDb.applications = parsed.applications;
+      if (parsed.jdMatches) mockDb.jdMatches = parsed.jdMatches;
+      if (parsed.activities) mockDb.activities = parsed.activities;
+      if (parsed.subscriptions) mockDb.subscriptions = parsed.subscriptions;
     } else {
       // Create initial DB file from seeds
       saveDb();
@@ -278,3 +379,4 @@ const loadDb = () => {
 
 // Initial load
 loadDb();
+saveDb();

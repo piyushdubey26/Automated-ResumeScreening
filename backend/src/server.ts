@@ -29,9 +29,25 @@ io.on('connection', (socket) => {
   });
 });
 
+let currentPort = PORT;
+
+server.on('error', (err: any) => {
+  if (err.code === 'EADDRINUSE' && currentPort !== 8000) {
+    console.log(`Port ${currentPort} is already in use (possibly macOS AirPlay). Falling back to port 8000...`);
+    currentPort = 8000;
+    server.listen(8000);
+  } else if (err.code === 'EADDRINUSE' && currentPort === 8000) {
+    console.log(`Port 8000 is also in use. Falling back to port 8080...`);
+    currentPort = 8080;
+    server.listen(8080);
+  } else {
+    console.error('Server error:', err);
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`===============================================`);
-  console.log(` ResumeAI Engine Server is running on port ${PORT}`);
-  console.log(` Health check URL: http://localhost:${PORT}/api/health`);
+  console.log(` ResumeAI Engine Server is running on port ${currentPort}`);
+  console.log(` Health check URL: http://localhost:${currentPort}/api/health`);
   console.log(`===============================================`);
 });

@@ -20,17 +20,23 @@ export const LandingPage: React.FC = () => {
 
   useEffect(() => {
     if (user && user.userType === 'seeker') {
-      const key = `resumeai_user_resume_${user.id}`;
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        try {
-          setUserResumeRecord(JSON.parse(saved));
-        } catch {
-          setUserResumeRecord(null);
-        }
-      } else {
-        setUserResumeRecord(null);
-      }
+      let active = true;
+      resumeApi.getLatest()
+        .then(res => {
+          if (active && res && res.resume) {
+            setUserResumeRecord(res.resume);
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setUserResumeRecord(null);
+          }
+        });
+      return () => {
+        active = false;
+      };
+    } else {
+      setUserResumeRecord(null);
     }
   }, [user]);
 

@@ -125,3 +125,20 @@ export interface LeaderboardEntry {
   badges: string[];
   avatar: string;
 }
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  planId: string;
+  planName: string;
+  status: 'active' | 'expired';
+  billingInterval: 'monthly';
+  startedAt: string;
+  expiresAt: string;
+  autoRenew: boolean;
+  createdAt: string;
+  updatedAt: string;
+  customerId?: string;
+  subscriptionId?: string;
+  priceId?: string;
+}

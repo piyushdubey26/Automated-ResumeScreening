@@ -4,9 +4,13 @@ import { authenticateJWT } from '../middleware/auth';
 import {
   uploadAndParseResume,
   getResumeById,
+  getLatestResume,
   getResumeFeedback,
   rewriteBullet,
-  generateMockInterview
+  generateMockInterview,
+  getApplications,
+  addApplication,
+  deleteApplication
 } from '../controllers/resumeController';
 
 import { extractTextFromBuffer } from '../utils/fileExtractor';
@@ -28,8 +32,17 @@ router.post('/extract-text', authenticateJWT, upload.single('file'), async (req,
     return res.status(500).json({ success: false, error: err.message || 'Failed to extract text from file' });
   }
 });
+
 router.post('/rewrite', authenticateJWT, rewriteBullet);
 router.post('/mock-interview', authenticateJWT, generateMockInterview);
+
+// Static routes first
+router.get('/latest', authenticateJWT, getLatestResume);
+router.get('/applications', authenticateJWT, getApplications);
+router.post('/applications', authenticateJWT, addApplication);
+router.delete('/applications/:id', authenticateJWT, deleteApplication);
+
+// Parameter routes last
 router.get('/:id', authenticateJWT, getResumeById);
 router.get('/:id/feedback', authenticateJWT, getResumeFeedback);
 

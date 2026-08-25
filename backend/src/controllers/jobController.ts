@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { mockDb, JobDescriptionRecord, saveDb } from '../utils/mockDb';
+import { getActiveSubscription } from '../utils/auth';
+import { mockDb, JobDescriptionRecord, JDMatchRecord, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { JDMatchEngine } from '../services/jdMatchEngine';
 
@@ -11,7 +12,7 @@ export const createJD = (req: Request, res: Response) => {
 
   const newJd: JobDescriptionRecord = {
     id: `jd-${Date.now()}`,
-    recruiterId: (req as any).user?.id || 'user-recruiter-1',
+    recruiterId: req.user?.userId || 'user-recruiter-1',
     title: title || 'Full Stack Engineer',
     targetRole: targetRole || 'sde',
     text,
@@ -30,6 +31,14 @@ export const getJobs = (req: Request, res: Response) => {
 };
 
 export const matchResumeWithJD = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (authUserId) {
+    const activeSub = getActiveSubscription(authUserId);
+    if (!activeSub) {
+      return res.status(403).json({ error: 'Upgrade required: JD Matching is a premium feature.' });
+    }
+  }
+
   const { resumeId, resumeText, jdId, jdText, targetRole } = req.body;
 
   let rText = resumeText;
@@ -57,9 +66,45 @@ Architected microservices in Node.js, Express, React, PostgreSQL, Docker, AWS. R
   const parsedResume = ParserService.parseText(rText);
   const matchResult = JDMatchEngine.match(parsedResume, jText, targetRole || 'sde');
 
+  // If user is authenticated, save the match to the db
+  if (authUserId) {
+    const newMatch: JDMatchRecord = {
+      id: `match-${Date.now()}`,
+      userId: authUserId,
+      resumeId: resumeId || 'latest',
+      jdId: jdId || 'latest',
+      jdText: jText,
+      targetRole: targetRole || 'sde',
+      matchPct: matchResult.matchPct,
+      keywordScore: matchResult.keywordScore,
+      embeddingScore: matchResult.embeddingScore,
+      matchedKeywords: matchResult.matchedKeywords,
+      missingKeywords: matchResult.missingKeywords,
+      missingCoreSkills: matchResult.missingCoreSkills,
+      impactGapScore: matchResult.impactGapScore,
+      recommendations: matchResult.recommendations,
+      createdAt: new Date().toISOString()
+    };
+    // Remove previous match for the same user if any, or keep history. Let's unshift and keep latest first.
+    mockDb.jdMatches.unshift(newMatch);
+    saveDb();
+  }
+
   return res.json({
     resumeId: resumeId || 'latest',
     jdId: jdId || 'latest',
     ...matchResult
   });
+};
+
+export const getLatestMatch = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const match = mockDb.jdMatches.find(m => m.userId === authUserId);
+  if (!match) {
+    return res.status(404).json({ error: 'No job matches found' });
+  }
+  return res.json(match);
 };

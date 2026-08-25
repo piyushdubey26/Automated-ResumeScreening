@@ -31,9 +31,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const ext = file.name.toLowerCase().split('.').pop() || '';
     setFileType(ext);
 
+    // Extension/Type check
+    const allowedExts = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'bmp', 'txt'];
+    if (!allowedExts.includes(ext)) {
+      setError('Unsupported file type.');
+      setIsProcessing(false);
+      return;
+    }
+
     // Size check (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      setError('File size must be under 10MB');
+      setError('File must be 10MB or smaller.');
       setIsProcessing(false);
       return;
     }

@@ -1,10 +1,19 @@
 import { Router } from 'express';
-import { signup, login, getMe } from '../controllers/authController';
+import { signup, login, getMe, updateProfile, getAllUsers, updateSubscription, getUserSubscription, purchaseSubscription, cancelSubscription, reactivateSubscription } from '../controllers/authController';
+import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.get('/me', getMe);
+router.get('/me', authenticateJWT, getMe);
+router.put('/profile', authenticateJWT, updateProfile);
+router.get('/users', authenticateJWT, getAllUsers);
+router.put('/users/:userId/subscription', authenticateJWT, updateSubscription);
+
+router.get('/subscription', authenticateJWT, getUserSubscription);
+router.post('/subscription/purchase', authenticateJWT, purchaseSubscription);
+router.post('/subscription/cancel', authenticateJWT, cancelSubscription);
+router.post('/subscription/reactivate', authenticateJWT, reactivateSubscription);
 
 export default router;

@@ -28,7 +28,8 @@ import {
   User,
   Plus,
   Trash2,
-  Upload
+  Upload,
+  Clock3
 } from 'lucide-react';
 
 interface ActivityItem {
@@ -109,53 +110,29 @@ export const DashboardPage: React.FC = () => {
     localStorage.removeItem('userStats');
   }, []);
 
+  // Async data loading state
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
   // 1. Resume Record (scoped)
-  const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(() => {
-    const saved = localStorage.getItem(KEY_RESUME);
-    if (!saved) return null;
-    try { return JSON.parse(saved); } catch { return null; }
-  });
+  const [resumeRecord, setResumeRecord] = useState<ResumeRecord | null>(null);
 
   // 2. Resume Text Input (scoped)
-  const [resumeInput, setResumeInput] = useState<string>(() => {
-    return localStorage.getItem(KEY_RESUME_TEXT) || '';
-  });
+  const [resumeInput, setResumeInput] = useState<string>('');
 
   // 3. JD Match Result (scoped)
-  const [jdMatchResult, setJdMatchResult] = useState<JDMatchResult | null>(() => {
-    const saved = localStorage.getItem(KEY_JDMATCH);
-    if (!saved) return null;
-    try { return JSON.parse(saved); } catch { return null; }
-  });
+  const [jdMatchResult, setJdMatchResult] = useState<JDMatchResult | null>(null);
 
   // 4. Tracked Job Applications (scoped)
-  const [applications, setApplications] = useState<UserApplication[]>(() => {
-    const saved = localStorage.getItem(KEY_APPS);
-    if (!saved) return [];
-    try { return JSON.parse(saved); } catch { return []; }
-  });
+  const [applications, setApplications] = useState<UserApplication[]>([]);
 
   // 5. Recent Activity Logs (scoped)
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>(() => {
-    const saved = localStorage.getItem(KEY_ACTIVITY);
-    if (!saved) return [];
-    try { return JSON.parse(saved); } catch { return []; }
-  });
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
 
   // 6. Interview Score (scoped)
-  const [interviewScore, setInterviewScore] = useState<number | null>(() => {
-    const saved = localStorage.getItem(KEY_INTERVIEW_SCORE);
-    if (!saved) return null;
-    const parsed = Number(saved);
-    return isNaN(parsed) ? null : parsed;
-  });
+  const [interviewScore, setInterviewScore] = useState<number | null>(null);
 
   // 7. Profile Links (scoped)
-  const [profileLinks, setProfileLinks] = useState(() => {
-    const saved = localStorage.getItem(KEY_LINKS);
-    if (!saved) return { github: '', linkedin: '', project: '', coding: '' };
-    try { return JSON.parse(saved); } catch { return { github: '', linkedin: '', project: '', coding: '' }; }
-  });
+  const [profileLinks, setProfileLinks] = useState({ github: '', linkedin: '', project: '', coding: '' });
 
   // Target role preference
   const [targetRole, setTargetRole] = useState<'sde' | 'data-science' | 'marketing' | 'product-management'>(
@@ -189,6 +166,148 @@ export const DashboardPage: React.FC = () => {
   const [newAppCompany, setNewAppCompany] = useState('');
   const [newAppStatus, setNewAppStatus] = useState<'Applied' | 'Interviewing' | 'Offered' | 'Rejected'>('Applied');
   const [showAddAppForm, setShowAddAppForm] = useState(false);
+  const [activeSub, setActiveSub] = useState<any>(null);
+  const [countdownText, setCountdownText] = useState<string>('');
+
+  // Sync data from database on mount or when user changes
+  useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+
+    async function loadData() {
+      setIsLoadingData(true);
+      try {
+        // Sync user profile
+        const meRes = await authApi.getMe().catch(() => null);
+        if (active && meRes && meRes.user) {
+          localStorage.setItem('resumeai_user', JSON.stringify(meRes.user));
+          window.dispatchEvent(new Event('resumeai-subscription-updated'));
+        }
+
+        // Fetch active subscription
+        const subRes = await authApi.getSubscription().catch(() => null);
+        if (active && subRes) {
+          setActiveSub(subRes.subscription || null);
+        }
+
+        // Fetch latest resume
+        const resumeRes = await resumeApi.getLatest().catch(() => null);
+        if (active && resumeRes && resumeRes.resume) {
+          setResumeRecord(resumeRes.resume);
+          setResumeInput(resumeRes.resume.rawText || '');
+        }
+
+        // Fetch latest JD match
+        const matchRes = await jobApi.getLatestMatch().catch(() => null);
+        if (active && matchRes) {
+          setJdMatchResult(matchRes);
+          setJdInput(matchRes.jdText || '');
+        }
+
+        // Fetch job applications
+        const appsRes = await resumeApi.getApplications().catch(() => null);
+        if (active && appsRes && appsRes.applications) {
+          setApplications(appsRes.applications);
+        }
+
+        // Fetch links & interview score & activities from the user profile
+        if (active) {
+          setProfileLinks({
+            github: user.profileLinks?.github || '',
+            linkedin: user.profileLinks?.linkedin || '',
+            project: user.profileLinks?.project || '',
+            coding: user.profileLinks?.coding || ''
+          });
+          setInterviewScore(user.interviewScore || null);
+
+          // Load local activities
+          const savedActivity = localStorage.getItem(`resumeai_user_activity_${userId}`);
+          if (savedActivity) {
+            try { setRecentActivity(JSON.parse(savedActivity)); } catch {}
+          }
+        }
+      } catch (err) {
+        console.error("Error loading user data:", err);
+      } finally {
+        if (active) {
+          setIsLoadingData(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
+  }, [user, userId]);
+
+  // Live subscription countdown timer
+  useEffect(() => {
+    if (!activeSub || activeSub.status !== 'active') {
+      setCountdownText('');
+      return;
+    }
+
+    const updateCountdown = () => {
+      const expiresAt = new Date(activeSub.expiresAt).getTime();
+      const now = Date.now();
+      const diff = expiresAt - now;
+
+      if (diff <= 0) {
+        setCountdownText('Expired');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (days > 0) {
+        setCountdownText(`${days} day${days > 1 ? 's' : ''} left`);
+      } else if (hours > 0) {
+        setCountdownText(`${hours}h ${minutes}m left`);
+      } else {
+        setCountdownText(`${minutes}m left`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000); // update every minute
+
+    return () => clearInterval(interval);
+  }, [activeSub]);
+
+  const handleCancelSubscription = async () => {
+    try {
+      const res = await authApi.cancelSubscription();
+      setActiveSub(res.subscription);
+      if (user) {
+        const updated = { ...user, subscriptionStatus: 'cancelled' };
+        localStorage.setItem('resumeai_user', JSON.stringify(updated));
+        window.dispatchEvent(new Event('resumeai-subscription-updated'));
+      }
+      alert('Your subscription auto-renewal has been successfully cancelled.');
+    } catch (err: any) {
+      alert(`Failed to cancel subscription: ${err.response?.data?.error || err.message}`);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    try {
+      const res = await authApi.reactivateSubscription();
+      setActiveSub(res.subscription);
+      if (user) {
+        const updated = { ...user, plan: res.subscription.planId, subscriptionStatus: 'approved' };
+        localStorage.setItem('resumeai_user', JSON.stringify(updated));
+        window.dispatchEvent(new Event('resumeai-subscription-updated'));
+      }
+      alert('Subscription reactivated successfully!');
+    } catch (err: any) {
+      alert(`Failed to reactivate subscription: ${err.response?.data?.error || err.message}`);
+    }
+  };
 
   // Helper to log user activity
   const addActivityLog = (action: string, desc: string) => {
@@ -200,7 +319,7 @@ export const DashboardPage: React.FC = () => {
     };
     const updated = [newLog, ...recentActivity.slice(0, 9)];
     setRecentActivity(updated);
-    localStorage.setItem(KEY_ACTIVITY, JSON.stringify(updated));
+    localStorage.setItem(`resumeai_user_activity_${userId}`, JSON.stringify(updated));
   };
 
   // Helper to construct full resume with links
@@ -215,10 +334,14 @@ export const DashboardPage: React.FC = () => {
   };
 
   // Save profile links on change
-  const handleUpdateLinks = (key: keyof typeof profileLinks, val: string) => {
+  const handleUpdateLinks = async (key: keyof typeof profileLinks, val: string) => {
     const updated = { ...profileLinks, [key]: val };
     setProfileLinks(updated);
-    localStorage.setItem(KEY_LINKS, JSON.stringify(updated));
+    try {
+      await authApi.updateProfile({ profileLinks: updated });
+    } catch (err) {
+      console.error("Failed to update profile links:", err);
+    }
   };
 
   // Handle Load Sample Resume or Rubric Switch
@@ -230,7 +353,6 @@ export const DashboardPage: React.FC = () => {
     if (!resumeInput.trim()) {
       const text = sampleResumesText[role];
       setResumeInput(text);
-      localStorage.setItem(KEY_RESUME_TEXT, text);
     }
   };
 
@@ -254,7 +376,6 @@ export const DashboardPage: React.FC = () => {
       const textToUse = resumeWithLinks();
       const res = await jobApi.matchJD(textToUse, jdInput, targetRole);
       setJdMatchResult(res);
-      localStorage.setItem(KEY_JDMATCH, JSON.stringify(res));
       addActivityLog('✓ Job Matched', `Scored ${res.matchPct}% against ${targetRole.toUpperCase()} Job Description.`);
     } finally {
       setIsMatching(false);
@@ -274,17 +395,13 @@ export const DashboardPage: React.FC = () => {
       const resume = await resumeApi.uploadAndParse(textToUse, 'My_Resume.pdf', targetRole);
       
       setResumeRecord(resume.resume);
-      localStorage.setItem(KEY_RESUME, JSON.stringify(resume.resume));
-      localStorage.setItem(KEY_RESUME_TEXT, resumeInput);
 
       if (hasJD) {
         const match = await jobApi.matchJD(textToUse, jdInput, targetRole);
         setJdMatchResult(match);
-        localStorage.setItem(KEY_JDMATCH, JSON.stringify(match));
         addActivityLog('✓ Resume & JD Analyzed', `Score: ${resume.resume.score}/100 · Match: ${match.matchPct}%`);
       } else {
         setJdMatchResult(null);
-        localStorage.removeItem(KEY_JDMATCH);
         addActivityLog('✓ Resume Analyzed', `Resume Health Score: ${resume.resume.score}/100`);
       }
     } finally {
@@ -315,7 +432,7 @@ export const DashboardPage: React.FC = () => {
       const res = await resumeApi.generateMockInterview(targetRole, textToUse, jdToUse);
       setInterviewQuestions(res.questions);
       setInterviewScore(85);
-      localStorage.setItem(KEY_INTERVIEW_SCORE, '85');
+      await authApi.updateProfile({ interviewScore: 85 }).catch(() => null);
       addActivityLog('✓ Mock Interview Generated', `Generated ${res.questions.length} questions for ${targetRole.toUpperCase()}.`);
     } finally {
       setIsLoadingInterview(false);
@@ -323,33 +440,39 @@ export const DashboardPage: React.FC = () => {
   };
 
   // Add Application
-  const handleAddApplication = (e: React.FormEvent) => {
+  const handleAddApplication = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAppRole.trim() || !newAppCompany.trim()) return;
 
-    const newApp: UserApplication = {
-      id: `app-${Date.now()}`,
-      role: newAppRole.trim(),
-      company: newAppCompany.trim(),
-      status: newAppStatus,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    };
-
-    const updated = [newApp, ...applications];
-    setApplications(updated);
-    localStorage.setItem(KEY_APPS, JSON.stringify(updated));
+    try {
+      const res = await resumeApi.addApplication({
+        role: newAppRole.trim(),
+        company: newAppCompany.trim(),
+        status: newAppStatus
+      });
+      if (res.success && res.application) {
+        setApplications(prev => [res.application, ...prev]);
+        addActivityLog(`✓ Applied to ${res.application.role}`, `${res.application.company} · ${res.application.status}`);
+      }
+    } catch (err) {
+      console.error("Failed to add application:", err);
+    }
 
     setNewAppRole('');
     setNewAppCompany('');
     setShowAddAppForm(false);
-    addActivityLog(`✓ Applied to ${newApp.role}`, `${newApp.company} · ${newApp.status}`);
   };
 
   // Delete Application
-  const handleDeleteApplication = (id: string) => {
-    const updated = applications.filter(a => a.id !== id);
-    setApplications(updated);
-    localStorage.setItem(KEY_APPS, JSON.stringify(updated));
+  const handleDeleteApplication = async (id: string) => {
+    try {
+      const res = await resumeApi.deleteApplication(id);
+      if (res.success) {
+        setApplications(prev => prev.filter(a => a.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete application:", err);
+    }
   };
 
   // AI Career Assistant Query Handler
@@ -456,35 +579,41 @@ export const DashboardPage: React.FC = () => {
               </p>
             </div>
             
-            <div className="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-xs shrink-0">
+            <div className="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-xs shrink-0 font-sans">
               <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Monthly Usage</span>
                 <span className="font-extrabold text-white text-xs">
-                  {(user?.plan === 'pro' || user?.plan === 'career-max') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                  {activeSub && activeSub.status === 'active'
                     ? 'Unlimited'
                     : `${user?.usage?.['resume_reviews'] || 0} / 5 Used`}
                 </span>
               </div>
               <div className="text-center px-3 border-r border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">XP Points</span>
-                <span className="font-extrabold text-[#a84c38] text-sm">{user?.points ? `${user.points} XP` : '0 XP'}</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Plan Period</span>
+                <span className="font-extrabold text-white text-xs block min-w-[70px]">
+                  {activeSub && activeSub.status === 'active'
+                    ? countdownText || 'Active'
+                    : activeSub && activeSub.status === 'expired'
+                    ? 'Expired'
+                    : 'No active plan'}
+                </span>
               </div>
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-1.5 px-3">
                 <span className={`px-2 py-1 rounded border text-[10px] font-bold ${
-                  (user?.plan === 'career-max') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                  activeSub && activeSub.status === 'active' && activeSub.planId === 'career-max'
                     ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                    : (user?.plan === 'pro') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    : activeSub && activeSub.status === 'active' && (activeSub.planId === 'job_seeker_pro' || activeSub.planId === 'pro')
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                    : user?.subscriptionStatus === 'pending'
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    : activeSub && activeSub.status === 'expired'
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
                     : 'bg-[#a84c38]/10 text-[#a84c38] border-[#a84c38]/20'
                 }`}>
-                  {(user?.plan === 'career-max') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                  {activeSub && activeSub.status === 'active' && activeSub.planId === 'career-max'
                     ? 'Career Max'
-                    : (user?.plan === 'pro') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    : activeSub && activeSub.status === 'active' && (activeSub.planId === 'job_seeker_pro' || activeSub.planId === 'pro')
                     ? 'Job Seeker Pro'
-                    : user?.subscriptionStatus === 'pending'
-                    ? 'Approval Pending'
+                    : activeSub && activeSub.status === 'expired'
+                    ? 'Expired'
                     : 'Free Seeker'}
                 </span>
               </div>
@@ -520,8 +649,16 @@ export const DashboardPage: React.FC = () => {
               );
             })}
           </div>
-          {/* TAB 1: DASHBOARD OVERVIEW */}
-          {activeNav === 'Dashboard' && (
+          {isLoadingData ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-24 bg-slate-900/10 rounded-3xl border border-slate-900/50 animate-pulse">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a84c38] mb-4"></div>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Synchronizing Career Data...</p>
+              <p className="text-[10px] text-slate-600 mt-1">Retrieving latest score, job matches, and applications</p>
+            </div>
+          ) : (
+            <>
+              {/* TAB 1: DASHBOARD OVERVIEW */}
+              {activeNav === 'Dashboard' && (
             <div className="space-y-8 animate-fadeIn">
               {/* KPI Cards Row */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1636,8 +1773,84 @@ export const DashboardPage: React.FC = () => {
                     <option value="product-management">Product Manager (PM)</option>
                   </select>
                 </div>
+
+                <div className="pt-6 border-t border-slate-800 space-y-4">
+                  <h4 className="text-sm font-serif font-bold text-white flex items-center space-x-2">
+                    <Clock3 className="w-4 h-4 text-indigo-400" />
+                    <span>Subscription & Billing</span>
+                  </h4>
+                  
+                  {!activeSub || activeSub.status !== 'active' && activeSub.status !== 'expired' ? (
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                      <div>
+                        <p className="text-slate-300 font-bold">FREE SEEKER</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">No active subscription</p>
+                      </div>
+                      <button
+                        onClick={() => navigate('/pricing')}
+                        className="px-3.5 py-1.5 bg-[#a84c38] hover:bg-[#8e3f2e] text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                      >
+                        View Plans
+                      </button>
+                    </div>
+                  ) : activeSub.status === 'expired' ? (
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-rose-500/30 flex items-center justify-between">
+                      <div>
+                        <p className="text-rose-400 font-bold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-rose-500 block animate-pulse"></span>
+                          <span>{activeSub.planName.toUpperCase()} (Expired)</span>
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Your plan expired on {new Date(activeSub.expiresAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleReactivateSubscription}
+                        className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                      >
+                        Reactivate Plan
+                      </button>
+                    </div>
+                  ) : activeSub.autoRenew === false ? (
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
+                      <div>
+                        <p className="text-amber-400 font-bold">{activeSub.planName.toUpperCase()}</p>
+                        <p className="text-[11px] text-slate-300 mt-1">
+                          Active until {new Date(activeSub.expiresAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-[10px] text-amber-500 font-semibold mt-0.5">Auto-renewal is Off</p>
+                      </div>
+                      <button
+                        onClick={handleReactivateSubscription}
+                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+                      >
+                        Reactivate
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-emerald-500/30 flex items-center justify-between">
+                      <div>
+                        <p className="text-emerald-400 font-bold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 block animate-pulse"></span>
+                          <span>{activeSub.planName.toUpperCase()}</span>
+                        </p>
+                        <p className="text-[11px] text-slate-350 mt-1">
+                          Active · Renews on {new Date(activeSub.expiresAt).toLocaleDateString()} ({countdownText || 'Just now'})
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleCancelSubscription}
+                        className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                      >
+                        Cancel Plan
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+          )}
+            </>
           )}
 
         </main>

@@ -23,6 +23,7 @@ import {
   Edit2
 } from "lucide-react";
 import { cloudSync } from "../services/cloudSync";
+import { authApi } from "../services/api";
 
 // ─── Local Database Key ──────────────────────────────────────────────────────
 const LOCAL_DB_KEY = "resumeai_local_db";
@@ -83,47 +84,45 @@ export const AdminDashboardPage: React.FC = () => {
   // Dynamic user database state loaded from LocalStorage
   const [usersDb, setUsersDb] = useState<AdminUserRecord[]>([]);
 
-  // Load & poll users with Cloud Sync across devices
+  const mapToAdminUser = (u: any): AdminUserRecord => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    userType: u.userType,
+    rolePreference: u.rolePreference,
+    company: u.company || '',
+    status: u.subscriptionStatus === 'pending' ? 'Pending' : (u.status || 'Active'),
+    plan: u.plan || 'free',
+    subscriptionStatus: u.subscriptionStatus || 'free',
+    subscriptionRequestedAt: u.subscriptionRequestedAt || u.createdAt,
+    joinedDate: u.createdAt || new Date().toISOString(),
+    lastActive: u.lastActive || 'Just now'
+  });
+
+  // Load & poll users from server DB
   useEffect(() => {
-    const refreshUsers = () => {
-      const users = cloudSync.getUsers() as AdminUserRecord[];
-      setUsersDb(users);
+    const fetchUsers = async () => {
+      try {
+        const res = await authApi.getAllUsers();
+        if (res && res.users) {
+          setUsersDb(res.users.map(mapToAdminUser));
+        }
+      } catch (err) {
+        console.error("Failed to fetch admin users:", err);
+      }
     };
 
-    refreshUsers();
-    cloudSync.pullFromCloud().then(cloudUsers => {
-      setUsersDb(cloudUsers as AdminUserRecord[]);
-    });
-
-    const interval = setInterval(() => {
-      cloudSync.pullFromCloud().then(cloudUsers => {
-        setUsersDb(cloudUsers as AdminUserRecord[]);
-      });
-    }, 3000);
-
-    const handleSyncEvent = () => refreshUsers();
-    window.addEventListener('resumeai-db-updated', handleSyncEvent);
-    window.addEventListener('resumeai-subscription-updated', handleSyncEvent);
+    fetchUsers();
+    const interval = setInterval(fetchUsers, 5000);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('resumeai-db-updated', handleSyncEvent);
-      window.removeEventListener('resumeai-subscription-updated', handleSyncEvent);
     };
   }, []);
 
-  // Update cloud & localStorage helper
+  // Update helper (local fallback + cloud/sync)
   const syncDb = (updatedList: AdminUserRecord[]) => {
     setUsersDb(updatedList);
-    try {
-      const saved = localStorage.getItem(LOCAL_DB_KEY);
-      const db = saved ? JSON.parse(saved) : { users: [], resumes: [] };
-      db.users = updatedList;
-      localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
-      cloudSync.pushToCloud(updatedList as any);
-    } catch (e) {
-      console.error(e);
-    }
   };
 
   // Perform confirm-modal actions
@@ -143,19 +142,17 @@ export const AdminDashboardPage: React.FC = () => {
         syncDb(updated);
       } else if (type === "approve-pro") {
         const targetUser = updated[index];
-        const latestCloud = cloudSync.getUsers().find(u => u.email.toLowerCase() === targetUser.email.toLowerCase());
-        const targetPlan = (latestCloud && latestCloud.plan && latestCloud.plan !== "free")
-          ? latestCloud.plan
-          : (targetUser.plan && targetUser.plan !== "free" ? targetUser.plan : "career-max");
+        const targetPlan = targetUser.plan && targetUser.plan !== "free" ? targetUser.plan : "career-max";
 
         updated[index].plan = targetPlan;
         updated[index].subscriptionStatus = "approved";
         updated[index].status = "Active";
-        cloudSync.approveSubscription(updated[index].email);
+        authApi.updateSubscription(targetUser.id, targetPlan, "approved").catch(console.error);
         syncDb(updated);
       } else if (type === "decline-pro") {
+        const targetUser = updated[index];
         updated[index].subscriptionStatus = "declined";
-        cloudSync.declineSubscription(updated[index].email);
+        authApi.updateSubscription(targetUser.id, targetUser.plan || "free", "declined").catch(console.error);
         syncDb(updated);
       } else if (type === "change-role" && targetRole) {
         updated[index].userType = targetRole;
