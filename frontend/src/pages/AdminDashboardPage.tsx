@@ -22,6 +22,7 @@ import {
   X,
   Edit2
 } from "lucide-react";
+import { cloudSync } from "../services/cloudSync";
 
 // ─── Local Database Key ──────────────────────────────────────────────────────
 const LOCAL_DB_KEY = "resumeai_local_db";
@@ -82,128 +83,36 @@ export const AdminDashboardPage: React.FC = () => {
   // Dynamic user database state loaded from LocalStorage
   const [usersDb, setUsersDb] = useState<AdminUserRecord[]>([]);
 
-  // Seed default admin users if DB does not exist
+  // Load & poll users with Cloud Sync across devices
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_DB_KEY);
-      let db = saved ? JSON.parse(saved) : { users: [], resumes: [] };
+    const refreshUsers = () => {
+      const users = cloudSync.getUsers() as AdminUserRecord[];
+      setUsersDb(users);
+    };
 
-      // Make sure we have seed users in local storage if not populated
-      const seedUsers: AdminUserRecord[] = [
-        {
-          id: "u-1",
-          name: "Aarav Sharma",
-          email: "aarav.sharma@example.com",
-          userType: "seeker",
-          rolePreference: "sde",
-          status: "Active",
-          plan: "free",
-          subscriptionStatus: "free",
-          joinedDate: "2026-08-20T10:00:00Z",
-          lastActive: "2 minutes ago"
-        },
-        {
-          id: "u-2",
-          name: "Priya Mehta",
-          email: "priya.mehta@example.com",
-          userType: "seeker",
-          rolePreference: "sde",
-          status: "Active",
-          plan: "pro",
-          subscriptionStatus: "approved",
-          joinedDate: "2026-08-18T14:30:00Z",
-          lastActive: "31 minutes ago"
-        },
-        {
-          id: "u-3",
-          name: "Rohan Gupta",
-          email: "rohan.gupta@yahoo.com",
-          userType: "seeker",
-          rolePreference: "marketing",
-          status: "Suspended",
-          plan: "free",
-          subscriptionStatus: "free",
-          joinedDate: "2026-08-15T09:15:00Z",
-          lastActive: "3 days ago"
-        },
-        {
-          id: "u-4",
-          name: "Sarah Jenkins",
-          email: "sarah.jenkins@techcorp.com",
-          userType: "recruiter",
-          company: "TechCorp",
-          status: "Active",
-          plan: "recruiter",
-          subscriptionStatus: "approved",
-          joinedDate: "2026-08-22T08:00:00Z",
-          lastActive: "Today"
-        },
-        {
-          id: "u-5",
-          name: "Alex Rivera",
-          email: "alex.rivera@example.com",
-          userType: "recruiter",
-          company: "CloudTech",
-          status: "Active",
-          plan: "recruiter",
-          subscriptionStatus: "approved",
-          joinedDate: "2026-08-21T11:20:00Z",
-          lastActive: "18 minutes ago"
-        },
-        {
-          id: "u-6",
-          name: "Piyush Dubey",
-          email: "piyushdubey447@gmail.com",
-          userType: "admin",
-          status: "Active",
-          plan: "pro",
-          subscriptionStatus: "approved",
-          joinedDate: "2026-08-10T12:00:00Z",
-          lastActive: "Just now"
-        }
-      ];
+    refreshUsers();
+    cloudSync.pullFromCloud().then(cloudUsers => {
+      setUsersDb(cloudUsers as AdminUserRecord[]);
+    });
 
-      let merged = false;
-      if (!db.users || db.users.length === 0) {
-        db.users = seedUsers;
-        localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
-        setUsersDb(seedUsers);
-      } else {
-        // Map whatever format is present into clean AdminUserRecord items
-        const parsed: AdminUserRecord[] = db.users.map((u: any, idx: number) => ({
-          id: u.id || `u-${idx}`,
-          name: u.name || "Default User",
-          email: u.email || "user@example.com",
-          userType: u.userType || "seeker",
-          rolePreference: u.rolePreference || u.rolePreference || "sde",
-          company: u.company || (u.userType === 'recruiter' ? "TechScale Innovations" : undefined),
-          status: u.status || "Active",
-          plan: u.plan || "free",
-          subscriptionStatus: u.subscriptionStatus || "free",
-          joinedDate: u.createdAt || "2026-08-24T00:00:00Z",
-          lastActive: u.lastActive || "Today"
-        }));
+    const interval = setInterval(() => {
+      cloudSync.pullFromCloud().then(cloudUsers => {
+        setUsersDb(cloudUsers as AdminUserRecord[]);
+      });
+    }, 3000);
 
-        // Fill missing seeds
-        seedUsers.forEach(seed => {
-          if (!parsed.some(p => p.email.toLowerCase() === seed.email.toLowerCase())) {
-            parsed.push(seed);
-            merged = true;
-          }
-        });
+    const handleSyncEvent = () => refreshUsers();
+    window.addEventListener('resumeai-db-updated', handleSyncEvent);
+    window.addEventListener('resumeai-subscription-updated', handleSyncEvent);
 
-        if (merged) {
-          db.users = parsed;
-          localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
-        }
-        setUsersDb(parsed);
-      }
-    } catch (e) {
-      console.error("Failed to load local DB", e);
-    }
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resumeai-db-updated', handleSyncEvent);
+      window.removeEventListener('resumeai-subscription-updated', handleSyncEvent);
+    };
   }, []);
 
-  // Update localStorage helper
+  // Update cloud & localStorage helper
   const syncDb = (updatedList: AdminUserRecord[]) => {
     setUsersDb(updatedList);
     try {
@@ -211,6 +120,7 @@ export const AdminDashboardPage: React.FC = () => {
       const db = saved ? JSON.parse(saved) : { users: [], resumes: [] };
       db.users = updatedList;
       localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
+      cloudSync.pushToCloud(updatedList as any);
     } catch (e) {
       console.error(e);
     }
@@ -232,12 +142,20 @@ export const AdminDashboardPage: React.FC = () => {
         updated[index].status = updated[index].status === "Suspended" ? "Active" : "Suspended";
         syncDb(updated);
       } else if (type === "approve-pro") {
-        updated[index].plan = "pro";
+        const targetUser = updated[index];
+        const latestCloud = cloudSync.getUsers().find(u => u.email.toLowerCase() === targetUser.email.toLowerCase());
+        const targetPlan = (latestCloud && latestCloud.plan && latestCloud.plan !== "free")
+          ? latestCloud.plan
+          : (targetUser.plan && targetUser.plan !== "free" ? targetUser.plan : "career-max");
+
+        updated[index].plan = targetPlan;
         updated[index].subscriptionStatus = "approved";
+        updated[index].status = "Active";
+        cloudSync.approveSubscription(updated[index].email);
         syncDb(updated);
       } else if (type === "decline-pro") {
-        updated[index].plan = "free";
         updated[index].subscriptionStatus = "declined";
+        cloudSync.declineSubscription(updated[index].email);
         syncDb(updated);
       } else if (type === "change-role" && targetRole) {
         updated[index].userType = targetRole;

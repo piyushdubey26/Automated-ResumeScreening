@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Check, Clock3, ShieldCheck, Shield, Settings, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { PLANS, type PricingPlan } from '../data/plans';
+import { cloudSync } from '../services/cloudSync';
 import type { User } from '../types';
-
-const LOCAL_DB_KEY = 'resumeai_local_db';
 
 export const PricingPage: React.FC = () => {
   const { user } = useAuth();
@@ -28,18 +27,17 @@ export const PricingPage: React.FC = () => {
       return;
     }
     const targetPlanId = tier === 'Career Max' ? 'career-max' : 'pro';
+    
+    // Save to cloud sync database
+    cloudSync.requestSubscription(user.email, targetPlanId);
+
     const updated: User = {
       ...user,
       plan: targetPlanId,
       subscriptionStatus: 'pending',
       subscriptionRequestedAt: new Date().toISOString()
     };
-    const saved = localStorage.getItem(LOCAL_DB_KEY);
-    const db = saved ? JSON.parse(saved) : { users: [], resumes: [] };
-    const index = db.users.findIndex((item: User) => item.id === user.id || item.email === user.email);
-    if (index >= 0) db.users[index] = updated;
-    else db.users.push(updated);
-    localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
+
     localStorage.setItem('resumeai_user', JSON.stringify(updated));
     window.dispatchEvent(new Event('resumeai-subscription-updated'));
     setNotice(`Your ${tier} request is pending admin approval. You will maintain Free access until approved.`);

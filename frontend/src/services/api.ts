@@ -9,6 +9,7 @@ import type {
   LeaderboardEntry,
   FeedbackCard
 } from '../types';
+import { cloudSync } from './cloudSync';
 
 const SKILLS_BY_ROLE = {
   sde: ['typescript', 'javascript', 'node.js', 'node', 'express', 'react', 'postgresql', 'postgres', 'docker', 'aws', 'redis', 'rest api', 'git', 'graphql', 'kubernetes', 'python', 'java', 'c++', 'go', 'sql', 'html', 'css'],
@@ -236,6 +237,20 @@ export const authApi = {
       } else if (user.password && password && user.password !== password) {
         throw new Error('Incorrect password for this account. Try again or reset password.');
       }
+
+      cloudSync.saveUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        userType: user.userType,
+        rolePreference: user.rolePreference,
+        status: 'Active',
+        plan: user.plan || 'free',
+        subscriptionStatus: user.subscriptionStatus || 'free',
+        joinedDate: user.createdAt || new Date().toISOString(),
+        lastActive: 'Just now'
+      });
+
       return { token: 'mock-jwt-token', user };
     }
   },
@@ -268,6 +283,20 @@ export const authApi = {
       };
       db.users.push(user);
       saveLocalDB(db);
+
+      cloudSync.saveUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        userType: user.userType,
+        rolePreference: user.rolePreference,
+        status: 'Active',
+        plan: user.plan || 'free',
+        subscriptionStatus: user.subscriptionStatus || 'free',
+        joinedDate: user.createdAt,
+        lastActive: 'Just now'
+      });
+
       return { token: 'mock-jwt-token', user };
     }
   },
