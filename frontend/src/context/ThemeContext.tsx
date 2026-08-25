@@ -8,10 +8,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('resumeai_theme');
+    return saved === 'light' ? 'light' : 'dark';
+  });
 
   useEffect(() => {
     const root = document.documentElement;
+    localStorage.setItem('resumeai_theme', theme);
     if (theme === 'dark') {
       root.classList.add('dark');
       root.style.colorScheme = 'dark';

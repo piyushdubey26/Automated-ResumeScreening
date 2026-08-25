@@ -66,24 +66,30 @@ export const Navbar: React.FC = () => {
         <nav className="hidden md:flex items-center space-x-1 bg-slate-900/80 p-1.5 rounded-full border border-slate-800">
           <Link
             to="/"
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              isCurrent('/') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            className={`px-4 py-1.5 rounded-full text-xs transition-all ${
+              isCurrent('/')
+                ? 'bg-[#a84c38]/25 text-white font-bold border border-[#a84c38]/60 shadow-md shadow-[#a84c38]/20'
+                : 'text-slate-300 font-medium hover:text-white hover:bg-slate-800/60 border border-transparent'
             }`}
           >
             Home
           </Link>
           <Link
             to="/features"
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              isCurrent('/features') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            className={`px-4 py-1.5 rounded-full text-xs transition-all ${
+              isCurrent('/features')
+                ? 'bg-[#a84c38]/25 text-white font-bold border border-[#a84c38]/60 shadow-md shadow-[#a84c38]/20'
+                : 'text-slate-300 font-medium hover:text-white hover:bg-slate-800/60 border border-transparent'
             }`}
           >
             Features
           </Link>
           <Link
             to="/pricing"
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              isCurrent('/pricing') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            className={`px-4 py-1.5 rounded-full text-xs transition-all ${
+              isCurrent('/pricing')
+                ? 'bg-[#a84c38]/25 text-white font-bold border border-[#a84c38]/60 shadow-md shadow-[#a84c38]/20'
+                : 'text-slate-300 font-medium hover:text-white hover:bg-slate-800/60 border border-transparent'
             }`}
           >
             Pricing
@@ -93,8 +99,10 @@ export const Navbar: React.FC = () => {
               {user?.userType === 'seeker' && (
                 <Link
                   to="/dashboard"
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
-                    isCurrent('/dashboard') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  className={`px-4 py-1.5 rounded-full text-xs flex items-center space-x-1.5 transition-all ${
+                    isCurrent('/dashboard')
+                      ? 'bg-[#a84c38]/25 text-white font-bold border border-[#a84c38]/60 shadow-md shadow-[#a84c38]/20'
+                      : 'text-slate-300 font-medium hover:text-white hover:bg-slate-800/60 border border-transparent'
                   }`}
                 >
                   <FileSearch className="w-4 h-4 text-indigo-400" />
@@ -104,8 +112,10 @@ export const Navbar: React.FC = () => {
               {user?.userType === 'recruiter' && (
                 <Link
                   to="/recruiter"
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
-                    isCurrent('/recruiter') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  className={`px-4 py-1.5 rounded-full text-xs flex items-center space-x-1.5 transition-all ${
+                    isCurrent('/recruiter')
+                      ? 'bg-[#a84c38]/25 text-white font-bold border border-[#a84c38]/60 shadow-md shadow-[#a84c38]/20'
+                      : 'text-slate-300 font-medium hover:text-white hover:bg-slate-800/60 border border-transparent'
                   }`}
                 >
                   <Users className="w-4 h-4 text-purple-400" />
@@ -115,8 +125,10 @@ export const Navbar: React.FC = () => {
               {(user?.userType === 'admin' || user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com') && (
                 <Link
                   to="/admin"
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1.5 transition-all ${
-                    isCurrent('/admin') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  className={`px-4 py-1.5 rounded-full text-xs flex items-center space-x-1.5 transition-all ${
+                    isCurrent('/admin')
+                      ? 'bg-[#a84c38]/25 text-white font-bold border border-[#a84c38]/60 shadow-md shadow-[#a84c38]/20'
+                      : 'text-slate-300 font-medium hover:text-white hover:bg-slate-800/60 border border-transparent'
                   }`}
                 >
                   <Shield className="w-4 h-4 text-amber-400" />
