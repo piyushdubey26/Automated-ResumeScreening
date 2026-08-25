@@ -297,20 +297,32 @@ export const DashboardPage: React.FC = () => {
               <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Monthly Usage</span>
                 <span className="font-extrabold text-white text-xs">
-                  {user?.plan === 'pro' || user?.plan === 'career-max' ? 'Unlimited' : `${user?.usage?.['resume_reviews'] || 3} / 5 Used`}
+                  {(user?.plan === 'pro' || user?.plan === 'career-max') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    ? 'Unlimited'
+                    : `${user?.usage?.['resume_reviews'] || 0} / 5 Used`}
                 </span>
               </div>
               <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">XP Points</span>
-                <span className="font-extrabold text-[#a84c38] text-sm">1,450 XP</span>
+                <span className="font-extrabold text-[#a84c38] text-sm">{user?.points ? `${user.points} XP` : '1,450 XP'}</span>
               </div>
               <div className="flex items-center space-x-1.5">
                 <span className={`px-2 py-1 rounded border text-[10px] font-bold ${
-                  user?.plan === 'pro' || user?.plan === 'career-max'
-                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  (user?.plan === 'career-max') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                    : (user?.plan === 'pro') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : user?.subscriptionStatus === 'pending'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                     : 'bg-[#a84c38]/10 text-[#a84c38] border-[#a84c38]/20'
                 }`}>
-                  {user?.plan === 'pro' || user?.plan === 'career-max' ? 'Pro Member' : 'Free Seeker'}
+                  {(user?.plan === 'career-max') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    ? 'Career Max'
+                    : (user?.plan === 'pro') && (user?.subscriptionStatus === 'approved' || user?.subscriptionStatus === 'active')
+                    ? 'Job Seeker Pro'
+                    : user?.subscriptionStatus === 'pending'
+                    ? 'Approval Pending'
+                    : 'Free Seeker'}
                 </span>
               </div>
             </div>
