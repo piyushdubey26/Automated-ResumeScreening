@@ -21,37 +21,11 @@ const SKILLS_BY_ROLE = {
 const ACTION_VERBS = ['achieved', 'analyzed', 'architected', 'built', 'created', 'designed', 'developed', 'engineered', 'formulated', 'implemented', 'improved', 'increased', 'led', 'managed', 'optimized', 'reduced', 'scaled'];
 
 const getApiBase = () => {
-  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isRemoteDomain = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-
   let envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE;
-
-  // Ignore localhost/127.0.0.1 environment settings if loaded on a remote domain or HTTPS site
-  if ((isHttps || isRemoteDomain) && envUrl && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
-    envUrl = '';
-  }
-
   if (envUrl) {
     return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
   }
-
-  if (typeof window !== 'undefined') {
-    const { protocol, hostname } = window.location;
-    
-    // In production deployments (e.g. Vercel, Netlify, Custom Domain)
-    if (protocol === 'https:' || (hostname !== 'localhost' && hostname !== '127.0.0.1' && !/^(\d+\.){3}\d+$/.test(hostname))) {
-      return '/api';
-    }
-
-    // Check if the frontend is accessed via local network IP (e.g. 192.168.x.x on mobile)
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && /^(\d+\.){3}\d+$/.test(hostname)) {
-      return `${protocol}//${hostname}:8000/api`;
-    }
-
-    // Local development fallback
-    return `${protocol}//localhost:8000/api`;
-  }
-
+  // Default to relative /api (proxied in Vite dev, native on Vercel production)
   return '/api';
 };
 
