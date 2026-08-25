@@ -589,32 +589,31 @@ export const DashboardPage: React.FC = () => {
                 </span>
               </div>
               <div className="text-center px-3 border-r border-slate-800">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Plan Period</span>
-                <span className="font-extrabold text-white text-xs block min-w-[70px]">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Subscription</span>
+                <span className="font-extrabold text-white text-xs block">
                   {activeSub && activeSub.status === 'active'
-                    ? countdownText || 'Active'
+                    ? (activeSub.planName || 'Job Seeker Pro')
                     : activeSub && activeSub.status === 'expired'
-                    ? 'Expired'
-                    : 'No active plan'}
+                    ? `${activeSub.planName || 'Pro'} (Expired)`
+                    : 'Free Seeker'}
                 </span>
               </div>
-              <div className="flex items-center space-x-1.5 px-3">
-                <span className={`px-2 py-1 rounded border text-[10px] font-bold ${
-                  activeSub && activeSub.status === 'active' && activeSub.planId === 'career-max'
-                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                    : activeSub && activeSub.status === 'active' && (activeSub.planId === 'job_seeker_pro' || activeSub.planId === 'pro')
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+              <div className="text-center px-3">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Status / Period</span>
+                <span className={`font-extrabold text-xs block px-2 py-0.5 rounded ${
+                  activeSub && activeSub.status === 'active'
+                    ? 'text-emerald-400 bg-emerald-500/10'
                     : activeSub && activeSub.status === 'expired'
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
-                    : 'bg-[#a84c38]/10 text-[#a84c38] border-[#a84c38]/20'
+                    ? 'text-rose-400 bg-rose-500/10 animate-pulse'
+                    : 'text-slate-400 bg-slate-800/40'
                 }`}>
-                  {activeSub && activeSub.status === 'active' && activeSub.planId === 'career-max'
-                    ? 'Career Max'
-                    : activeSub && activeSub.status === 'active' && (activeSub.planId === 'job_seeker_pro' || activeSub.planId === 'pro')
-                    ? 'Job Seeker Pro'
+                  {activeSub && activeSub.status === 'active'
+                    ? (activeSub.autoRenew === false 
+                        ? `Until ${new Date(activeSub.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` 
+                        : (countdownText || 'Active'))
                     : activeSub && activeSub.status === 'expired'
                     ? 'Expired'
-                    : 'Free Seeker'}
+                    : 'Free Tier'}
                 </span>
               </div>
             </div>
