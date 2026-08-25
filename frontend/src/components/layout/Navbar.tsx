@@ -315,10 +315,17 @@ export const Navbar: React.FC = () => {
 
               <Link
                 to="/login"
-                className="inline-flex items-center space-x-1 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg shadow-indigo-600/30 hover:opacity-95 transition-all"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-all"
               >
-                <span>Sign In</span>
-                <ChevronRight className="w-4 h-4" />
+                Log In
+              </Link>
+
+              <Link
+                to="/register"
+                className="inline-flex items-center space-x-1 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg shadow-indigo-600/30 hover:opacity-95 transition-all"
+              >
+                <span>Get Started</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           )}

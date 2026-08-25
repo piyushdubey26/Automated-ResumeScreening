@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Zap, Users, ArrowRight } from 'lucide-react';
 
@@ -9,6 +9,22 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const { login, demoLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTarget = searchParams.get('redirect');
+
+  const handleRedirect = (role?: string) => {
+    if (redirectTarget) {
+      navigate(redirectTarget);
+    } else if (role === 'admin' || email.includes('admin')) {
+      navigate('/admin');
+    } else if (role === 'recruiter' || email.includes('recruiter')) {
+      navigate('/recruiter');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,11 +34,7 @@ export const LoginPage: React.FC = () => {
     }
     try {
       await login(email, password);
-      if (email.includes('recruiter')) {
-        navigate('/recruiter');
-      } else {
-        navigate('/dashboard');
-      }
+      handleRedirect();
     } catch {
       setError('Authentication failed. Try demo login.');
     }
@@ -53,9 +65,9 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={async () => {
                 await demoLogin('seeker');
-                navigate('/dashboard');
+                handleRedirect('seeker');
               }}
-              className="p-3 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 rounded-2xl text-xs font-bold text-indigo-300 transition-all flex flex-col items-center justify-center space-y-1 shadow"
+              className="p-3 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 rounded-2xl text-xs font-bold text-indigo-300 transition-all flex flex-col items-center justify-center space-y-1 shadow cursor-pointer"
             >
               <Zap className="w-4 h-4 text-amber-400" />
               <span>Demo Seeker</span>
@@ -64,9 +76,9 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={async () => {
                 await demoLogin('recruiter');
-                navigate('/recruiter');
+                handleRedirect('recruiter');
               }}
-              className="p-3 bg-purple-950/80 hover:bg-purple-900 border border-purple-700/60 rounded-2xl text-xs font-bold text-purple-300 transition-all flex flex-col items-center justify-center space-y-1 shadow"
+              className="p-3 bg-purple-950/80 hover:bg-purple-900 border border-purple-700/60 rounded-2xl text-xs font-bold text-purple-300 transition-all flex flex-col items-center justify-center space-y-1 shadow cursor-pointer"
             >
               <Users className="w-4 h-4 text-purple-400" />
               <span>Demo Recruiter</span>

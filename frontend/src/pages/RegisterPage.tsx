@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
@@ -10,12 +10,18 @@ export const RegisterPage: React.FC = () => {
   const [userType, setUserType] = useState<'seeker' | 'recruiter'>('seeker');
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTarget = searchParams.get('redirect');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) return;
     await signup(name, email, rolePreference, userType);
-    if (userType === 'recruiter') {
+    if (redirectTarget) {
+      navigate(redirectTarget);
+    } else if (userType === 'recruiter') {
       navigate('/recruiter');
     } else {
       navigate('/dashboard');

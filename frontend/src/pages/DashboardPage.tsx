@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { sampleResumesText, sampleJDsText, resumeApi, jobApi } from '../services/api';
 import { FileUpload } from '../components/upload/FileUpload';
+import { canAccessFeature } from '../utils/permissions';
+import UpgradeGate from '../components/auth/UpgradeGate';
 import type {
   ResumeRecord,
   JDMatchResult,
@@ -23,7 +25,8 @@ import {
   Info,
   LayoutDashboard,
   Briefcase,
-  User
+  User,
+  Lock
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
@@ -225,30 +228,38 @@ export const DashboardPage: React.FC = () => {
 
             <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none border-b border-slate-900 lg:border-none">
               {[
-                { name: "Dashboard", label: "Dashboard", icon: LayoutDashboard },
-                { name: "Resume Review", label: "Resume Review", icon: FileText },
-                { name: "Job Matches", label: "Job Matches", icon: Briefcase },
-                { name: "AI Bullet Rewriter", label: "AI Bullet Rewriter", icon: Zap },
-                { name: "Portfolio & Learning", label: "Portfolio & Learning", icon: BookOpen },
-                { name: "AI Mock Interview", label: "AI Mock Interview", icon: HelpCircle },
-                { name: "Applications", label: "Applications", icon: FileCheck2 },
-                { name: "Leaderboard & Badges", label: "Leaderboard & Badges", icon: Award },
-                { name: "Profile", label: "Profile", icon: User }
+                { name: "Dashboard", label: "Dashboard", icon: LayoutDashboard, feature: null },
+                { name: "Resume Review", label: "Resume Review", icon: FileText, feature: 'resume.basicReview' },
+                { name: "Job Matches", label: "Job Matches", icon: Briefcase, feature: 'resume.jdMatch' },
+                { name: "AI Bullet Rewriter", label: "AI Bullet Rewriter", icon: Zap, feature: 'ai.bulletRewriter' },
+                { name: "Portfolio & Learning", label: "Portfolio & Learning", icon: BookOpen, feature: 'portfolio.analysis' },
+                { name: "AI Mock Interview", label: "AI Mock Interview", icon: HelpCircle, feature: 'ai.mockInterview' },
+                { name: "Applications", label: "Applications", icon: FileCheck2, feature: null },
+                { name: "Leaderboard & Badges", label: "Leaderboard & Badges", icon: Award, feature: null },
+                { name: "Profile", label: "Profile", icon: User, feature: null }
               ].map(item => {
                 const Icon = item.icon;
                 const isActive = activeNav === item.name;
+                const access = item.feature ? canAccessFeature(user, item.feature as any) : { allowed: true };
+                const isLocked = !access.allowed;
+
                 return (
                   <button
                     key={item.name}
                     onClick={() => setActiveNav(item.name as any)}
-                    className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                    className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                       isActive
                         ? "bg-[#a84c38]/20 text-[#a84c38] border border-[#a84c38]/20 shadow-md shadow-[#a84c38]/10"
                         : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-transparent"
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
+                    <div className="flex items-center space-x-2.5">
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </div>
+                    {isLocked && (
+                      <Lock className="w-3 h-3 text-amber-400 opacity-80" />
+                    )}
                   </button>
                 );
               })}
@@ -284,12 +295,22 @@ export const DashboardPage: React.FC = () => {
             
             <div className="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-xs shrink-0">
               <div className="text-center px-3 border-r border-slate-800">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Monthly Usage</span>
+                <span className="font-extrabold text-white text-xs">
+                  {user?.plan === 'pro' || user?.plan === 'career-max' ? 'Unlimited' : `${user?.usage?.['resume_reviews'] || 3} / 5 Used`}
+                </span>
+              </div>
+              <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">XP Points</span>
                 <span className="font-extrabold text-[#a84c38] text-sm">1,450 XP</span>
               </div>
               <div className="flex items-center space-x-1.5">
-                <span className="px-2 py-1 rounded bg-[#a84c38]/10 text-[#a84c38] border border-[#a84c38]/20 text-[10px] font-bold">
-                  ATS Ninja
+                <span className={`px-2 py-1 rounded border text-[10px] font-bold ${
+                  user?.plan === 'pro' || user?.plan === 'career-max'
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    : 'bg-[#a84c38]/10 text-[#a84c38] border-[#a84c38]/20'
+                }`}>
+                  {user?.plan === 'pro' || user?.plan === 'career-max' ? 'Pro Member' : 'Free Seeker'}
                 </span>
               </div>
             </div>
@@ -780,7 +801,10 @@ export const DashboardPage: React.FC = () => {
 
           {/* TAB 3: JOB MATCHES */}
           {activeNav === 'Job Matches' && (
-            <div className="space-y-6 animate-fadeIn">
+            !canAccessFeature(user, 'resume.jdMatch').allowed ? (
+              <UpgradeGate featureKey="resume.jdMatch" reason={canAccessFeature(user, 'resume.jdMatch').reason} />
+            ) : (
+              <div className="space-y-6 animate-fadeIn">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 
                 {/* Left Column: Job Description Input */}
@@ -953,11 +977,14 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          )}
+          ))}
 
           {/* TAB 4: AI BULLET REWRITER */}
           {activeNav === 'AI Bullet Rewriter' && (
-            <div className="max-w-4xl mx-auto bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
+            !canAccessFeature(user, 'ai.bulletRewriter').allowed ? (
+              <UpgradeGate featureKey="ai.bulletRewriter" reason={canAccessFeature(user, 'ai.bulletRewriter').reason} />
+            ) : (
+              <div className="max-w-4xl mx-auto bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-white flex items-center space-x-2">
                   <Zap className="w-5 h-5 text-amber-400" />
@@ -1066,65 +1093,73 @@ export const DashboardPage: React.FC = () => {
               )}
 
             </div>
+            )
           )}
 
           {/* TAB 5: PORTFOLIO & LEARNING */}
           {activeNav === 'Portfolio & Learning' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start animate-fadeIn">
-              <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
-                <h3 className="font-bold text-white text-base flex items-center space-x-2">
-                  <BookOpen className="w-5 h-5 text-emerald-400" />
-                  <span>Public Portfolio Signals</span>
-                </h3>
-                <p className="text-xs text-slate-400">Validate code repositories and public activity strength.</p>
+            !canAccessFeature(user, 'portfolio.analysis').allowed ? (
+              <UpgradeGate featureKey="portfolio.analysis" reason={canAccessFeature(user, 'portfolio.analysis').reason} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start animate-fadeIn">
+                <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
+                  <h3 className="font-bold text-white text-base flex items-center space-x-2">
+                    <BookOpen className="w-5 h-5 text-emerald-400" />
+                    <span>Public Portfolio Signals</span>
+                  </h3>
+                  <p className="text-xs text-slate-400">Validate code repositories and public activity strength.</p>
 
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">GitHub Stars</span>
-                    <span className="text-white font-bold">38 Stars</span>
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">GitHub Stars</span>
+                      <span className="text-white font-bold">38 Stars</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Public Repositories</span>
+                      <span className="text-white font-bold">14 Repos</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Portfolio Rating</span>
+                      <span className="text-emerald-400 font-bold">88 / 100</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-900 text-slate-300 leading-relaxed">
+                      Verified activity in microservices, React, and TypeScript projects. GitHub connection status: Active.
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Public Repositories</span>
-                    <span className="text-white font-bold">14 Repos</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Portfolio Rating</span>
-                    <span className="text-emerald-400 font-bold">88 / 100</span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-900 text-slate-300 leading-relaxed">
-                    Verified activity in microservices, React, and TypeScript projects. GitHub connection status: Active.
+                </div>
+
+                <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
+                  <h3 className="font-bold text-white text-base">Curated Learning Paths</h3>
+                  <p className="text-xs text-slate-400">Targeted course recommendations to fill identified skill gaps.</p>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <div className="flex justify-between text-white font-bold">
+                        <span>GraphQL & Microservices Architecture</span>
+                        <span className="text-indigo-400">6 Hours</span>
+                      </div>
+                      <p className="text-slate-500 text-[10px]">Educative.io / Coursera</p>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <div className="flex justify-between text-white font-bold">
+                        <span>Kubernetes Deployment & DevOps Pipelines</span>
+                        <span className="text-indigo-400">10 Hours</span>
+                      </div>
+                      <p className="text-slate-500 text-[10px]">Udemy / LinkedIn Learning</p>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <div className="bg-slate-900/50 border border-slate-900 p-6 rounded-3xl space-y-4">
-                <h3 className="font-bold text-white text-base">Curated Learning Paths</h3>
-                <p className="text-xs text-slate-400">Targeted course recommendations to fill identified skill gaps.</p>
-
-                <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
-                    <div className="flex justify-between text-white font-bold">
-                      <span>GraphQL & Microservices Architecture</span>
-                      <span className="text-indigo-400">6 Hours</span>
-                    </div>
-                    <p className="text-slate-500 text-[10px]">Educative.io / Coursera</p>
-                  </div>
-
-                  <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
-                    <div className="flex justify-between text-white font-bold">
-                      <span>Kubernetes Deployment & DevOps Pipelines</span>
-                      <span className="text-indigo-400">10 Hours</span>
-                    </div>
-                    <p className="text-slate-500 text-[10px]">Udemy / LinkedIn Learning</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )
           )}
 
           {/* TAB 6: AI MOCK INTERVIEW */}
           {activeNav === 'AI Mock Interview' && (
-            <div className="bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
+            !canAccessFeature(user, 'ai.mockInterview').allowed ? (
+              <UpgradeGate featureKey="ai.mockInterview" reason={canAccessFeature(user, 'ai.mockInterview').reason} />
+            ) : (
+              <div className="bg-slate-900/50 border border-slate-900 p-6 sm:p-8 rounded-3xl space-y-6 animate-fadeIn">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
                 <div>
                   <h3 className="text-xl font-bold text-white flex items-center space-x-2">
@@ -1184,6 +1219,7 @@ export const DashboardPage: React.FC = () => {
                 ))}
               </div>
             </div>
+            )
           )}
 
           {/* TAB 7: APPLICATIONS TRACKER */}

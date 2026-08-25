@@ -8,9 +8,10 @@ export interface User {
   points: number;
   avatar?: string;
   createdAt: string;
-  plan?: 'free' | 'pro' | 'recruiter';
-  subscriptionStatus?: 'free' | 'pending' | 'approved' | 'declined';
+  plan?: 'free' | 'pro' | 'career-max' | 'recruiter' | 'enterprise';
+  subscriptionStatus?: 'free' | 'active' | 'trialing' | 'pending' | 'approved' | 'declined' | 'cancelled' | 'expired';
   subscriptionRequestedAt?: string;
+  usage?: Record<string, number>;
 }
 
 export interface FeedbackCard {

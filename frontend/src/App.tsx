@@ -16,6 +16,9 @@ import DashboardPage from './pages/DashboardPage';
 import RecruiterDashboardPage from './pages/RecruiterDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleGuard from './components/auth/RoleGuard';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -35,14 +38,50 @@ export const App: React.FC = () => {
               <Navbar />
               <div className="flex-1">
                 <Routes>
+                  {/* PUBLIC ROUTES */}
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/features" element={<FeaturesPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/recruiter" element={<RecruiterDashboardPage />} />
-                  <Route path="/admin" element={<AdminDashboardPage />} />
+
+                  {/* PROTECTED SEEKER DASHBOARD */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <RoleGuard allowedRoles={['seeker']}>
+                          <DashboardPage />
+                        </RoleGuard>
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* PROTECTED RECRUITER HUB */}
+                  <Route
+                    path="/recruiter"
+                    element={
+                      <ProtectedRoute>
+                        <RoleGuard allowedRoles={['recruiter']}>
+                          <RecruiterDashboardPage />
+                        </RoleGuard>
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* PROTECTED ADMIN DASHBOARD */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute>
+                        <RoleGuard allowedRoles={['admin']}>
+                          <AdminDashboardPage />
+                        </RoleGuard>
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* FALLBACK */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </div>
