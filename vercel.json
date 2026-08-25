@@ -1,10 +1,18 @@
 {
-  "buildCommand": "cd frontend && npm run build",
+  "version": 2,
+  "buildCommand": "npm --prefix frontend run build",
   "outputDirectory": "frontend/dist",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

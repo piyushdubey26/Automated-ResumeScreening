@@ -21,16 +21,28 @@ const SKILLS_BY_ROLE = {
 const ACTION_VERBS = ['achieved', 'analyzed', 'architected', 'built', 'created', 'designed', 'developed', 'engineered', 'formulated', 'implemented', 'improved', 'increased', 'led', 'managed', 'optimized', 'reduced', 'scaled'];
 
 const getApiBase = () => {
-  const envBase = import.meta.env.VITE_API_BASE;
-  if (envBase) return envBase;
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE;
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
+  }
 
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    // Check if the frontend is accessed via local network IP (e.g. 192.168.x.x)
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && /^(\d+\.){3}\d+$/.test(hostname)) {
-      return `http://${hostname}:8000/api`;
+    const { protocol, hostname } = window.location;
+    
+    // In production deployments (e.g. Vercel, Netlify, Custom Domain over HTTPS)
+    if (protocol === 'https:') {
+      return '/api';
     }
+
+    // Check if the frontend is accessed via local network IP (e.g. 192.168.x.x on mobile)
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1' && /^(\d+\.){3}\d+$/.test(hostname)) {
+      return `${protocol}//${hostname}:8000/api`;
+    }
+
+    // Local development fallback
+    return `${protocol}//localhost:8000/api`;
   }
+
   return 'http://localhost:8000/api';
 };
 

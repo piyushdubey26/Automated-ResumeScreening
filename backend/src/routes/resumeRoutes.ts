@@ -25,11 +25,18 @@ router.post('/extract-text', authenticateJWT, upload.single('file'), async (req,
     if (!reqFile) {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
+    if (reqFile.size > 10 * 1024 * 1024) {
+      return res.status(413).json({ success: false, error: 'File must be 10MB or smaller.' });
+    }
     const text = await extractTextFromBuffer(reqFile.buffer, reqFile.originalname || 'file.pdf', reqFile.mimetype);
     return res.json({ success: true, text });
   } catch (err: any) {
     console.error('Text extraction error:', err);
-    return res.status(500).json({ success: false, error: err.message || 'Failed to extract text from file' });
+    const isUnsupported = err.message?.includes('Unsupported file type');
+    return res.status(isUnsupported ? 415 : 500).json({ 
+      success: false, 
+      error: isUnsupported ? 'Unsupported file type.' : (err.message || 'Failed to extract text from file') 
+    });
   }
 });
 

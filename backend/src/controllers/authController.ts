@@ -106,9 +106,32 @@ export const getAllUsers = (req: Request, res: Response) => {
     return res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
 
+  const now = new Date();
   const usersResponse = mockDb.users.map(u => {
     const userCopy = { ...u };
     delete userCopy.password;
+
+    // Attach latest subscription info
+    const sub = mockDb.subscriptions.find(s => s.userId === u.id);
+    if (sub) {
+      (userCopy as any).subscription = sub;
+      if (sub.status === 'active') {
+        const diff = new Date(sub.expiresAt).getTime() - now.getTime();
+        (userCopy as any).daysRemaining = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      }
+    }
+
+    // Attach latest resume info
+    const userResumes = mockDb.resumes.filter(r => r.userId === u.id);
+    if (userResumes.length > 0) {
+      const latestResume = userResumes[userResumes.length - 1];
+      (userCopy as any).hasResume = true;
+      (userCopy as any).latestResumeScore = latestResume.score;
+    } else {
+      (userCopy as any).hasResume = false;
+      (userCopy as any).latestResumeScore = null;
+    }
+
     return userCopy;
   });
 
