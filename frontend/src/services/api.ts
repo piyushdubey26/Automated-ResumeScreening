@@ -150,20 +150,21 @@ export const authApi = {
       const res = await api.post('/auth/login', { email, password });
       return res.data;
     } catch {
-      const lowerEmail = email.toLowerCase().trim();
-      
-      // Enforce strict credentials for primary Admin account
-      if (lowerEmail === 'piyushdubey447@gmail.com') {
-        if (!password || password !== 'piyush26') {
-          throw new Error('Invalid Admin password. Access restricted to Admin credential holders.');
-        }
+      const lowerEmail = (email || '').toLowerCase().trim();
+      if (!lowerEmail) {
+        throw new Error('Please enter your email address.');
+      }
+      if (!password) {
+        throw new Error('Please enter your password.');
       }
 
-      const db = getLocalDB();
-      let user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
-
-      // Primary Admin account provisioning
+      // 1. Primary Admin account verification
       if (lowerEmail === 'piyushdubey447@gmail.com') {
+        if (password !== 'piyush26') {
+          throw new Error('Invalid email or password.');
+        }
+        const db = getLocalDB();
+        let user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
         if (!user) {
           user = {
             id: 'admin-piyush',
@@ -180,40 +181,29 @@ export const authApi = {
           };
           db.users.push(user);
           saveLocalDB(db);
-        } else {
-          user.userType = 'admin';
-          saveLocalDB(db);
         }
-        return { token: 'mock-admin-jwt-token', user };
+        const userClean = { ...user };
+        delete userClean.password;
+        return { token: 'mock-admin-jwt-token', user: userClean };
       }
 
-      // For non-Piyush accounts, preserve assigned userType (which can be admin if promoted by Piyush in Admin Dashboard)
-      const isRecruiter = lowerEmail.includes('recruiter');
-      const userType: 'seeker' | 'recruiter' | 'admin' = user?.userType || (isRecruiter ? 'recruiter' : 'seeker');
+      // 2. Regular user authentication check
+      const db = getLocalDB();
+      const user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
 
-      const rawName = lowerEmail.split('@')[0].replace(/[._-]/g, ' ');
-      const displayName = rawName.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-
+      // Account must exist (NO auto-creation on login)
       if (!user) {
-        user = {
-          id: `user-${Date.now()}`,
-          name: displayName,
-          email,
-          password: password || 'password123',
-          rolePreference: 'sde',
-          userType,
-          plan: userType === 'recruiter' ? 'recruiter' : 'free',
-          subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free',
-          badges: ['New Explorer'],
-          points: 500,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
-          createdAt: new Date().toISOString()
-        };
-        db.users.push(user);
-        saveLocalDB(db);
-      } else if (user.password && password && user.password !== password) {
-        throw new Error('Incorrect password for this account. Try again or reset password.');
+        throw new Error('Invalid email or password.');
       }
+
+      // STRICT EXACT PASSWORD EQUALITY CHECK
+      if (user.password !== password) {
+        throw new Error('Invalid email or password.');
+      }
+
+      // Strip password from returned payload
+      const userClean = { ...user };
+      delete userClean.password;
 
       cloudSync.saveUser({
         id: user.id,
@@ -228,7 +218,7 @@ export const authApi = {
         lastActive: 'Just now'
       });
 
-      return { token: 'mock-jwt-token', user };
+      return { token: `mock-jwt-token-${Date.now()}`, user: userClean };
     }
   },
   signup: async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => {
@@ -236,7 +226,14 @@ export const authApi = {
       const res = await api.post('/auth/signup', { name, email, rolePreference, userType, password });
       return res.data;
     } catch {
-      const lowerEmail = email.toLowerCase().trim();
+      const lowerEmail = (email || '').toLowerCase().trim();
+      if (!lowerEmail) {
+        throw new Error('Please provide an email address.');
+      }
+      if (!password || password.length < 4) {
+        throw new Error('Password must be at least 4 characters long.');
+      }
+
       const db = getLocalDB();
       
       const existing = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
@@ -246,15 +243,16 @@ export const authApi = {
 
       const user: User & { password?: string } = {
         id: `user-${Date.now()}`,
-        name,
-        email,
-        password: password || 'password123',
+        name: name.trim(),
+        email: email.trim(),
+        password: password,
         rolePreference: rolePreference as any,
         userType,
         plan: userType === 'recruiter' ? 'recruiter' : 'free',
         subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free',
-        badges: ['New Explorer'],
-        points: 500,
+        badges: [],
+        points: 0,
+        usage: { resume_reviews: 0 },
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
         createdAt: new Date().toISOString()
       };
@@ -274,7 +272,10 @@ export const authApi = {
         lastActive: 'Just now'
       });
 
-      return { token: 'mock-jwt-token', user };
+      const userClean = { ...user };
+      delete userClean.password;
+
+      return { token: `mock-jwt-token-${Date.now()}`, user: userClean };
     }
   },
   getMe: async () => {
