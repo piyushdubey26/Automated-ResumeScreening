@@ -1336,7 +1336,7 @@ export const RecruiterDashboardPage: React.FC = () => {
 
                       <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1 scrollbar-none">
                         {uploadFilesMock.map((file, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-955 border border-slate-850/50">
+                          <div key={i} className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-950 border border-slate-800/50">
                             <div className="flex items-center space-x-2">
                               <FileText className="w-4 h-4 text-slate-500" />
                               <span className="font-semibold text-slate-300 truncate max-w-[200px]">{file.name}</span>

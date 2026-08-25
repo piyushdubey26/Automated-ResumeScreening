@@ -934,3 +934,160 @@ html.dark [class*="text-[#35634c]"] {
 html.dark [class*="bg-[#e6eee9]"] {
   background-color: #d9e9df !important;
 }
+
+/* ==========================================================================
+   UNIVERSAL LIGHT MODE HIGH-CONTRAST TEXT & SURFACE OVERRIDES
+   Ensures 100% text visibility across Seeker Dashboard, Recruiter Hub, Admin
+   ========================================================================== */
+
+/* Turn all dark slate container background opacities into clean light paper surfaces in light mode */
+html:not(.dark) [class*="bg-slate-950"],
+html:not(.dark) [class*="bg-slate-900"],
+html:not(.dark) [class*="bg-slate-800"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+/* Light mode transparent/opaque card overlays */
+html:not(.dark) .bg-slate-900\/50,
+html:not(.dark) .bg-slate-900\/40,
+html:not(.dark) .bg-slate-900\/30,
+html:not(.dark) .bg-slate-900\/20,
+html:not(.dark) .bg-slate-900\/10,
+html:not(.dark) .bg-slate-950\/80,
+html:not(.dark) .bg-slate-950\/50,
+html:not(.dark) .bg-slate-950\/30,
+html:not(.dark) .bg-slate-950\/20,
+html:not(.dark) .bg-slate-800\/60,
+html:not(.dark) .bg-slate-800\/40 {
+  background-color: #ffffff !important;
+}
+
+/* Light mode badge backgrounds */
+html:not(.dark) [class*="bg-indigo-950"],
+html:not(.dark) [class*="bg-indigo-500/10"],
+html:not(.dark) [class*="bg-indigo-500/20"] {
+  background-color: #eef2ff !important;
+}
+
+html:not(.dark) [class*="bg-purple-950"],
+html:not(.dark) [class*="bg-purple-500/10"],
+html:not(.dark) [class*="bg-purple-500/20"] {
+  background-color: #f3e8ff !important;
+}
+
+html:not(.dark) [class*="bg-emerald-950"],
+html:not(.dark) [class*="bg-emerald-500/10"],
+html:not(.dark) [class*="bg-emerald-500/20"] {
+  background-color: #ecfdf5 !important;
+}
+
+html:not(.dark) [class*="bg-rose-950"],
+html:not(.dark) [class*="bg-rose-500/10"],
+html:not(.dark) [class*="bg-rose-500/20"] {
+  background-color: #fff1f2 !important;
+}
+
+html:not(.dark) [class*="bg-amber-950"],
+html:not(.dark) [class*="bg-amber-500/10"],
+html:not(.dark) [class*="bg-amber-500/20"] {
+  background-color: #fffbeb !important;
+}
+
+/* All light mode text elements -> Matte Black / Dark Slate */
+html:not(.dark) .text-white,
+html:not(.dark) .text-slate-50,
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200,
+html:not(.dark) .text-slate-300 {
+  color: #0f172a !important; /* matte black slate-900 */
+}
+
+html:not(.dark) .text-slate-400 {
+  color: #334155 !important; /* dark slate-700 */
+}
+
+html:not(.dark) .text-slate-500 {
+  color: #475569 !important; /* slate-600 */
+}
+
+/* High contrast accent text in light mode */
+html:not(.dark) .text-indigo-300,
+html:not(.dark) .text-indigo-400 {
+  color: #3730a3 !important; /* indigo-800 */
+}
+
+html:not(.dark) .text-purple-300,
+html:not(.dark) .text-purple-400 {
+  color: #6b21a8 !important; /* purple-800 */
+}
+
+html:not(.dark) .text-emerald-300,
+html:not(.dark) .text-emerald-400 {
+  color: #065f46 !important; /* emerald-800 */
+}
+
+html:not(.dark) .text-amber-300,
+html:not(.dark) .text-amber-400 {
+  color: #92400e !important; /* amber-800 */
+}
+
+html:not(.dark) .text-rose-300,
+html:not(.dark) .text-rose-400 {
+  color: #9f1239 !important; /* rose-800 */
+}
+
+html:not(.dark) .text-pink-300,
+html:not(.dark) .text-pink-400 {
+  color: #9d174d !important; /* pink-800 */
+}
+
+html:not(.dark) .text-teal-300,
+html:not(.dark) .text-teal-400 {
+  color: #115e59 !important; /* teal-800 */
+}
+
+/* Light mode table headers and cells */
+html:not(.dark) th,
+html:not(.dark) td {
+  color: #0f172a !important;
+}
+
+/* Maintain crisp white text inside solid colored buttons & badges */
+html:not(.dark) .bg-\[\#a84c38\],
+html:not(.dark) .bg-amber-600,
+html:not(.dark) .bg-indigo-600,
+html:not(.dark) .bg-purple-600,
+html:not(.dark) .bg-emerald-600,
+html:not(.dark) .bg-rose-600,
+html:not(.dark) .bg-[#1d3848],
+html:not(.dark) .bg-[#203b49],
+html:not(.dark) button.bg-\[\#a84c38\],
+html:not(.dark) button.bg-amber-600,
+html:not(.dark) button.bg-indigo-600,
+html:not(.dark) button.bg-purple-600,
+html:not(.dark) button.bg-emerald-600,
+html:not(.dark) button.bg-rose-600,
+html:not(.dark) a.bg-\[\#a84c38\],
+html:not(.dark) a.bg-indigo-600 {
+  color: #ffffff !important;
+}
+
+html:not(.dark) .bg-\[\#a84c38\] *,
+html:not(.dark) .bg-amber-600 *,
+html:not(.dark) .bg-indigo-600 *,
+html:not(.dark) .bg-purple-600 *,
+html:not(.dark) .bg-emerald-600 *,
+html:not(.dark) .bg-rose-600 *,
+html:not(.dark) .bg-[#1d3848] *,
+html:not(.dark) .bg-[#203b49] *,
+html:not(.dark) button.bg-\[\#a84c38\] *,
+html:not(.dark) button.bg-amber-600 *,
+html:not(.dark) button.bg-indigo-600 *,
+html:not(.dark) button.bg-purple-600 *,
+html:not(.dark) button.bg-emerald-600 *,
+html:not(.dark) button.bg-rose-600 *,
+html:not(.dark) a.bg-\[\#a84c38\] *,
+html:not(.dark) a.bg-indigo-600 * {
+  color: #ffffff !important;
+}
