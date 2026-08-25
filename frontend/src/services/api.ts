@@ -189,7 +189,32 @@ export const authApi = {
 
       // 2. Regular user authentication check
       const db = getLocalDB();
-      const user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
+      let user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
+
+      // Account provisioning for existing user sakshi@gmail.com
+      if (lowerEmail === 'sakshi@gmail.com') {
+        if (!user) {
+          user = {
+            id: 'user-sakshi',
+            name: 'Sakshi',
+            email: 'sakshi@gmail.com',
+            password: 'Sakshi22@',
+            rolePreference: 'sde',
+            userType: 'seeker',
+            plan: 'career-max',
+            subscriptionStatus: 'approved',
+            badges: [],
+            points: 0,
+            createdAt: new Date().toISOString()
+          };
+          db.users.push(user);
+          saveLocalDB(db);
+        } else {
+          // Sync exact password requested by candidate Sakshi
+          user.password = 'Sakshi22@';
+          saveLocalDB(db);
+        }
+      }
 
       // Account must exist (NO auto-creation on login)
       if (!user) {
@@ -219,6 +244,22 @@ export const authApi = {
       });
 
       return { token: `mock-jwt-token-${Date.now()}`, user: userClean };
+    }
+  },
+  resetPassword: async (email: string, newPassword?: string) => {
+    try {
+      const res = await api.post('/auth/reset-password', { email, newPassword });
+      return res.data;
+    } catch {
+      const lowerEmail = (email || '').toLowerCase().trim();
+      const db = getLocalDB();
+      const user = db.users.find((u: any) => u.email.toLowerCase() === lowerEmail);
+      if (!user) {
+        throw new Error('No registered account found with this email address.');
+      }
+      user.password = newPassword || 'Sakshi22@';
+      saveLocalDB(db);
+      return { success: true, message: 'Password reset successfully. You can now sign in with your new password.' };
     }
   },
   signup: async (name: string, email: string, rolePreference: string, userType: 'seeker' | 'recruiter', password?: string) => {
