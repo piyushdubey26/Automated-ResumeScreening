@@ -13,33 +13,46 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
     const reqFile = (req as any).file;
     const role = targetRole || 'sde';
 
-    let rawText = text || '';
-
     // Enforce authentication
     const authUserId = req.user?.userId;
     if (!authUserId) {
       return res.status(401).json({ success: false, error: 'Authentication required. Please log in.' });
     }
 
-    if (!rawText && reqFile) {
+    let rawText = text || '';
+
+    if (!rawText && !reqFile) {
+      return res.status(400).json({ success: false, error: 'No resume text or file uploaded.' });
+    }
+
+    if (reqFile) {
       // Validate file size (max 10MB)
       if (reqFile.size > 10 * 1024 * 1024) {
-        return res.status(400).json({ success: false, error: 'File must be 10MB or smaller.' });
+        return res.status(413).json({ success: false, error: 'File size exceeds maximum limit of 10MB.' });
       }
+
       try {
-        rawText = await extractTextFromBuffer(reqFile.buffer, reqFile.originalname || 'resume.pdf', reqFile.mimetype);
+        rawText = await extractTextFromBuffer(reqFile.buffer, reqFile.originalname || 'resume.pdf', reqFile.mimetype || '');
       } catch (err: any) {
-        return res.status(400).json({ success: false, error: err.message || 'Failed to extract text from file' });
+        console.error('Text extraction failed during resume upload:', err);
+        const isUnsupported = err.message?.includes('Unsupported file type');
+        return res.status(isUnsupported ? 415 : 422).json({
+          success: false,
+          error: isUnsupported ? 'Unsupported file type.' : (err.message || 'Failed to extract text from file.')
+        });
       }
     }
 
     if (!rawText || rawText.trim().length < 10) {
-      return res.status(400).json({ success: false, error: 'Could not extract enough text from this file. Try a different format or paste text manually.' });
+      return res.status(422).json({
+        success: false,
+        error: 'Could not extract enough text from this file. Try a different format or paste text manually.'
+      });
     }
 
     const userRecord = mockDb.users.find(u => u.id === authUserId);
     if (!userRecord) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: 'User account not found.' });
     }
 
     const activeSub = getActiveSubscription(authUserId);
@@ -76,6 +89,7 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
       createdAt: new Date().toISOString()
     };
 
+    mockDb.resumes = mockDb.resumes.filter(r => r.userId !== authUserId);
     mockDb.resumes.unshift(newResume);
     saveDb();
 
@@ -86,30 +100,37 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
       resume: newResume
     });
   } catch (err: any) {
-    console.error('Error parsing resume:', err);
-    return res.status(500).json({ success: false, error: 'Failed to parse resume' });
+    console.error('CRITICAL BACKEND ERROR in uploadAndParseResume:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'An unexpected server error occurred while processing the upload.'
+    });
   }
 };
 
 export const getResumeById = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const resume = mockDb.resumes.find(r => r.id === id) || mockDb.resumes[0];
-  if (!resume) {
-    return res.status(404).json({ error: 'Resume not found' });
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ success: false, error: 'Authentication required' });
   }
-  return res.json({ resume });
+  const { id } = req.params;
+  const resume = mockDb.resumes.find(r => r.id === id && r.userId === authUserId);
+  if (!resume) {
+    return res.status(404).json({ success: false, error: 'Resume not found' });
+  }
+  return res.json({ success: true, resume });
 };
 
 export const getLatestResume = (req: Request, res: Response) => {
   const authUserId = req.user?.userId;
   if (!authUserId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res.status(401).json({ success: false, error: 'Authentication required' });
   }
   const resume = mockDb.resumes.find(r => r.userId === authUserId);
   if (!resume) {
-    return res.status(404).json({ error: 'No resume found' });
+    return res.status(404).json({ success: false, error: 'No resume found for this user' });
   }
-  return res.json({ resume });
+  return res.json({ success: true, resume });
 };
 
 export const getResumeFeedback = (req: Request, res: Response) => {

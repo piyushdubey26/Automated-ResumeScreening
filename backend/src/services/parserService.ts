@@ -32,6 +32,10 @@ const ACTION_VERBS = [
   'increased', 'modeled', 'evaluated', 'designed', 'prioritized', 'transformed'
 ];
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export class ParserService {
   public static parseText(text: string): ParsedResume {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
@@ -49,8 +53,16 @@ export class ParserService {
     // Extract skills present in text
     const lowerText = text.toLowerCase();
     const foundSkills = COMMON_SKILLS.filter(skill => {
-      const regex = new RegExp(`\\b${skill.replace('.', '\\.')}\\b`, 'i');
-      return regex.test(lowerText);
+      const lowerSkill = skill.toLowerCase();
+      if (lowerSkill.includes('+')) {
+        return lowerText.includes(lowerSkill);
+      }
+      try {
+        const regex = new RegExp(`\\b${escapeRegExp(skill)}\\b`, 'i');
+        return regex.test(lowerText);
+      } catch {
+        return lowerText.includes(lowerSkill);
+      }
     });
 
     // Count metrics (percentages, dollar amounts, scale indicators like 2M+, 40%)

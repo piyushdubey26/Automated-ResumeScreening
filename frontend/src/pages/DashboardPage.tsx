@@ -386,6 +386,11 @@ export const DashboardPage: React.FC = () => {
   const handleRunComparison = async () => {
     if (!resumeInput.trim()) return;
     setIsAnalyzing(true);
+    
+    // Invalidate/clear stale state before running new analysis
+    setResumeRecord(null);
+    setJdMatchResult(null);
+
     const hasJD = !!jdInput.trim();
     if (hasJD) {
       setIsMatching(true);
@@ -406,8 +411,10 @@ export const DashboardPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Analysis failed:', err);
+      setResumeRecord(null);
+      setJdMatchResult(null);
       const errorMsg = err.response?.data?.error || err.message || 'Failed to analyze resume.';
-      alert(errorMsg);
+      alert(`Resume upload failed: ${errorMsg}`);
     } finally {
       setIsAnalyzing(false);
       setIsMatching(false);
@@ -1006,6 +1013,8 @@ export const DashboardPage: React.FC = () => {
                 {/* File Upload Zone */}
                 <FileUpload
                   onTextExtracted={(text) => {
+                    setResumeRecord(null);
+                    setJdMatchResult(null);
                     setResumeInput(text);
                     localStorage.setItem(KEY_RESUME_TEXT, text);
                   }}

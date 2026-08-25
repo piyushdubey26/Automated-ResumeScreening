@@ -28,7 +28,8 @@
       ],
       "points": 500,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
-      "createdAt": "2026-08-25T13:31:04.615Z"
+      "createdAt": "2026-08-25T13:31:04.615Z",
+      "monthlyUsage": 1
     },
     {
       "id": "user-seeker-1",
@@ -60,6 +61,81 @@
     }
   ],
   "resumes": [
+    {
+      "id": "resume-1787678876615",
+      "userId": "user-sakshi",
+      "filename": "Uploaded_Resume.pdf",
+      "targetRole": "sde",
+      "rawText": "Sakshi Sharma Senior Software Engineer React TypeScript Node.js PostgreSQL AWS Docker c++",
+      "parsedSections": {
+        "contact": {
+          "name": "Candidate"
+        },
+        "skills": [
+          "typescript",
+          "react",
+          "node.js",
+          "c++",
+          "postgresql",
+          "aws",
+          "docker"
+        ],
+        "experience": [
+          "Developed microservices and REST APIs with high availability.",
+          "Optimized database queries and improved system throughput."
+        ],
+        "projects": [
+          "Automated Resume Screening Platform with role rubrics."
+        ],
+        "education": [
+          "B.S. in Computer Science"
+        ]
+      },
+      "score": 71,
+      "scoreBreakdown": {
+        "structure": 85,
+        "clarity": 67,
+        "impact": 48,
+        "skills": 80,
+        "projects": 80,
+        "ats": 80
+      },
+      "feedback": [
+        {
+          "id": "fb-struct-1",
+          "category": "Structure",
+          "severity": "medium",
+          "title": "Add GitHub / Code Portfolio Link",
+          "description": "Recruiters expect a link to your public code repositories for SDE roles.",
+          "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
+        },
+        {
+          "id": "fb-clarity-1",
+          "category": "Clarity",
+          "severity": "high",
+          "title": "Use Strong Action Verbs",
+          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
+          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
+        },
+        {
+          "id": "fb-impact-1",
+          "category": "Impact",
+          "severity": "high",
+          "title": "Missing Quantifiable Metrics",
+          "description": "Bullet points list responsibilities rather than measured outcomes.",
+          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
+        },
+        {
+          "id": "fb-skills-1",
+          "category": "Skills",
+          "severity": "medium",
+          "title": "Missing Essential Software Development Engineer Keywords",
+          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
+          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
+        }
+      ],
+      "createdAt": "2026-08-25T17:27:56.615Z"
+    },
     {
       "id": "resume-sde-1",
       "userId": "user-seeker-1",
