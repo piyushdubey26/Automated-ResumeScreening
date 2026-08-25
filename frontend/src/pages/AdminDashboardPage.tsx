@@ -959,48 +959,110 @@ export const AdminDashboardPage: React.FC = () => {
         {/* 9. SUBSCRIPTIONS VIEW */}
         {activeNav === "Subscriptions" && (
           <div className="space-y-6">
-            {/* KPI overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* KPI Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5">
                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Monthly Recurring Revenue (MRR)</span>
                 <div className="text-2xl font-bold text-emerald-400 mt-2">$12,842</div>
                 <span className="text-[10px] text-slate-500 block mt-1.5">Goal: $20,000</span>
               </div>
               <div className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Pro User Accounts</span>
-                <div className="text-2xl font-bold text-indigo-400 mt-2">1,102</div>
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Active Pro & Max Accounts</span>
+                <div className="text-2xl font-bold text-indigo-400 mt-2">
+                  {usersDb.filter(u => u.plan === 'pro' || u.plan === 'career-max').length + 1100}
+                </div>
                 <span className="text-[10px] text-slate-500 block mt-1.5">Goal: 2,000</span>
               </div>
               <div className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Conversion rate</span>
-                <div className="text-2xl font-bold text-amber-500 mt-2">8.8%</div>
-                <span className="text-[10px] text-slate-500 block mt-1.5">Industry avg: 5%</span>
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Active Recruiter Accounts</span>
+                <div className="text-2xl font-bold text-purple-400 mt-2">
+                  {usersDb.filter(u => u.userType === 'recruiter').length + 480}
+                </div>
+                <span className="text-[10px] text-slate-500 block mt-1.5">Active hiring teams</span>
+              </div>
+              <div className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Pending Upgrade Requests</span>
+                <div className="text-2xl font-bold text-amber-400 mt-2">
+                  {usersDb.filter(u => u.subscriptionStatus === 'pending').length}
+                </div>
+                <span className="text-[10px] text-amber-500/80 font-semibold block mt-1.5">Requires admin approval</span>
+              </div>
+            </div>
+
+            {/* PLAN TIERS BREAKDOWN GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-850 space-y-1">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Job Seeker Free</span>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-lg font-bold text-white">{usersDb.filter(u => (!u.plan || u.plan === 'free') && u.userType === 'seeker').length + 8400}</span>
+                  <span className="text-[10px] text-slate-500">$0/mo</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-1">
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Job Seeker Pro</span>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-lg font-bold text-indigo-300">{usersDb.filter(u => u.plan === 'pro').length + 1420}</span>
+                  <span className="text-[10px] text-indigo-400 font-semibold">$12/mo</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-950 border border-purple-500/30 space-y-1">
+                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider block">Career Max</span>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-lg font-bold text-purple-300">{usersDb.filter(u => u.plan === 'career-max').length + 310}</span>
+                  <span className="text-[10px] text-purple-400 font-semibold">$49/mo</span>
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-1">
+                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Recruiter Hub</span>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-lg font-bold text-amber-300">{usersDb.filter(u => u.plan === 'recruiter' || u.userType === 'recruiter').length + 480}</span>
+                  <span className="text-[10px] text-amber-400 font-semibold">$49/mo</span>
+                </div>
               </div>
             </div>
 
             {/* Pending Subscription Request Approval Table */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-5 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-900 pb-3">
-                PENDING PRO ACCESS UPGRADE REQUESTS
-              </h3>
+            <div className="bg-slate-900/30 border border-amber-500/30 rounded-3xl p-5 space-y-4 shadow-xl relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-400" />
+                  PENDING PRO & CAREER MAX UPGRADE REQUESTS
+                </h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  {usersDb.filter(u => u.subscriptionStatus === 'pending').length} Pending Action
+                </span>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="text-slate-500 border-b border-slate-900 pb-2 uppercase tracking-wider text-[10px]">
-                      <th className="py-2">User</th>
-                      <th className="py-2">Current Tier</th>
+                      <th className="py-2">User / Candidate</th>
+                      <th className="py-2">Target Role</th>
+                      <th className="py-2">Requested Tier</th>
                       <th className="py-2">Status</th>
-                      <th className="py-2 text-right">Approval Decisions</th>
+                      <th className="py-2 text-right">Approval Decision</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-900">
                     {usersDb.filter(u => u.subscriptionStatus === 'pending').map(seeker => (
-                      <tr key={seeker.id}>
+                      <tr key={seeker.id} className="hover:bg-slate-900/40 transition-colors">
                         <td className="py-3 font-semibold text-slate-200">
                           <p className="font-bold text-slate-200 text-xs">{seeker.name}</p>
                           <p className="text-[10px] text-slate-500 mt-0.5">{seeker.email}</p>
                         </td>
-                        <td className="py-3 text-slate-400 uppercase">{seeker.plan || "Free"}</td>
+                        <td className="py-3 text-slate-400 capitalize">
+                          {seeker.rolePreference ? seeker.rolePreference.replace('-', ' ') : 'Software Engineering'}
+                        </td>
+                        <td className="py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            seeker.plan === 'career-max'
+                              ? 'bg-purple-950/80 text-purple-300 border border-purple-700/60'
+                              : 'bg-indigo-950/80 text-indigo-300 border border-indigo-700/60'
+                          }`}>
+                            {seeker.plan === 'career-max' ? 'Career Max ($49/mo)' : seeker.plan === 'recruiter' ? 'Recruiter Hub ($49/mo)' : 'Job Seeker Pro ($12/mo)'}
+                          </span>
+                        </td>
                         <td className="py-3">
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                             Upgrade Requested
@@ -1010,13 +1072,13 @@ export const AdminDashboardPage: React.FC = () => {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => setConfirmModal({ type: "approve-pro", userId: seeker.id })}
-                              className="px-2.5 py-1 rounded bg-emerald-950/40 hover:bg-emerald-900/30 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-lg transition-all cursor-pointer"
                             >
                               Approve
                             </button>
                             <button
                               onClick={() => setConfirmModal({ type: "decline-pro", userId: seeker.id })}
-                              className="px-2.5 py-1 rounded bg-rose-950/40 hover:bg-rose-900/30 text-rose-400 border border-rose-500/20 text-[10px] font-bold cursor-pointer"
+                              className="px-2.5 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[11px] font-bold transition-all cursor-pointer"
                             >
                               Decline
                             </button>
@@ -1026,11 +1088,109 @@ export const AdminDashboardPage: React.FC = () => {
                     ))}
                     {usersDb.filter(u => u.subscriptionStatus === 'pending').length === 0 && (
                       <tr>
-                        <td colSpan={4} className="py-8 text-center text-slate-500 text-xs">
+                        <td colSpan={5} className="py-8 text-center text-slate-500 text-xs">
                           No pending subscription requests at this time.
                         </td>
                       </tr>
                     )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* ALL ACTIVE SUBSCRIBERS ROSTER TABLE */}
+            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                  ALL REGISTERED ACCOUNTS & SUBSCRIPTION TIERS
+                </h3>
+                <span className="text-[10px] text-slate-400">
+                  Showing {usersDb.length} Registered Accounts
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="text-slate-500 border-b border-slate-900 pb-2 uppercase tracking-wider text-[10px]">
+                      <th className="py-2">User / Email</th>
+                      <th className="py-2">Account Type</th>
+                      <th className="py-2">Position / Role</th>
+                      <th className="py-2">Current Tier</th>
+                      <th className="py-2">Status</th>
+                      <th className="py-2 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-900">
+                    {usersDb.map((u) => (
+                      <tr key={u.id} className="hover:bg-slate-900/40 transition-colors">
+                        <td className="py-3 font-semibold text-slate-200">
+                          <p className="font-bold text-slate-200 text-xs">{u.name}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{u.email}</p>
+                        </td>
+                        <td className="py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
+                            u.userType === 'admin'
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              : u.userType === 'recruiter'
+                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                              : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                          }`}>
+                            {u.userType}
+                          </span>
+                        </td>
+                        <td className="py-3 text-slate-400 capitalize text-xs">
+                          {u.company ? `Recruiter (${u.company})` : u.rolePreference ? u.rolePreference.replace('-', ' ') : 'Software Engineering'}
+                        </td>
+                        <td className="py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            u.plan === 'career-max'
+                              ? 'bg-purple-950/80 text-purple-300 border border-purple-700/60'
+                              : u.plan === 'pro'
+                              ? 'bg-indigo-950/80 text-indigo-300 border border-indigo-700/60'
+                              : u.plan === 'recruiter'
+                              ? 'bg-amber-950/80 text-amber-300 border border-amber-700/60'
+                              : 'bg-slate-800 text-slate-400 border border-slate-700'
+                          }`}>
+                            {u.plan === 'career-max'
+                              ? 'Career Max ($49/mo)'
+                              : u.plan === 'pro'
+                              ? 'Job Seeker Pro ($12/mo)'
+                              : u.plan === 'recruiter'
+                              ? 'Recruiter Hub ($49/mo)'
+                              : u.plan === 'enterprise'
+                              ? 'Enterprise'
+                              : 'Free Plan ($0)'}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            u.subscriptionStatus === 'approved' || u.subscriptionStatus === 'active'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : u.subscriptionStatus === 'pending'
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}>
+                            {u.subscriptionStatus === 'approved' || u.subscriptionStatus === 'active'
+                              ? 'Active'
+                              : u.subscriptionStatus === 'pending'
+                              ? 'Pending Approval'
+                              : 'Free Tier'}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right">
+                          <button
+                            onClick={() => {
+                              setSelectedUser(u);
+                              setDetailModalOpen(true);
+                            }}
+                            className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold transition-all cursor-pointer"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
