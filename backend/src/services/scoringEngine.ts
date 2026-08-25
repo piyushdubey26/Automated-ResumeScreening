@@ -26,9 +26,16 @@ export interface ScoreResult {
   feedback: FeedbackCard[];
 }
 
+const DEFAULT_RUBRIC = {
+  title: 'Target Role',
+  keywords: ['typescript', 'javascript', 'node.js', 'express', 'react', 'postgresql', 'docker', 'aws', 'redis', 'git', 'python', 'java', 'sql'],
+  weights: { structure: 0.2, clarity: 0.15, impact: 0.25, skills: 0.2, projects: 0.1, ats: 0.1 }
+};
+
 export class ScoringEngine {
   public static evaluate(parsed: ParsedResume, roleKey: string = 'sde'): ScoreResult {
-    const rubric = RUBRICS[roleKey] || RUBRICS['sde'];
+    const rubric = RUBRICS[roleKey] || RUBRICS['sde'] || DEFAULT_RUBRIC;
+    const rubricTitle = rubric?.title || 'Target Role';
     const feedback: FeedbackCard[] = [];
 
     // 1. Structure (20 points max)
@@ -102,7 +109,7 @@ export class ScoringEngine {
 
     // 4. Skills Match (20 points max)
     let skillsScore = 10;
-    const requiredKeywords: string[] = rubric.keywords || [];
+    const requiredKeywords: string[] = rubric?.keywords || DEFAULT_RUBRIC.keywords;
     const matchedRoleKeywords = requiredKeywords.filter(kw =>
       parsed.sections.skills.map(s => s.toLowerCase()).includes(kw.toLowerCase())
     );
@@ -119,7 +126,7 @@ export class ScoringEngine {
         id: 'fb-skills-1',
         category: 'Skills',
         severity: 'medium',
-        title: `Missing Essential ${rubric.title} Keywords`,
+        title: `Missing Essential ${rubricTitle} Keywords`,
         description: `Key industry terms missing from your skills section: ${missingRoleKeywords.join(', ')}.`,
         suggestion: `Add relevant experience or project bullets demonstrating proficiency in ${missingRoleKeywords.slice(0, 2).join(' & ')}.`
       });
@@ -147,7 +154,7 @@ export class ScoringEngine {
     }
 
     // Weighted Overall Score calculation
-    const weights = rubric.weights || { structure: 0.2, clarity: 0.15, impact: 0.25, skills: 0.2, projects: 0.1, ats: 0.1 };
+    const weights = rubric?.weights || DEFAULT_RUBRIC.weights;
     const overallScore = Math.min(99, Math.round(
       (structureScore / 20) * (weights.structure * 100) +
       (clarityScore / 15) * (weights.clarity * 100) +
