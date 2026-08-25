@@ -201,57 +201,56 @@ export const Navbar: React.FC = () => {
                     </div>
                   </div>
 
-                  <hr className="border-slate-800 my-1" />
-
-                  {/* Mode switcher option */}
-                  <div className="px-3 py-2">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Switch Mode</p>
-                    <div className={`grid gap-1 bg-slate-950 p-1 rounded-lg border border-slate-850 ${
-                      (user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com') ? 'grid-cols-3' : 'grid-cols-2'
-                    }`}>
-                      <button
-                        onClick={() => {
-                          switchMode('seeker');
-                          navigate('/dashboard');
-                        }}
-                        className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
-                          user?.userType === 'seeker'
-                            ? 'bg-indigo-600 text-white shadow-sm font-extrabold'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        Candidate
-                      </button>
-                      <button
-                        onClick={() => {
-                          switchMode('recruiter');
-                          navigate('/recruiter');
-                        }}
-                        className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
-                          user?.userType === 'recruiter'
-                            ? 'bg-purple-600 text-white shadow-sm font-extrabold'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        Recruiter
-                      </button>
-                      {(user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com') && (
-                        <button
-                          onClick={() => {
-                            switchMode('admin');
-                            navigate('/admin');
-                          }}
-                          className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
-                            user?.userType === 'admin'
-                              ? 'bg-amber-600 text-white shadow-sm font-extrabold'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Admin
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  {/* Mode switcher option - Only for Platform Admins */}
+                  {(user?.userType === 'admin' || user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com') && (
+                    <>
+                      <hr className="border-slate-800 my-1" />
+                      <div className="px-3 py-2">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Switch Mode (Admin Only)</p>
+                        <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-850">
+                          <button
+                            onClick={() => {
+                              switchMode('seeker');
+                              navigate('/dashboard');
+                            }}
+                            className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
+                              user?.userType === 'seeker'
+                                ? 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            Candidate
+                          </button>
+                          <button
+                            onClick={() => {
+                              switchMode('recruiter');
+                              navigate('/recruiter');
+                            }}
+                            className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
+                              user?.userType === 'recruiter'
+                                ? 'bg-purple-600 text-white shadow-sm font-extrabold'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            Recruiter
+                          </button>
+                          <button
+                            onClick={() => {
+                              switchMode('admin');
+                              navigate('/admin');
+                            }}
+                            className={`px-2 py-1.5 rounded-md text-[10px] font-bold transition-all text-center cursor-pointer ${
+                              user?.userType === 'admin'
+                                ? 'bg-amber-600 text-white shadow-sm font-extrabold'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            Admin
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <hr className="border-slate-800 my-1" />
 
