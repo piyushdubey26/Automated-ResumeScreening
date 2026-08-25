@@ -152,10 +152,10 @@ export const authApi = {
     } catch {
       const lowerEmail = email.toLowerCase().trim();
       
-      // Enforce strict password validation for primary Admin account
+      // Enforce strict credentials for primary Admin account
       if (lowerEmail === 'piyushdubey447@gmail.com') {
-        if (password && password !== 'piyush26') {
-          throw new Error('Invalid password for Admin account (piyushdubey447@gmail.com)');
+        if (!password || password !== 'piyush26') {
+          throw new Error('Invalid Admin password. Access restricted to Admin credential holders.');
         }
       }
 
