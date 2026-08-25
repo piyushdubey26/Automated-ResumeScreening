@@ -236,11 +236,23 @@ export const DashboardPage: React.FC = () => {
 
   // Run JD Matching
   const handleRunJDMatch = async () => {
-    if (!resumeInput.trim() && !sampleResumesText.sde) return;
+    if (!resumeInput.trim() && !jdInput.trim()) {
+      alert("Upload your resume and add a job description.");
+      return;
+    }
+    if (!resumeInput.trim()) {
+      alert("Upload your resume to calculate your JD match.");
+      return;
+    }
+    if (!jdInput.trim()) {
+      alert("Add a job description to calculate your JD match.");
+      return;
+    }
+
     setIsMatching(true);
     try {
-      const textToUse = resumeWithLinks() || sampleResumesText.sde;
-      const res = await jobApi.matchJD(textToUse, jdInput || sampleJDsText.sde, targetRole);
+      const textToUse = resumeWithLinks();
+      const res = await jobApi.matchJD(textToUse, jdInput, targetRole);
       setJdMatchResult(res);
       localStorage.setItem(KEY_JDMATCH, JSON.stringify(res));
       addActivityLog('✓ Job Matched', `Scored ${res.matchPct}% against ${targetRole.toUpperCase()} Job Description.`);
@@ -253,23 +265,28 @@ export const DashboardPage: React.FC = () => {
   const handleRunComparison = async () => {
     if (!resumeInput.trim()) return;
     setIsAnalyzing(true);
-    setIsMatching(true);
+    const hasJD = !!jdInput.trim();
+    if (hasJD) {
+      setIsMatching(true);
+    }
     try {
       const textToUse = resumeWithLinks();
-      const jdToUse = jdInput || sampleJDsText.sde;
-      const [resume, match] = await Promise.all([
-        resumeApi.uploadAndParse(textToUse, 'My_Resume.pdf', targetRole),
-        jobApi.matchJD(textToUse, jdToUse, targetRole)
-      ]);
+      const resume = await resumeApi.uploadAndParse(textToUse, 'My_Resume.pdf', targetRole);
       
       setResumeRecord(resume.resume);
       localStorage.setItem(KEY_RESUME, JSON.stringify(resume.resume));
       localStorage.setItem(KEY_RESUME_TEXT, resumeInput);
 
-      setJdMatchResult(match);
-      localStorage.setItem(KEY_JDMATCH, JSON.stringify(match));
-
-      addActivityLog('✓ Resume & JD Analyzed', `Score: ${resume.resume.score}/100 · Match: ${match.matchPct}%`);
+      if (hasJD) {
+        const match = await jobApi.matchJD(textToUse, jdInput, targetRole);
+        setJdMatchResult(match);
+        localStorage.setItem(KEY_JDMATCH, JSON.stringify(match));
+        addActivityLog('✓ Resume & JD Analyzed', `Score: ${resume.resume.score}/100 · Match: ${match.matchPct}%`);
+      } else {
+        setJdMatchResult(null);
+        localStorage.removeItem(KEY_JDMATCH);
+        addActivityLog('✓ Resume Analyzed', `Resume Health Score: ${resume.resume.score}/100`);
+      }
     } finally {
       setIsAnalyzing(false);
       setIsMatching(false);
@@ -519,7 +536,7 @@ export const DashboardPage: React.FC = () => {
                   },
                   {
                     label: "JOB MATCHES",
-                    val: jdMatchResult ? "1" : "0",
+                    val: jdMatchResult ? `${jdMatchResult.matchPct}%` : "0%",
                     change: jdMatchResult ? `Top match: ${jdMatchResult.matchPct}%` : "No matches yet",
                     col: jdMatchResult ? "text-purple-400" : "text-slate-500",
                     desc: jdMatchResult ? "Based on target JD" : "Compare against a JD",
@@ -1109,6 +1126,39 @@ export const DashboardPage: React.FC = () => {
                       <p className="text-xs text-slate-400">Keyword Overlap: <strong>{jdMatchResult.keywordScore}%</strong> | Semantic Similarity: <strong>{jdMatchResult.embeddingScore}%</strong></p>
                     </div>
 
+                    {/* Category Scores Breakdown */}
+                    {jdMatchResult.scoreBreakdown && (
+                      <div className="bg-slate-950 border border-slate-850 rounded-2xl p-4.5 space-y-3">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Category Match Scores</span>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          {[
+                            { label: "Required Skills", val: jdMatchResult.scoreBreakdown.requiredSkills },
+                            { label: "Experience / Seniority", val: jdMatchResult.scoreBreakdown.experience },
+                            { label: "Responsibilities", val: jdMatchResult.scoreBreakdown.responsibilities },
+                            { label: "Preferred Skills", val: jdMatchResult.scoreBreakdown.preferredSkills },
+                            { label: "Projects & Evidence", val: jdMatchResult.scoreBreakdown.projects },
+                            { label: "ATS Readability", val: jdMatchResult.scoreBreakdown.ats }
+                          ].map(cat => (
+                            <div key={cat.label} className="p-2.5 bg-slate-900/40 rounded-xl border border-slate-900 flex flex-col justify-between">
+                              <span className="text-[10px] text-slate-400 font-bold block">{cat.label}</span>
+                              <span className="text-sm font-extrabold text-white mt-1">{cat.val}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Explanatory Explanation Card */}
+                    {jdMatchResult.explanation && (
+                      <div className="p-3.5 rounded-2xl bg-indigo-950/20 border border-indigo-900/40 text-xs text-slate-300 leading-relaxed">
+                        <h4 className="font-bold text-white flex items-center gap-1.5 mb-1">
+                          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                          Evaluation Explanation
+                        </h4>
+                        {jdMatchResult.explanation}
+                      </div>
+                    )}
+
                     <div className="space-y-4 text-xs">
                       <div>
                         <h4 className="font-bold text-emerald-400 mb-2 flex items-center space-x-1">
@@ -1118,25 +1168,44 @@ export const DashboardPage: React.FC = () => {
                         <div className="flex flex-wrap gap-1.5">
                           {jdMatchResult.matchedKeywords.map((kw, i) => (
                             <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-semibold">
-                              {kw}
+                              ✓ {kw}
                             </span>
                           ))}
                         </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-bold text-rose-400 mb-2 flex items-center space-x-1">
-                          <AlertTriangle className="w-4 h-4" />
-                          <span>Missing Core Skills ({jdMatchResult.missingCoreSkills.length})</span>
-                        </h4>
-                        <div className="flex flex-wrap gap-1.5">
-                          {jdMatchResult.missingCoreSkills.map((kw, i) => (
-                            <span key={i} className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-350 border border-rose-500/30 font-semibold">
-                              {kw}
-                            </span>
-                          ))}
+                      {jdMatchResult.partialSkills && jdMatchResult.partialSkills.length > 0 && (
+                        <div>
+                          <h4 className="font-bold text-amber-400 mb-2 flex items-center space-x-1">
+                            <span className="text-sm">◐</span>
+                            <span>Partial Matches / Seniority ({jdMatchResult.partialSkills.length})</span>
+                          </h4>
+                          <div className="space-y-1.5">
+                            {jdMatchResult.partialSkills.map((kw, i) => (
+                              <div key={i} className="px-2.5 py-1 rounded-lg bg-amber-500/5 text-amber-300 border border-amber-500/20 font-semibold flex items-center gap-1.5">
+                                <span>◐</span>
+                                <span>{kw}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
+
+                      {jdMatchResult.criticalGaps && jdMatchResult.criticalGaps.length > 0 && (
+                        <div>
+                          <h4 className="font-bold text-rose-450 mb-2 flex items-center space-x-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>Critical Gaps / Missing Required ({jdMatchResult.criticalGaps.length})</span>
+                          </h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {jdMatchResult.criticalGaps.map((kw, i) => (
+                              <span key={i} className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-350 border border-rose-500/30 font-semibold">
+                                ✕ {kw}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       <div className="pt-3 border-t border-slate-800 space-y-3">
                         <h4 className="font-bold text-white flex items-center space-x-2">
@@ -1157,8 +1226,18 @@ export const DashboardPage: React.FC = () => {
                 ) : (
                   <div className="p-12 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/40 space-y-3">
                     <Briefcase className="w-8 h-8 text-slate-600 mx-auto" />
-                    <p className="text-xs font-semibold text-slate-300">No Job Match calculated yet.</p>
-                    <p className="text-[11px] text-slate-500">Paste a job description on the left and click "Calculate JD Match %".</p>
+                    <p className="text-xs font-semibold text-slate-300">
+                      {!resumeInput.trim() && !jdInput.trim()
+                        ? "Upload your resume and add a job description."
+                        : !resumeInput.trim()
+                        ? "Upload your resume to calculate your JD match."
+                        : !jdInput.trim()
+                        ? "Add a job description to calculate your JD match."
+                        : "Click 'Calculate JD Match % & Skill Gaps' to analyze."}
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Matches are calculated strictly based on evidence in your resume compared against JD requirements.
+                    </p>
                   </div>
                 )}
               </div>

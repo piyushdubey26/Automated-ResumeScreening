@@ -76,6 +76,17 @@ export interface JDMatchResult {
   missingCoreSkills: string[];
   impactGapScore: number;
   recommendations: string[];
+  scoreBreakdown?: {
+    requiredSkills: number;
+    experience: number;
+    responsibilities: number;
+    preferredSkills: number;
+    projects: number;
+    ats: number;
+  };
+  criticalGaps?: string[];
+  partialSkills?: string[];
+  explanation?: string;
 }
 
 export interface RewriteResult {

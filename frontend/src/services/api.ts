@@ -335,150 +335,345 @@ export const authApi = {
   }
 };
 
+export const TECH_ALIASES: Record<string, string[]> = {
+  'javascript': ['js', 'javascript', 'javascript.js'],
+  'typescript': ['ts', 'typescript', 'typescript.js'],
+  'react': ['react', 'react.js', 'reactjs'],
+  'next.js': ['next.js', 'nextjs', 'next'],
+  'node.js': ['node.js', 'nodejs', 'node'],
+  'postgresql': ['postgresql', 'postgres', 'postgresql database'],
+  'aws': ['aws', 'amazon web services', 'amazon web service'],
+  'docker': ['docker', 'docker container', 'containers'],
+  'kubernetes': ['kubernetes', 'k8s'],
+  'graphql': ['graphql', 'gql']
+};
+
+const checkSkillMatched = (text: string, skill: string): boolean => {
+  const lowerText = text.toLowerCase();
+  const cleanSkill = skill.toLowerCase().trim();
+  
+  let searchTerms = [cleanSkill];
+  for (const [canonical, aliases] of Object.entries(TECH_ALIASES)) {
+    if (canonical === cleanSkill || aliases.includes(cleanSkill)) {
+      searchTerms = [canonical, ...aliases];
+      break;
+    }
+  }
+
+  return searchTerms.some(term => {
+    const escaped = term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+    return regex.test(lowerText);
+  });
+};
+
+const parseYearsRequired = (jdText: string): number => {
+  const matches = jdText.match(/(\d+)\s*\+?\s*years?/i);
+  if (matches) {
+    return parseInt(matches[1], 10);
+  }
+  return 0;
+};
+
+const parseCandidateYears = (resumeText: string): number => {
+  const matches = resumeText.match(/(\d+)\s*\+?\s*years?\s+(?:of\s+)?experience/i);
+  if (matches) {
+    return parseInt(matches[1], 10);
+  }
+  const durMatches = resumeText.matchAll(/(?:20\d{2}|19\d{2})\s*-\s*(?:20\d{2}|19\d{2}|present)/gi);
+  let calculated = 0;
+  for (const match of durMatches) {
+    const parts = match[0].split('-');
+    const start = parseInt(parts[0].trim(), 10);
+    const endStr = parts[1].trim().toLowerCase();
+    const end = endStr === 'present' ? new Date().getFullYear() : parseInt(endStr, 10);
+    calculated += Math.max(0, end - start);
+  }
+  if (calculated > 0) return Math.min(20, calculated);
+  return 1;
+};
+
+const extractJDSkills = (jdText: string, targetRole: string) => {
+  const lowerJD = jdText.toLowerCase();
+  const roleSkills = SKILLS_BY_ROLE[targetRole as keyof typeof SKILLS_BY_ROLE] || SKILLS_BY_ROLE.sde;
+  const required: string[] = [];
+  const preferred: string[] = [];
+  
+  roleSkills.forEach(skill => {
+    const escapes = skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`\\b${escapes}\\b`, 'i');
+    if (regex.test(lowerJD)) {
+      const index = lowerJD.indexOf(skill.toLowerCase());
+      const prefix = lowerJD.substring(Math.max(0, index - 200), index);
+      const isPreferred = prefix.includes('preferred') || 
+                          prefix.includes('nice to have') || 
+                          prefix.includes('plus') || 
+                          prefix.includes('bonus') ||
+                          prefix.includes('desired');
+      if (isPreferred) {
+        preferred.push(skill);
+      } else {
+        required.push(skill);
+      }
+    }
+  });
+
+  if (required.length === 0) {
+    required.push(...roleSkills.slice(0, 3));
+  }
+  return { required, preferred };
+};
+
+export const evaluateResumeAgainstJD = (resumeText: string, jdText: string, targetRole: string): JDMatchResult => {
+  const lowerResume = resumeText.toLowerCase();
+  const { required, preferred } = extractJDSkills(jdText, targetRole);
+
+  const matchedSkills: string[] = [];
+  const missingSkills: string[] = [];
+  const partialSkills: string[] = [];
+
+  required.forEach(skill => {
+    if (checkSkillMatched(resumeText, skill)) {
+      matchedSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+    } else {
+      missingSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+    }
+  });
+
+  preferred.forEach(skill => {
+    if (checkSkillMatched(resumeText, skill)) {
+      matchedSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+    } else {
+      missingSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+    }
+  });
+
+  const requiredYears = parseYearsRequired(jdText);
+  const candidateYears = parseCandidateYears(resumeText);
+  
+  let experienceScore = 100;
+  if (requiredYears > 0) {
+    if (candidateYears >= requiredYears) {
+      experienceScore = 100;
+    } else {
+      experienceScore = Math.round((candidateYears / requiredYears) * 100);
+      partialSkills.push(`${requiredYears}+ years experience required (Resume shows ~${candidateYears} years)`);
+    }
+  }
+
+  const totalRequired = required.length;
+  const matchedRequiredCount = required.filter(s => matchedSkills.map(ms => ms.toLowerCase()).includes(s.toLowerCase())).length;
+  const requiredSkillsScore = totalRequired > 0 ? Math.round((matchedRequiredCount / totalRequired) * 100) : 100;
+
+  const totalPreferred = preferred.length;
+  const matchedPreferredCount = preferred.filter(s => matchedSkills.map(ms => ms.toLowerCase()).includes(s.toLowerCase())).length;
+  const preferredSkillsScore = totalPreferred > 0 ? Math.round((matchedPreferredCount / totalPreferred) * 100) : 100;
+
+  const matchedVerbs = ACTION_VERBS.filter(verb => new RegExp(`\\b${verb}\\b`, 'i').test(lowerResume));
+  const responsibilitiesScore = Math.min(100, Math.round(50 + (matchedVerbs.length / 8) * 50));
+
+  const metricsMatches = resumeText.match(/\d+%/g) || resumeText.match(/\d+\s*%/g) || resumeText.match(/\$\d+/g) || resumeText.match(/\b\d+\+\b/g);
+  const projectsScore = metricsMatches ? Math.min(100, Math.round(40 + metricsMatches.length * 15)) : 40;
+
+  const hasDegree = lowerResume.includes('degree') || lowerResume.includes('bachelor') || lowerResume.includes('master') || lowerResume.includes('btech') || lowerResume.includes('b.s.') || lowerResume.includes('university') || lowerResume.includes('college');
+  const educationScore = hasDegree ? 100 : 50;
+
+  const hasEmail = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(resumeText);
+  const hasPhone = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b|\+\d+/.test(resumeText);
+  const resumeLines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 5);
+  const atsScore = Math.round((hasEmail ? 50 : 0) + (hasPhone ? 30 : 0) + (resumeLines.length >= 10 ? 20 : 0));
+
+  const finalScore = Math.round(
+    requiredSkillsScore * 0.40 +
+    experienceScore * 0.20 +
+    responsibilitiesScore * 0.15 +
+    preferredSkillsScore * 0.10 +
+    projectsScore * 0.10 +
+    educationScore * 0.05
+  );
+
+  const criticalGaps: string[] = [];
+  const recommendations: string[] = [];
+
+  required.forEach(skill => {
+    if (!matchedSkills.map(ms => ms.toLowerCase()).includes(skill.toLowerCase())) {
+      criticalGaps.push(`${skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}`);
+      recommendations.push(`Explicitly incorporate the missing keyword: "${skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}" in your Skills or Experience section.`);
+    }
+  });
+
+  if (requiredYears > 0 && candidateYears < requiredYears) {
+    criticalGaps.push(`Seniority Gap: JD requires ${requiredYears}+ years, but resume shows ~${candidateYears} years`);
+    recommendations.push(`Highlight key leadership tasks or high-impact projects to compensate for the ${requiredYears - candidateYears} year experience gap.`);
+  }
+
+  let explanation = `Your match score is ${finalScore}% because you match ${matchedRequiredCount} out of ${totalRequired} required core skills (${matchedSkills.slice(0, 3).join(', ') || 'none'}).`;
+  if (requiredYears > 0 && candidateYears < requiredYears) {
+    explanation += ` Additionally, the target job description requires ${requiredYears}+ years of experience and your resume shows approximately ${candidateYears} years.`;
+  } else if (requiredYears > 0) {
+    explanation += ` Your experience level (~${candidateYears} years) meets the target requirement of ${requiredYears}+ years.`;
+  }
+  if (criticalGaps.length > 0) {
+    explanation += ` Consider adding evidence of "${criticalGaps.slice(0, 2).map(g => g.split(' ')[0]).join(', ')}" to boost your compatibility score.`;
+  }
+
+  return {
+    matchPct: finalScore,
+    keywordScore: requiredSkillsScore,
+    embeddingScore: Math.round(finalScore * 0.95),
+    matchedKeywords: matchedSkills,
+    missingKeywords: missingSkills,
+    missingCoreSkills: missingSkills.slice(0, 3),
+    impactGapScore: 100 - finalScore,
+    recommendations: recommendations.length > 0 ? recommendations : ['Highlight experience where you worked with target technologies.'],
+    scoreBreakdown: {
+      requiredSkills: requiredSkillsScore,
+      experience: experienceScore,
+      responsibilities: responsibilitiesScore,
+      preferredSkills: preferredSkillsScore,
+      projects: projectsScore,
+      ats: atsScore
+    },
+    criticalGaps,
+    partialSkills,
+    explanation
+  };
+};
+
+export const evaluateResumeHealth = (text: string, targetRole: string) => {
+  const lowerText = text.toLowerCase();
+  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const githubMatch = text.match(/(github\.com\/[a-zA-Z0-9_-]+)/i);
+  const linkedinMatch = text.match(/(linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
+  
+  let structureScore = 50;
+  if (emailMatch) structureScore += 25;
+  if (githubMatch || linkedinMatch) structureScore += 25;
+  structureScore = Math.min(100, structureScore);
+
+  const feedback: FeedbackCard[] = [];
+  if (!emailMatch) {
+    feedback.push({
+      id: 'fb-struct-1',
+      category: 'Structure',
+      severity: 'high',
+      title: 'Missing Email Address',
+      description: 'No valid email address was detected in your resume.',
+      suggestion: 'Add a professional email address at the very top of your resume.'
+    });
+  }
+  if (!githubMatch && !linkedinMatch) {
+    feedback.push({
+      id: 'fb-struct-2',
+      category: 'Structure',
+      severity: 'medium',
+      title: 'Missing Professional Links',
+      description: 'No LinkedIn or GitHub links were detected.',
+      suggestion: 'Include your LinkedIn profile and GitHub (for technical roles) to build trust.'
+    });
+  }
+
+  const verbsFound = ACTION_VERBS.filter(verb => new RegExp(`\\b${verb}\\b`, 'i').test(lowerText));
+  const clarityScore = Math.min(100, Math.round(50 + (verbsFound.length / 5) * 50));
+  
+  if (verbsFound.length < 5) {
+    feedback.push({
+      id: 'fb-clarity-1',
+      category: 'Clarity',
+      severity: 'medium',
+      title: 'Weak Action Verbs',
+      description: 'Your bullet points use passive verbs or repetitive wording.',
+      suggestion: 'Start bullet points with strong action verbs like: Architected, Led, Optimized, or Engineered.'
+    });
+  }
+
+  const metricsMatches = text.match(/\d+%/g) || text.match(/\d+\s*%/g) || text.match(/\$\d+/g) || text.match(/\b\d+\+\b/g);
+  const impactScore = metricsMatches ? Math.min(100, Math.round(40 + metricsMatches.length * 15)) : 40;
+
+  if (!metricsMatches || metricsMatches.length < 3) {
+    feedback.push({
+      id: 'fb-impact-2',
+      category: 'Impact',
+      severity: 'high',
+      title: 'Weak Metric Quantifiers',
+      description: 'Very few metrics (percentages, dollar values, user counts) were detected in your resume bullet points.',
+      suggestion: 'Quantify your impact. For example: "built API" -> "built API handling 10k+ requests, reducing latency by 20%".'
+    });
+  } else {
+    feedback.push({
+      id: 'fb-impact-1',
+      category: 'Impact',
+      severity: 'success',
+      title: 'Strong Metric Quantifiers',
+      description: `Detected ${metricsMatches.length} metrics showing quantified achievements.`,
+      suggestion: 'Keep highlighting ROI and quantifiable benchmarks.'
+    });
+  }
+
+  const roleSkills = SKILLS_BY_ROLE[targetRole as keyof typeof SKILLS_BY_ROLE] || SKILLS_BY_ROLE.sde;
+  const foundSkills: string[] = [];
+  roleSkills.forEach(skill => {
+    if (checkSkillMatched(text, skill)) {
+      foundSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+    }
+  });
+  const skillScore = Math.min(100, Math.round(50 + (foundSkills.length / Math.max(1, roleSkills.length)) * 50));
+
+  const missingSkills = roleSkills.filter(s => !foundSkills.map(fs => fs.toLowerCase()).includes(s.toLowerCase()));
+  if (missingSkills.length > 0) {
+    feedback.push({
+      id: 'fb-skills-1',
+      category: 'Skills',
+      severity: 'medium',
+      title: `Missing ${targetRole.toUpperCase()} Skills`,
+      description: `Your resume is missing keywords: ${missingSkills.slice(0, 3).map(s => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')).join(', ')}.`,
+      suggestion: `Explicitly add missing skills like: ${missingSkills.slice(0, 3).map(s => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')).join(', ')} to your Skills section.`
+    });
+  }
+
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const projectLines = lines.filter(l => l.toLowerCase().includes('project') || l.toLowerCase().includes('resumeai'));
+  const projectsScore = projectLines.length > 0 ? 100 : 50;
+
+  const atsScore = Math.round((emailMatch ? 50 : 0) + (githubMatch || linkedinMatch ? 30 : 0) + (lines.length >= 10 ? 20 : 0));
+
+  const score = Math.round(
+    structureScore * 0.20 +
+    clarityScore * 0.20 +
+    impactScore * 0.20 +
+    skillScore * 0.20 +
+    projectsScore * 0.10 +
+    atsScore * 0.10
+  );
+
+  return {
+    score,
+    scoreBreakdown: {
+      structure: structureScore,
+      clarity: clarityScore,
+      impact: impactScore,
+      skills: skillScore,
+      projects: projectsScore,
+      ats: atsScore
+    },
+    feedback,
+    foundSkills
+  };
+};
+
 export const resumeApi = {
   uploadAndParse: async (text: string, filename?: string, targetRole: string = 'sde'): Promise<{ resume: ResumeRecord }> => {
     try {
       const res = await api.post('/resumes/upload', { text, filename, targetRole });
       return res.data;
     } catch {
-      const lowerText = text.toLowerCase();
+      const { score, scoreBreakdown, feedback, foundSkills } = evaluateResumeHealth(text, targetRole);
       
-      // 1. Extract contact info via regex
       const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
       const githubMatch = text.match(/(github\.com\/[a-zA-Z0-9_-]+)/i);
       const linkedinMatch = text.match(/(linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
-      
-      // Get display name: use first line of text or fallback
       const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       const derivedName = lines[0] && lines[0].length < 40 ? lines[0] : 'Uploaded Candidate';
-
-      // 2. Identify skills present
-      const roleSkills = SKILLS_BY_ROLE[targetRole as keyof typeof SKILLS_BY_ROLE] || SKILLS_BY_ROLE.sde;
-      const foundSkills: string[] = [];
-      roleSkills.forEach(skill => {
-        const escaped = skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-        const regex = new RegExp(`\\b${escaped}\\b`, 'i');
-        if (regex.test(lowerText)) {
-          foundSkills.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-        }
-      });
-      
-      const missingSkills = roleSkills
-        .filter(skill => !foundSkills.map(s => s.toLowerCase()).includes(skill))
-        .map(skill => skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-
-      // 3. Score calculation
-      let scoreBreakdown = {
-        structure: 75,
-        clarity: 70,
-        impact: 60,
-        skills: 50,
-        projects: 70,
-        ats: 80
-      };
-
-      const feedback: FeedbackCard[] = [];
-
-      // Structure check
-      if (emailMatch) scoreBreakdown.structure += 15;
-      if (githubMatch || linkedinMatch) scoreBreakdown.structure += 10;
-      if (scoreBreakdown.structure > 100) scoreBreakdown.structure = 100;
-      
-      if (!emailMatch) {
-        feedback.push({
-          id: 'fb-struct-1',
-          category: 'Structure',
-          severity: 'high',
-          title: 'Missing Email Address',
-          description: 'No valid email address was detected in your resume.',
-          suggestion: 'Add a professional email address at the very top of your resume.'
-        });
-      }
-      if (!githubMatch && !linkedinMatch) {
-        feedback.push({
-          id: 'fb-struct-2',
-          category: 'Structure',
-          severity: 'medium',
-          title: 'Missing Professional Links',
-          description: 'No LinkedIn or GitHub links were detected.',
-          suggestion: 'Include your LinkedIn profile and GitHub (for technical roles) to build trust.'
-        });
-      }
-
-      // Skills score
-      const skillRatio = roleSkills.length > 0 ? foundSkills.length / roleSkills.length : 1;
-      scoreBreakdown.skills = Math.round(50 + skillRatio * 50);
-
-      if (missingSkills.length > 0) {
-        feedback.push({
-          id: 'fb-skills-1',
-          category: 'Skills',
-          severity: missingSkills.length > 4 ? 'high' : 'medium',
-          title: `Missing ${targetRole.toUpperCase()} Core Skills`,
-          description: `Your resume is missing important keywords: ${missingSkills.slice(0, 4).join(', ')}.`,
-          suggestion: `Explicitly add missing skills like: ${missingSkills.slice(0, 3).join(', ')} to your Skills section.`
-        });
-      } else {
-        feedback.push({
-          id: 'fb-skills-2',
-          category: 'Skills',
-          severity: 'success',
-          title: 'Excellent Core Skill Coverage',
-          description: 'Your resume contains all major core skills requested for this role.',
-          suggestion: 'Excellent alignment. Keep these skills updated with active project references.'
-        });
-      }
-
-      // Metrics & action verbs check (Impact & Clarity)
-      const metricsMatches = lowerText.match(/\d+%/g) || lowerText.match(/\d+\s*%/g) || lowerText.match(/\$\d+/g) || lowerText.match(/\b\d+\+\b/g);
-      if (metricsMatches && metricsMatches.length >= 3) {
-        scoreBreakdown.impact = 90;
-        feedback.push({
-          id: 'fb-impact-1',
-          category: 'Impact',
-          severity: 'success',
-          title: 'Strong Metric Quantifiers',
-          description: `Detected several metrics (${metricsMatches.slice(0, 3).join(', ')}) showing quantified achievements.`,
-          suggestion: 'Keep highlighting ROI and quantifiable benchmarks.'
-        });
-      } else {
-        scoreBreakdown.impact = 55;
-        feedback.push({
-          id: 'fb-impact-2',
-          category: 'Impact',
-          severity: 'high',
-          title: 'Weak Metric Quantifiers',
-          description: 'Very few metrics (percentages, dollar values, user counts) were detected in your resume bullet points.',
-          suggestion: 'Quantify your impact. For example: "built API" -> "built API handling 10k+ requests, reducing latency by 20%".'
-        });
-      }
-
-      // Action verbs check
-      const verbsFound = ACTION_VERBS.filter(verb => new RegExp(`\\b${verb}\\b`, 'i').test(lowerText));
-      scoreBreakdown.clarity = Math.round(60 + (verbsFound.length / 10) * 40);
-      if (scoreBreakdown.clarity > 100) scoreBreakdown.clarity = 100;
-
-      if (verbsFound.length < 5) {
-        feedback.push({
-          id: 'fb-clarity-1',
-          category: 'Clarity',
-          severity: 'medium',
-          title: 'Weak Action Verbs',
-          description: 'Your bullet points use passive verbs or repetitive wording.',
-          suggestion: 'Start bullet points with strong action verbs like: Architected, Led, Optimized, or Engineered.'
-        });
-      }
-
-      // Overall Score
-      const score = Math.round(
-        (scoreBreakdown.structure +
-          scoreBreakdown.clarity +
-          scoreBreakdown.impact +
-          scoreBreakdown.skills +
-          scoreBreakdown.projects +
-          scoreBreakdown.ats) /
-          6
-      );
 
       const mockRecord: ResumeRecord = {
         id: `resume-${Date.now()}`,
@@ -561,50 +756,7 @@ export const jobApi = {
       const res = await api.post('/jobs/match', { resumeText, jdText, targetRole });
       return res.data;
     } catch {
-      const lowerResume = resumeText.toLowerCase();
-      const lowerJD = jdText.toLowerCase();
-
-      // Find skills in JD
-      const allSkills = [...SKILLS_BY_ROLE.sde, ...SKILLS_BY_ROLE['data-science'], ...SKILLS_BY_ROLE.marketing, ...SKILLS_BY_ROLE['product-management']];
-      
-      const jdSkills: string[] = [];
-      allSkills.forEach(skill => {
-        const regex = new RegExp(`\\b${skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
-        if (regex.test(lowerJD) && !jdSkills.includes(skill)) {
-          jdSkills.push(skill);
-        }
-      });
-
-      // Find which of these are in the resume
-      const matched: string[] = [];
-      const missing: string[] = [];
-      jdSkills.forEach(skill => {
-        const regex = new RegExp(`\\b${skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
-        if (regex.test(lowerResume)) {
-          matched.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-        } else {
-          missing.push(skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-        }
-      });
-
-      const totalJD = jdSkills.length || 5;
-      const matchPct = Math.round((matched.length / totalJD) * 100);
-      
-      const recommendations = [
-        ...missing.map(skill => `Explicitly incorporate the missing keyword: "${skill}" in your Skills or Experience section.`),
-        `Highlight experience where you worked with ${matched.slice(0, 3).join(', ') || 'relevant technologies'}.`
-      ];
-
-      return {
-        matchPct,
-        keywordScore: matchPct,
-        embeddingScore: Math.round(matchPct * 0.95),
-        matchedKeywords: matched,
-        missingKeywords: missing,
-        missingCoreSkills: missing.slice(0, 3),
-        impactGapScore: 100 - matchPct,
-        recommendations
-      };
+      return evaluateResumeAgainstJD(resumeText, jdText, targetRole);
     }
   }
 };
