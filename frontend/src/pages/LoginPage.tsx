@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, Zap, Users, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,39 +58,7 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {/* 1-CLICK DEMO BUTTONS */}
-        <div className="space-y-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block text-center">Fast 1-Click Demo Login</span>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={async () => {
-                await demoLogin('seeker');
-                handleRedirect('seeker');
-              }}
-              className="p-3 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/60 rounded-2xl text-xs font-bold text-indigo-300 transition-all flex flex-col items-center justify-center space-y-1 shadow cursor-pointer"
-            >
-              <Zap className="w-4 h-4 text-amber-400" />
-              <span>Demo Seeker</span>
-            </button>
 
-            <button
-              onClick={async () => {
-                await demoLogin('recruiter');
-                handleRedirect('recruiter');
-              }}
-              className="p-3 bg-purple-950/80 hover:bg-purple-900 border border-purple-700/60 rounded-2xl text-xs font-bold text-purple-300 transition-all flex flex-col items-center justify-center space-y-1 shadow cursor-pointer"
-            >
-              <Users className="w-4 h-4 text-purple-400" />
-              <span>Demo Recruiter</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-slate-800"></div>
-          <span className="flex-shrink mx-3 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Or Account Login</span>
-          <div className="flex-grow border-t border-slate-800"></div>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

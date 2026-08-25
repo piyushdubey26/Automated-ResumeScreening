@@ -9,19 +9,17 @@ import {
   Sun,
   Moon,
   LogOut,
-  Zap,
   ChevronRight,
   Shield,
   ChevronDown
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout, demoLogin, switchMode } = useAuth();
+  const { user, isAuthenticated, logout, switchMode } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
@@ -270,48 +268,6 @@ export const Navbar: React.FC = () => {
             </div>
           ) : (
             <div className="flex items-center space-x-3">
-              {/* Demo Logins Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  onBlur={() => setTimeout(() => setDropdownOpen(false), 200)}
-                  className="inline-flex items-center space-x-1 px-3 py-2 text-xs font-semibold text-indigo-300 bg-indigo-950/80 border border-indigo-800/60 rounded-xl hover:bg-indigo-900/80 transition-all cursor-pointer"
-                >
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="hidden md:inline">Demo Logins</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-800 p-1.5 shadow-xl z-50">
-                    <button
-                      onClick={() => demoLogin('seeker')}
-                      className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all text-left cursor-pointer"
-                    >
-                      <Zap className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Demo Seeker</span>
-                    </button>
-                    <button
-                      onClick={() => demoLogin('recruiter')}
-                      className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all text-left cursor-pointer"
-                    >
-                      <Users className="w-3.5 h-3.5 text-purple-400" />
-                      <span>Demo Recruiter</span>
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await demoLogin('admin');
-                        navigate('/admin');
-                      }}
-                      className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all text-left cursor-pointer"
-                    >
-                      <Shield className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Demo Admin</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
               <Link
                 to="/login"
                 className="px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-all"
