@@ -49,10 +49,7 @@ const getApiBase = () => {
 const API_BASE = getApiBase();
 
 export const api = axios.create({
-  baseURL: API_BASE,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: API_BASE
 });
 
 api.interceptors.request.use((config) => {

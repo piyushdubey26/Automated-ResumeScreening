@@ -404,6 +404,10 @@ export const DashboardPage: React.FC = () => {
         setJdMatchResult(null);
         addActivityLog('✓ Resume Analyzed', `Resume Health Score: ${resume.resume.score}/100`);
       }
+    } catch (err: any) {
+      console.error('Analysis failed:', err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to analyze resume.';
+      alert(errorMsg);
     } finally {
       setIsAnalyzing(false);
       setIsMatching(false);

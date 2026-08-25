@@ -37,11 +37,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
     formData.append('file', file);
 
     try {
-      const response = await api.post('/resumes/extract-text', formData, {
-        headers: {
-          'Content-Type': undefined
-        }
-      });
+      const response = await api.post('/resumes/extract-text', formData);
 
       // Handle HTML redirects or errors returned as HTML
       if (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE html>')) {
