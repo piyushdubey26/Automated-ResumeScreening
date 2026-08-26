@@ -58,6 +58,31 @@
       "points": 3200,
       "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150",
       "createdAt": "2026-08-18T19:46:28.608Z"
+    },
+    {
+      "id": "user-1787731211731",
+      "name": "Piyush Dubey",
+      "email": "piyushdubey2613@gmail.com",
+      "password": "Piyush26",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Piyush%20Dubey",
+      "createdAt": "2026-08-26T08:00:11.731Z",
+      "profileLinks": {
+        "github": "",
+        "linkedin": "",
+        "project": "",
+        "coding": ""
+      },
+      "interviewScore": null,
+      "monthlyUsage": 0,
+      "plan": "free",
+      "subscriptionStatus": "free"
     }
   ],
   "resumes": [

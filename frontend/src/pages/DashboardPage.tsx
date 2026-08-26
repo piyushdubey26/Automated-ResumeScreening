@@ -160,20 +160,13 @@ export const DashboardPage: React.FC = () => {
 
   // Sync data from database on mount or when user changes
   useEffect(() => {
-    if (!user) return;
+    if (!userId || userId === 'guest') return;
 
     let active = true;
 
     async function loadData() {
       setIsLoadingData(true);
       try {
-        // Sync user profile
-        const meRes = await authApi.getMe().catch(() => null);
-        if (active && meRes && meRes.user) {
-          localStorage.setItem('resumeai_user', JSON.stringify(meRes.user));
-          window.dispatchEvent(new Event('resumeai-subscription-updated'));
-        }
-
         // Fetch active subscription
         const subRes = await authApi.getSubscription().catch(() => null);
         if (active && subRes) {
@@ -230,7 +223,7 @@ export const DashboardPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [user, userId]);
+  }, [userId]);
 
   // Live subscription countdown timer
   useEffect(() => {

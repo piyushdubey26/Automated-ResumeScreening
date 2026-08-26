@@ -98,7 +98,7 @@ export const getLatestMatch = (req: Request, res: Response) => {
   }
   const match = mockDb.jdMatches.find(m => m.userId === authUserId);
   if (!match) {
-    return res.status(404).json({ error: 'No job matches found' });
+    return res.json({ success: true, match: null });
   }
   return res.json(match);
 };

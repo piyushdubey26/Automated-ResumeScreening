@@ -114,16 +114,26 @@ export const getResumeById = (req: Request, res: Response) => {
   return res.json({ success: true, resume });
 };
 
-export const getLatestResume = (req: Request, res: Response) => {
-  const authUserId = req.user?.userId;
-  if (!authUserId) {
-    return res.status(401).json({ success: false, error: 'Authentication required' });
+export const getLatestResume = async (req: Request, res: Response) => {
+  try {
+    const authUserId = req.user?.userId;
+    if (!authUserId) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    const userResume = mockDb.resumes.find(r => r.userId === authUserId);
+    if (!userResume) {
+      return res.json({ success: true, resume: null });
+    }
+
+    return res.json({
+      success: true,
+      resume: userResume
+    });
+  } catch (err: any) {
+    console.error('Error fetching latest resume:', err);
+    return res.status(500).json({ success: false, error: 'Failed to fetch latest resume' });
   }
-  const resume = mockDb.resumes.find(r => r.userId === authUserId);
-  if (!resume) {
-    return res.status(404).json({ success: false, error: 'No resume found for this user' });
-  }
-  return res.json({ success: true, resume });
 };
 
 export const getResumeFeedback = (req: Request, res: Response) => {

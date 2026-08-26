@@ -489,9 +489,16 @@ export const resumeApi = {
     const res = await api.post('/resumes/upload', { text, filename, targetRole });
     return res.data;
   },
-  getLatest: async (): Promise<{ resume: ResumeRecord }> => {
-    const res = await api.get('/resumes/latest');
-    return res.data;
+  getLatest: async (): Promise<{ resume: ResumeRecord | null }> => {
+    try {
+      const res = await api.get('/resumes/latest');
+      return res.data;
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        return { resume: null };
+      }
+      throw err;
+    }
   },
   rewriteBullet: async (bulletText: string, focusMode: string, targetRole: string): Promise<RewriteResult> => {
     const res = await api.post('/resumes/rewrite', { bulletText, focusMode, targetRole });
@@ -520,9 +527,16 @@ export const jobApi = {
     const res = await api.post('/jobs/match', { resumeText, jdText, targetRole });
     return res.data;
   },
-  getLatestMatch: async (): Promise<JDMatchResult> => {
-    const res = await api.get('/jobs/latest-match');
-    return res.data;
+  getLatestMatch: async (): Promise<JDMatchResult | null> => {
+    try {
+      const res = await api.get('/jobs/latest-match');
+      return res.data;
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        return null;
+      }
+      throw err;
+    }
   }
 };
 
