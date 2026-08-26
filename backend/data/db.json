@@ -112,6 +112,31 @@
       "monthlyUsage": 0,
       "plan": "free",
       "subscriptionStatus": "free"
+    },
+    {
+      "id": "user-1787745481607",
+      "name": "New Candidate",
+      "email": "candidate_1787745481603@gmail.com",
+      "password": "Password123!",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=New%20Candidate",
+      "createdAt": "2026-08-26T11:58:01.607Z",
+      "profileLinks": {
+        "github": "",
+        "linkedin": "",
+        "project": "",
+        "coding": ""
+      },
+      "interviewScore": null,
+      "monthlyUsage": 0,
+      "plan": "free",
+      "subscriptionStatus": "free"
     }
   ],
   "resumes": [

@@ -2,10 +2,16 @@
   "version": 2,
   "buildCommand": "npm --prefix backend run build && npm --prefix frontend run build",
   "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 15
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/[...path].ts"
+      "destination": "/api/index.ts"
     },
     {
       "source": "/api",
