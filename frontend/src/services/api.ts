@@ -1,17 +1,15 @@
 import axios from 'axios';
 import type {
-  User,
   ResumeRecord,
   JDMatchResult,
   RewriteResult,
   InterviewQuestion,
   RecruiterCandidate,
   LeaderboardEntry,
-  FeedbackCard
+  FeedbackCard,
+  UserApplication
 } from '../types';
-import { cloudSync } from './cloudSync';
-
-const SKILLS_BY_ROLE = {
+export const SKILLS_BY_ROLE = {
   sde: ['typescript', 'javascript', 'node.js', 'node', 'express', 'react', 'postgresql', 'postgres', 'docker', 'aws', 'redis', 'rest api', 'git', 'graphql', 'kubernetes', 'python', 'java', 'c++', 'go', 'sql', 'html', 'css'],
   'data-science': ['python', 'pytorch', 'tensorflow', 'scikit-learn', 'pandas', 'numpy', 'sql', 'a/b testing', 'docker', 'aws', 'sagemaker', 'machine learning', 'deep learning', 'nlp', 'statistics', 'spark', 'etl'],
   marketing: ['seo', 'sem', 'paid social', 'google analytics', 'ga4', 'hubspot', 'a/b testing', 'figma', 'copywriting', 'cac', 'ltv', 'roas', 'ads', 'social media', 'email marketing'],
@@ -43,46 +41,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const fallbackUser: User = {
-  id: 'guest-user',
-  name: 'New Seeker',
-  email: 'seeker@example.com',
-  rolePreference: 'sde',
-  userType: 'seeker',
-  badges: [],
-  points: 0,
-  usage: { resume_reviews: 0 },
-  createdAt: new Date().toISOString()
-};
 
-// ── Browser-based LocalStorage fallback DB ────────────────────────────────────
-const LOCAL_DB_KEY = 'resumeai_local_db';
-
-interface LocalDB {
-  users: User[];
-  resumes: ResumeRecord[];
-}
-
-const getLocalDB = (): LocalDB => {
-  const saved = localStorage.getItem(LOCAL_DB_KEY);
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {}
-  }
-  
-  // Initial seed data
-  const initial: LocalDB = {
-    users: [],
-    resumes: []
-  };
-  localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(initial));
-  return initial;
-};
-
-const saveLocalDB = (db: LocalDB) => {
-  localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db));
-};
 
 export const sampleResumesText = {
   sde: `Alex Rivera

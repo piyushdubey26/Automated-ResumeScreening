@@ -9,10 +9,23 @@ export interface User {
   points: number;
   avatar?: string;
   createdAt: string;
-  plan?: 'free' | 'pro' | 'career-max' | 'recruiter' | 'enterprise';
-  subscriptionStatus?: 'free' | 'active' | 'trialing' | 'pending' | 'approved' | 'declined' | 'cancelled' | 'expired';
+  plan?: string;
+  subscriptionStatus?: string;
   subscriptionRequestedAt?: string;
   usage?: Record<string, number>;
+  profileLinks?: { github?: string; linkedin?: string; project?: string; coding?: string };
+  interviewScore?: number | null;
+}
+
+export interface UserApplication {
+  id: string;
+  userId: string;
+  company: string;
+  role: string;
+  status: 'Applied' | 'Interviewing' | 'Offered' | 'Rejected' | 'Offer';
+  appliedDate?: string;
+  date?: string;
+  notes?: string;
 }
 
 export interface FeedbackCard {
@@ -68,6 +81,7 @@ export interface JobDescriptionRecord {
 export interface JDMatchResult {
   resumeId?: string;
   jdId?: string;
+  jdText?: string;
   matchPct: number;
   keywordScore: number;
   embeddingScore: number;

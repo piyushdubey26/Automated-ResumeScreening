@@ -22,12 +22,7 @@ import {
   X,
   Edit2
 } from "lucide-react";
-import { cloudSync } from "../services/cloudSync";
 import { authApi } from "../services/api";
-
-// ─── Local Database Key ──────────────────────────────────────────────────────
-const LOCAL_DB_KEY = "resumeai_local_db";
-
 interface AdminUserRecord {
   id: string;
   name: string;
@@ -38,6 +33,7 @@ interface AdminUserRecord {
   status: "Active" | "Pending" | "Suspended";
   plan?: string;
   subscriptionStatus?: string;
+  subscriptionRequestedAt?: string;
   joinedDate: string;
   lastActive: string;
 }

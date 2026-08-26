@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { sampleResumesText, sampleJDsText, resumeApi, jobApi } from '../services/api';
+import { sampleResumesText, sampleJDsText, resumeApi, jobApi, authApi } from '../services/api';
 import { FileUpload } from '../components/upload/FileUpload';
 import { canAccessFeature } from '../utils/permissions';
 import UpgradeGate from '../components/auth/UpgradeGate';
@@ -9,7 +9,8 @@ import type {
   ResumeRecord,
   JDMatchResult,
   RewriteResult,
-  InterviewQuestion
+  InterviewQuestion,
+  UserApplication
 } from '../types';
 import {
   FileText,
@@ -39,26 +40,14 @@ interface ActivityItem {
   time: string;
 }
 
-interface UserApplication {
-  id: string;
-  role: string;
-  company: string;
-  status: 'Applied' | 'Interviewing' | 'Offered' | 'Rejected';
-  date: string;
-}
+
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const userId = user?.id || 'guest';
 
   // Storage Keys scoped per authenticated user ID
-  const KEY_RESUME = `resumeai_user_resume_${userId}`;
   const KEY_RESUME_TEXT = `resumeai_user_resumetext_${userId}`;
-  const KEY_JDMATCH = `resumeai_user_jdmatch_${userId}`;
-  const KEY_APPS = `resumeai_user_apps_${userId}`;
-  const KEY_ACTIVITY = `resumeai_user_activity_${userId}`;
-  const KEY_INTERVIEW_SCORE = `resumeai_user_interview_score_${userId}`;
-  const KEY_LINKS = `resumeai_user_links_${userId}`;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -214,12 +203,12 @@ export const DashboardPage: React.FC = () => {
         // Fetch links & interview score & activities from the user profile
         if (active) {
           setProfileLinks({
-            github: user.profileLinks?.github || '',
-            linkedin: user.profileLinks?.linkedin || '',
-            project: user.profileLinks?.project || '',
-            coding: user.profileLinks?.coding || ''
+            github: user?.profileLinks?.github || '',
+            linkedin: user?.profileLinks?.linkedin || '',
+            project: user?.profileLinks?.project || '',
+            coding: user?.profileLinks?.coding || ''
           });
-          setInterviewScore(user.interviewScore || null);
+          setInterviewScore(user?.interviewScore || null);
 
           // Load local activities
           const savedActivity = localStorage.getItem(`resumeai_user_activity_${userId}`);

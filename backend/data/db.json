@@ -29,7 +29,7 @@
       "points": 500,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
       "createdAt": "2026-08-25T13:31:04.615Z",
-      "monthlyUsage": 1
+      "monthlyUsage": 5
     },
     {
       "id": "user-seeker-1",
@@ -62,43 +62,80 @@
   ],
   "resumes": [
     {
-      "id": "resume-1787678876615",
+      "id": "resume-1787683761261",
       "userId": "user-sakshi",
-      "filename": "Uploaded_Resume.pdf",
+      "filename": "My_Resume.pdf",
       "targetRole": "sde",
-      "rawText": "Sakshi Sharma Senior Software Engineer React TypeScript Node.js PostgreSQL AWS Docker c++",
+      "rawText": "PIYUSH DUBEY\nLucknow, Uttar Pradesh\n+91 9696261063 | Piyushdubey447@gmail.com | LinkedIn | GitHub\nEDUCATION\nBabu Banarasi Das University, Lucknow \tAug 2023 – Present\nB.Tech in Computer Science & Engineering | CGPA: 8.0/10\nKunwar Convent School, Ballia, Uttar Pradesh\nIntermediate (Class XII) | Percentage: 63%\nTECHNICAL SKILLS\nProgramming Languages: Java, Python, JavaScript, C\nFrontend Development: React.js, Next.js, HTML5, CSS3, Tailwind CSS\nBackend Development: Node.js, Express.js, REST API Design\nDatabases: SQL, MySQL, MongoDB\nTools & Platforms: Git, GitHub, VS Code, Firebase, Vercel\nCore Subjects: Data Structures & Algorithms, DBMS, OOP, Operating Systems\nAI / Machine Learning: Machine Learning Fundamentals, NLP, Pandas, NumPy\nWORK EXPERIENCE\nMERN Stack Intern Trainee | Grastech\nCompleted practical, project-based training in full-stack MERN Stack Development.\nBuilt responsive full-stack web applications using React.js, Node.js, Express.js, and MongoDB.\nDeveloped and consumed REST APIs, integrating frontend and backend systems end-to-end.\nCollaborated using Git/GitHub for version control across team-based project workflows.\nParticipated in debugging, unit testing, and deployment of production-ready features.\nPROJECTS\nStyleSphere AI — AI-Powered Fashion Recommendation\nPlatform\nReact.js, Node.js, Express.js, MongoDB, Tailwind\nCSS\nDeveloped a full-stack AI-powered fashion recommendation platform with a modern, responsive UI/UX.\nIntegrated frontend and backend modules using the MERN stack for a seamless end-to-end user experience.\nImplemented AI-driven recommendation logic to personalize content for individual users.\nArchitected a scalable application structure using modern web development best practices.\nLive Demo: https://style-sphere-ai-awqf.vercel.app/\nShopSphere — Full Stack E-Commerce Platform \tReact.js, Node.js, Express.js, MongoDB\nBuilt a complete MERN-based e-commerce platform supporting product browsing and secure checkout.\nImplemented user authentication, product management, and RESTful API endpoints.\nIntegrated MongoDB with a responsive frontend to support real-time data-driven UI updates.\nDeveloped secure CRUD operations for products, orders, and user accounts.\nLive Demo: https://shopsphere-ecommerce-six.vercel.app/\nACHIEVEMENTS & CERTIFICATIONS\nMERN Stack Development Internship Certificate — Grastech.\nWeb Development Fundamentals Certificate — IBM.\nBuilt and deployed multiple full-stack web applications using the MERN Stack.\nDeveloped AI-powered and database-driven software projects from concept to completion.\nStrong foundation in Data Structures, Algorithms, and problem-solving techniques.\nActive learner consistently upskilling in Software Development, AI/ML, and Web Technologies.\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n\n-- 1 of 1 --\n\n",
       "parsedSections": {
         "contact": {
-          "name": "Candidate"
+          "name": "PIYUSH DUBEY",
+          "email": "Piyushdubey447@gmail.com",
+          "phone": "+91 9696261063"
         },
         "skills": [
-          "typescript",
+          "javascript",
           "react",
+          "next.js",
           "node.js",
-          "c++",
-          "postgresql",
-          "aws",
-          "docker"
+          "express",
+          "python",
+          "java",
+          "sql",
+          "mongodb",
+          "git",
+          "rest api",
+          "pandas",
+          "numpy"
         ],
         "experience": [
           "Developed microservices and REST APIs with high availability.",
           "Optimized database queries and improved system throughput."
         ],
         "projects": [
-          "Automated Resume Screening Platform with role rubrics."
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "- 1 of 1 --"
         ],
         "education": [
-          "B.S. in Computer Science"
+          "Babu Banarasi Das University, Lucknow \tAug 2023 – Present",
+          "B.Tech in Computer Science & Engineering | CGPA: 8.0/10",
+          "Kunwar Convent School, Ballia, Uttar Pradesh",
+          "Intermediate (Class XII) | Percentage: 63%"
         ]
       },
-      "score": 71,
+      "score": 86,
       "scoreBreakdown": {
-        "structure": 85,
-        "clarity": 67,
+        "structure": 100,
+        "clarity": 100,
         "impact": 48,
-        "skills": 80,
-        "projects": 80,
-        "ats": 80
+        "skills": 95,
+        "projects": 100,
+        "ats": 100
       },
       "feedback": [
         {
@@ -110,12 +147,12 @@
           "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
         },
         {
-          "id": "fb-clarity-1",
+          "id": "fb-clarity-2",
           "category": "Clarity",
-          "severity": "high",
-          "title": "Use Strong Action Verbs",
-          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
-          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
+          "severity": "success",
+          "title": "Strong Action Phrasing",
+          "description": "Found 10 impactful action verbs across experience bullets.",
+          "suggestion": "Maintain action-oriented verb tense consistency."
         },
         {
           "id": "fb-impact-1",
@@ -134,7 +171,7 @@
           "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
         }
       ],
-      "createdAt": "2026-08-25T17:27:56.615Z"
+      "createdAt": "2026-08-25T18:49:21.261Z"
     },
     {
       "id": "resume-sde-1",
@@ -278,7 +315,113 @@
     }
   ],
   "applications": [],
-  "jdMatches": [],
+  "jdMatches": [
+    {
+      "id": "match-1787683752555",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-25T18:49:12.555Z"
+    },
+    {
+      "id": "match-1787683751974",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-25T18:49:11.974Z"
+    },
+    {
+      "id": "match-1787683750934",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-25T18:49:10.934Z"
+    },
+    {
+      "id": "match-1787683531116",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-25T18:45:31.116Z"
+    },
+    {
+      "id": "match-1787679320956",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-25T17:35:20.956Z"
+    }
+  ],
   "activities": [],
   "subscriptions": []
 }

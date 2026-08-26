@@ -16,7 +16,6 @@ export const PricingPage: React.FC = () => {
   const isAdmin = user?.userType === 'admin' || user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com';
   const isSeeker = user?.userType === 'seeker';
   const isRecruiter = user?.userType === 'recruiter';
-  const status = user?.subscriptionStatus;
 
   useEffect(() => {
     if (user && isSeeker) {
