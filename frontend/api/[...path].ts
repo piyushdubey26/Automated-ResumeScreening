@@ -1,4 +1,4 @@
-import importedApp from '../../backend/src/app';
+import importedApp from '../../backend/src/app.js';
 
 const expressApp = (importedApp as any)?.default ?? importedApp;
 
