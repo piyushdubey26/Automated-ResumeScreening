@@ -40,45 +40,60 @@ app.use(limiter);
 
 // URL Normalization Middleware for Vercel Serverless Functions
 app.use((req, res, next) => {
-  // 1. Inspect Vercel Edge headers for the original client request URI before Vercel rewrites
-  const vercelForwardedUri = req.headers['x-forwarded-uri'] as string;
-  const vercelInvokePath = req.headers['x-invoke-path'] as string;
-  const vercelRewriteUrl = req.headers['x-rewrite-url'] as string;
+  let url = req.url || '/';
 
-  let url = vercelForwardedUri || vercelInvokePath || vercelRewriteUrl || req.originalUrl || req.url || '/';
-
-  // If url is an internal script name like /api/index.ts, fallback to req.url
-  if (url === '/api/index.ts' || url === '/api/index' || url === '/api' || url === '/index.ts') {
-    if (req.url && req.url !== url && !req.url.startsWith('/api/index')) {
-      url = req.url;
+  // 1. Inspect req.query.path (populated by Vercel rewrite /api/(.*) -> /api/index.ts?path=$1)
+  if (req.query && req.query.path) {
+    const p = req.query.path;
+    if (Array.isArray(p)) {
+      url = '/' + p.join('/');
+    } else if (typeof p === 'string') {
+      url = p.startsWith('/') ? p : '/' + p;
+    }
+  } else if (req.query && req.query.slug) {
+    const s = req.query.slug;
+    if (Array.isArray(s)) {
+      url = '/' + s.join('/');
+    } else if (typeof s === 'string') {
+      url = s.startsWith('/') ? s : '/' + s;
+    }
+  } else {
+    // 2. Inspect Vercel route matches header (e.g. x-now-route-matches: 1=auth/login)
+    const routeMatches = req.headers['x-now-route-matches'] as string;
+    if (routeMatches) {
+      const match = routeMatches.match(/(?:1|path)=([^&]+)/);
+      if (match && match[1]) {
+        url = '/' + decodeURIComponent(match[1]);
+      }
+    }
+    
+    // 3. Fallback to Vercel Edge request headers
+    if (url === '/' || url.startsWith('/api/index')) {
+      const vercelForwardedUri = req.headers['x-forwarded-uri'] as string;
+      const vercelInvokePath = req.headers['x-invoke-path'] as string;
+      const vercelRewriteUrl = req.headers['x-rewrite-url'] as string;
+      const alt = vercelForwardedUri || vercelInvokePath || vercelRewriteUrl || req.originalUrl;
+      if (alt && !alt.startsWith('/api/index')) {
+        url = alt;
+      }
     }
   }
 
-  // Strip query string if present in url (Express router handles query params via req.query)
+  // Strip query string from url
   if (url.includes('?')) {
     url = url.split('?')[0];
   }
 
-  // If Vercel catch-all router populated req.query.path or req.query.slug, reconstruct the real request URL
-  if (req.query && (req.query.path || req.query.slug)) {
-    const segments = req.query.path || req.query.slug;
-    if (Array.isArray(segments)) {
-      url = '/' + segments.join('/');
-    } else if (typeof segments === 'string') {
-      url = '/' + segments;
-    }
-  }
-  
-  // Remove any Vercel internal function filename prefixes (e.g. /api/index.ts, /api/[...path].ts, /api/index, /api/[...path], /index.ts)
+  // Clean up any internal script filename prefixes (e.g. /api/index.ts, /api/[...path].ts)
   url = url.replace(/^\/api\/(?:index(?:\.ts|\.js)?|\[\.\.\.path\](?:\.ts|\.js)?)/, '');
   url = url.replace(/^\/(?:index(?:\.ts|\.js)?|\[\.\.\.path\](?:\.ts|\.js)?)/, '');
 
-  // If url is empty or doesn't start with '/', default to '/'
+  // Ensure url starts with '/'
   if (!url || !url.startsWith('/')) {
     url = '/' + url;
   }
 
-  // Ensure url has /api prefix if it matches core routes without /api
+  // Ensure url has /api prefix for router matching
   if (!url.startsWith('/api')) {
     url = '/api' + url;
   }

@@ -184,10 +184,10 @@
         "project": "",
         "coding": ""
       },
-      "interviewScore": null,
+      "interviewScore": 85,
       "monthlyUsage": 1,
-      "plan": "free",
-      "subscriptionStatus": "pending_approval",
+      "plan": "career-max",
+      "subscriptionStatus": "approved",
       "usageMonth": "2026-08"
     }
   ],
@@ -687,6 +687,27 @@
   "applications": [],
   "jdMatches": [
     {
+      "id": "match-1787751046573",
+      "userId": "user-1787745643154",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T13:30:46.573Z"
+    },
+    {
       "id": "match-1787750762866",
       "userId": "user-1787750534910",
       "resumeId": "latest",
@@ -904,6 +925,19 @@
       "autoRenew": true,
       "createdAt": "2026-08-26T08:52:43.870Z",
       "updatedAt": "2026-08-26T09:04:53.095Z"
+    },
+    {
+      "id": "sub-1787750880458",
+      "userId": "user-1787750534910",
+      "planId": "career-max",
+      "planName": "Career Max",
+      "status": "active",
+      "billingInterval": "monthly",
+      "startedAt": "2026-08-26T13:28:00.458Z",
+      "expiresAt": "2026-09-26T13:28:00.458Z",
+      "autoRenew": true,
+      "createdAt": "2026-08-26T13:28:00.458Z",
+      "updatedAt": "2026-08-26T13:28:00.458Z"
     }
   ],
   "subscriptionRequests": [
@@ -915,8 +949,11 @@
       "currentPlan": "free",
       "requestedPlan": "career-max",
       "requestedPlanName": "Career Max",
-      "status": "pending",
-      "requestedAt": "2026-08-26T13:25:44.969Z"
+      "status": "approved",
+      "requestedAt": "2026-08-26T13:25:44.969Z",
+      "approvedAt": "2026-08-26T13:28:00.458Z",
+      "approvedBy": "admin-piyush",
+      "approvedByName": "Piyush Dubey"
     },
     {
       "id": "subreq-1787736264162",
