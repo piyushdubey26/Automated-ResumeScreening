@@ -13,6 +13,8 @@ export interface User {
   subscriptionStatus?: string;
   subscriptionRequestedAt?: string;
   usage?: Record<string, number>;
+  monthlyUsage?: number;
+  usageMonth?: string;
   profileLinks?: { github?: string; linkedin?: string; project?: string; coding?: string };
   interviewScore?: number | null;
 }

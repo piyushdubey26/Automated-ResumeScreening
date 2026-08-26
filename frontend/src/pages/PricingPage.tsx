@@ -295,6 +295,20 @@ export const PricingPage: React.FC = () => {
 
                 <p className="mt-5 min-h-12 text-xs leading-5 text-slate-400">{plan.description}</p>
 
+                {plan.id === 'free' && user && isSeeker && (
+                  <div className="mt-4 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
+                    <div className="flex justify-between items-center font-bold text-white mb-1">
+                      <span className="text-slate-400 text-[10px] uppercase tracking-wider">Current Usage</span>
+                      <span className={(user.monthlyUsage || 0) >= 5 ? "text-rose-400 font-extrabold" : "text-emerald-400 font-bold"}>
+                        {user.monthlyUsage || 0} / 5 used
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      {(user.monthlyUsage || 0) >= 5 ? "Limit reached for this month" : `${Math.max(0, 5 - (user.monthlyUsage || 0))} reviews remaining`}
+                    </div>
+                  </div>
+                )}
+
                 <ul className="mt-6 space-y-2.5 text-xs text-slate-300">
                   {plan.features.map(feature => (
                     <li key={feature} className="flex gap-2 items-start">

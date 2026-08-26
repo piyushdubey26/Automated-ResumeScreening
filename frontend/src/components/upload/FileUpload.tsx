@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, FileText, Image, X, Loader2, CheckCircle2 } from 'lucide-react';
+import { Upload, FileText, Image, X, Loader2, CheckCircle2, Lock, ArrowRight } from 'lucide-react';
 import { extractTextFromFile } from '../../utils/fileExtractor';
 
 interface FileUploadProps {
@@ -7,13 +7,19 @@ interface FileUploadProps {
   label?: string;
   accept?: string;
   helpText?: string;
+  disabled?: boolean;
+  disabledMessage?: string;
+  onUpgradeClick?: () => void;
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
   onTextExtracted,
   label = 'Upload Resume',
   accept = '.pdf,.jpg,.jpeg,.png,.txt',
-  helpText = 'Supports PDF, JPG, PNG, TXT files'
+  helpText = 'Supports PDF, JPG, PNG, TXT files',
+  disabled = false,
+  disabledMessage = "Monthly resume review limit reached. You've used all 5 free resume reviews this month. Upgrade your plan to continue.",
+  onUpgradeClick
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -115,29 +121,52 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       <label className="block text-xs font-semibold text-slate-400">{label}</label>
       
       <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => !isProcessing && inputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 ${
-          isDragging
-            ? 'border-indigo-500 bg-indigo-500/10'
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onDrop={disabled ? undefined : handleDrop}
+        onClick={() => !disabled && !isProcessing && inputRef.current?.click()}
+        className={`relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-200 ${
+          disabled
+            ? 'border-amber-500/30 bg-amber-500/5 cursor-not-allowed'
+            : isDragging
+            ? 'border-indigo-500 bg-indigo-500/10 cursor-pointer'
             : fileName && !error
-            ? 'border-emerald-500/50 bg-emerald-500/5'
+            ? 'border-emerald-500/50 bg-emerald-500/5 cursor-pointer'
             : error
-            ? 'border-rose-500/50 bg-rose-500/5'
-            : 'border-slate-700 bg-slate-950/50 hover:border-indigo-500/50 hover:bg-slate-900/50'
+            ? 'border-rose-500/50 bg-rose-500/5 cursor-pointer'
+            : 'border-slate-700 bg-slate-950/50 hover:border-indigo-500/50 hover:bg-slate-900/50 cursor-pointer'
         }`}
       >
         <input
           ref={inputRef}
           type="file"
           accept={accept}
+          disabled={disabled}
           onChange={handleFileSelect}
           className="hidden"
         />
 
-        {isProcessing ? (
+        {disabled ? (
+          <div className="flex flex-col items-center space-y-3 text-center p-2">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <Lock className="w-6 h-6 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-amber-300">Monthly resume review limit reached</p>
+              <p className="text-[11px] text-slate-400 mt-1 max-w-xs">{disabledMessage}</p>
+            </div>
+            {onUpgradeClick && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onUpgradeClick(); }}
+                className="mt-1 inline-flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-amber-600 to-[#a84c38] text-white text-xs font-bold rounded-xl hover:opacity-95 transition-opacity"
+              >
+                <span>Upgrade Plan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        ) : isProcessing ? (
           <div className="flex flex-col items-center space-y-2">
             <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
             <span className="text-xs text-indigo-300 font-medium">{progress}</span>

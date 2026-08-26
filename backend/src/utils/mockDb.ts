@@ -12,6 +12,7 @@ export interface User {
   profileLinks?: { github?: string; linkedin?: string; project?: string; coding?: string };
   interviewScore?: number | null;
   monthlyUsage?: number;
+  usageMonth?: string;
   plan?: string;
   subscriptionStatus?: string;
 }

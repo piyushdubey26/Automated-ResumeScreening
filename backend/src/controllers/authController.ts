@@ -72,6 +72,16 @@ export const getMe = (req: Request, res: Response) => {
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
+
+  // Calendar month reset check
+  const d = new Date();
+  const currentMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  if (user.usageMonth !== currentMonth) {
+    user.usageMonth = currentMonth;
+    user.monthlyUsage = 0;
+    saveDb();
+  }
+
   const userResponse = { ...user };
   delete userResponse.password;
   return res.json({ user: userResponse });

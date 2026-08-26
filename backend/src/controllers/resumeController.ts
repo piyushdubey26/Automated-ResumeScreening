@@ -55,13 +55,47 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'User account not found.' });
     }
 
+    // Monthly period calculation & auto reset for new calendar month
+    const d = new Date();
+    const currentMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (userRecord.usageMonth !== currentMonth) {
+      userRecord.usageMonth = currentMonth;
+      userRecord.monthlyUsage = 0;
+    }
+
     const activeSub = getActiveSubscription(authUserId);
-    if (!activeSub) {
-      userRecord.monthlyUsage = (userRecord.monthlyUsage || 0) + 1;
+    const isPaidPlan = userRecord.plan === 'job_seeker_pro' || 
+                       userRecord.plan === 'career-max' || 
+                       userRecord.plan === 'pro' || 
+                       userRecord.userType === 'recruiter' || 
+                       userRecord.userType === 'admin' || 
+                       (activeSub && activeSub.status === 'active');
+
+    // Strict Backend Entitlement Enforcement
+    if (!isPaidPlan) {
+      const currentUsage = userRecord.monthlyUsage || 0;
+      if (currentUsage >= 5) {
+        return res.status(403).json({
+          success: false,
+          code: 'LIMIT_REACHED',
+          error: "Monthly resume review limit reached (5 reviews). Upgrade your plan to continue.",
+          usage: {
+            used: currentUsage,
+            limit: 5,
+            remaining: 0,
+            isUnlimited: false
+          }
+        });
+      }
     }
 
     const parsed = ParserService.parseText(rawText);
     const scoreResult = ScoringEngine.evaluate(parsed, role);
+
+    // Increment usage ONLY upon successful review for Free tier users
+    if (!isPaidPlan) {
+      userRecord.monthlyUsage = (userRecord.monthlyUsage || 0) + 1;
+    }
 
     const newResume: ResumeRecord = {
       id: `resume-${Date.now()}`,
@@ -86,11 +120,19 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
     mockDb.resumes.unshift(newResume);
     saveDb();
 
+    const finalUsage = userRecord.monthlyUsage || 0;
+
     return res.status(201).json({
       success: true,
       message: 'Resume parsed and scored successfully',
       resumeId: newResume.id,
-      resume: newResume
+      resume: newResume,
+      usage: {
+        used: finalUsage,
+        limit: isPaidPlan ? null : 5,
+        remaining: isPaidPlan ? null : Math.max(0, 5 - finalUsage),
+        isUnlimited: isPaidPlan
+      }
     });
   } catch (err: any) {
     console.error('CRITICAL BACKEND ERROR in uploadAndParseResume:', err);

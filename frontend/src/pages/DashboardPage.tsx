@@ -506,6 +506,12 @@ export const DashboardPage: React.FC = () => {
     return fb.severity === feedbackFilter;
   }) || [];
 
+  // Usage calculation variables
+  const isUnlimited = user?.plan === 'job_seeker_pro' || user?.plan === 'career-max' || user?.plan === 'pro' || user?.userType === 'recruiter' || user?.userType === 'admin' || (activeSub && activeSub.status === 'active');
+  const usageUsed = user?.monthlyUsage || 0;
+  const remainingReviews = isUnlimited ? null : Math.max(0, 5 - usageUsed);
+  const isLimitReached = !isUnlimited && usageUsed >= 5;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col lg:flex-row gap-8">
@@ -575,11 +581,14 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-xs shrink-0 font-sans">
               <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Monthly Usage</span>
-                <span className="font-extrabold text-white text-xs">
-                  {activeSub && activeSub.status === 'active'
-                    ? 'Unlimited'
-                    : `${user?.usage?.['resume_reviews'] || 0} / 5 Used`}
+                <span className="font-extrabold text-white text-xs block">
+                  {isUnlimited ? 'Unlimited' : `${usageUsed} / 5 Used`}
                 </span>
+                {!isUnlimited && (
+                  <span className="text-[9px] text-slate-400 block mt-0.5 font-bold">
+                    {remainingReviews === 0 ? 'Limit reached' : `${remainingReviews} left`}
+                  </span>
+                )}
               </div>
               <div className="text-center px-3 border-r border-slate-800">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Subscription</span>
@@ -978,6 +987,48 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Monthly Allowance & Progress Bar Card */}
+                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        {isUnlimited ? 'Pro Plan Allowance' : 'Monthly Resume Review Allowance'}
+                      </span>
+                      <span className="text-xs font-bold text-white mt-0.5 block">
+                        {isUnlimited
+                          ? 'Unlimited resume reviews'
+                          : remainingReviews === 0
+                          ? '0 resume reviews remaining this month'
+                          : `${remainingReviews} resume review${remainingReviews! > 1 ? 's' : ''} remaining this month`}
+                      </span>
+                    </div>
+                    {!isUnlimited && (
+                      <div className="text-right">
+                        <span className="text-[11px] font-extrabold text-white block">{usageUsed} / 5 Used</span>
+                        <span className="text-[9px] text-slate-400 block">{remainingReviews} remaining</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {!isUnlimited && (
+                    <div className="space-y-1">
+                      <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            usageUsed >= 5 ? 'bg-rose-500' : usageUsed >= 4 ? 'bg-amber-500' : 'bg-emerald-500'
+                          }`}
+                          style={{ width: `${Math.min(100, (usageUsed / 5) * 100)}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[9px] font-mono text-slate-500 pt-0.5">
+                        <span>0/5</span>
+                        <span>{usageUsed}/5</span>
+                        <span>5/5</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1">Select Role Rubric</label>
                   <select
@@ -994,6 +1045,9 @@ export const DashboardPage: React.FC = () => {
 
                 {/* File Upload Zone */}
                 <FileUpload
+                  disabled={isLimitReached}
+                  disabledMessage="Monthly resume review limit reached. You've used all 5 free resume reviews this month. Upgrade your plan to continue."
+                  onUpgradeClick={() => navigate('/pricing')}
                   onTextExtracted={(text) => {
                     setResumeRecord(null);
                     setJdMatchResult(null);
@@ -1015,13 +1069,14 @@ export const DashboardPage: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-400 mb-1">Resume Document Text</label>
                   <textarea
                     value={resumeInput}
+                    disabled={isLimitReached}
                     onChange={(e) => {
                       setResumeInput(e.target.value);
                       localStorage.setItem(KEY_RESUME_TEXT, e.target.value);
                     }}
                     rows={8}
-                    placeholder="Paste your resume text here..."
-                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                    placeholder={isLimitReached ? "Monthly limit reached. Upgrade to continue." : "Paste your resume text here..."}
+                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
 
@@ -1055,11 +1110,13 @@ export const DashboardPage: React.FC = () => {
 
                 <button
                   onClick={handleRunComparison}
-                  disabled={isAnalyzing || isMatching || !resumeInput.trim()}
-                  className="w-full py-3 bg-gradient-to-r from-amber-600 to-[#a84c38] hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-[#a84c38]/20 transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                  disabled={isAnalyzing || isMatching || !resumeInput.trim() || isLimitReached}
+                  className="w-full py-3 bg-gradient-to-r from-amber-600 to-[#a84c38] hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg shadow-[#a84c38]/20 transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing ? (
                     <span>Parsing & Evaluating...</span>
+                  ) : isLimitReached ? (
+                    <span>Monthly Limit Reached (5/5 Used)</span>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-amber-300" />
