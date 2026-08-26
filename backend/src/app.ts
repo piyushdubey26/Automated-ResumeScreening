@@ -41,6 +41,16 @@ app.use(limiter);
 // URL Normalization Middleware for Vercel Serverless Functions
 app.use((req, res, next) => {
   let url = req.url || '/';
+
+  // If Vercel catch-all router populated req.query.path or req.query.slug, reconstruct the real request URL
+  if (req.query && (req.query.path || req.query.slug)) {
+    const segments = req.query.path || req.query.slug;
+    if (Array.isArray(segments)) {
+      url = '/' + segments.join('/');
+    } else if (typeof segments === 'string') {
+      url = '/' + segments;
+    }
+  }
   
   // Remove any Vercel internal function filename prefixes (e.g. /api/index.ts, /api/[...path].ts, /api/index, /api/[...path], /index.ts)
   url = url.replace(/^\/api\/(?:index(?:\.ts|\.js)?|\[\.\.\.path\](?:\.ts|\.js)?)/, '');

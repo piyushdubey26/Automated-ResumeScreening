@@ -87,6 +87,31 @@
       "plan": "job_seeker_pro",
       "subscriptionStatus": "pending_approval",
       "usageMonth": "2026-08"
+    },
+    {
+      "id": "user-1787744990211",
+      "name": "New Candidate",
+      "email": "newcandidate_1787744990210@example.com",
+      "password": "Password123!",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=New%20Candidate",
+      "createdAt": "2026-08-26T11:49:50.211Z",
+      "profileLinks": {
+        "github": "",
+        "linkedin": "",
+        "project": "",
+        "coding": ""
+      },
+      "interviewScore": null,
+      "monthlyUsage": 0,
+      "plan": "free",
+      "subscriptionStatus": "free"
     }
   ],
   "resumes": [
