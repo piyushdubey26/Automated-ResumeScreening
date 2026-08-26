@@ -51,21 +51,24 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// ResumeAI Core API Routes (Supported with and without /api prefix for Vercel Serverless Function routing)
-app.use('/api/auth', authRoutes);
-app.use('/auth', authRoutes);
+// URL Normalization Middleware for Vercel Serverless Functions
+app.use((req, res, next) => {
+  let url = req.url || '/';
+  if (url.startsWith('/api/index.ts')) {
+    url = url.replace('/api/index.ts', '') || '/';
+  } else if (url.startsWith('/index.ts')) {
+    url = url.replace('/index.ts', '') || '/';
+  }
+  req.url = url;
+  next();
+});
 
-app.use('/api/resumes', resumeRoutes);
-app.use('/resumes', resumeRoutes);
-
-app.use('/api/jobs', jobRoutes);
-app.use('/jobs', jobRoutes);
-
-app.use('/api/recruiter', recruiterRoutes);
-app.use('/recruiter', recruiterRoutes);
-
-app.use('/api/ecosystem', ecosystemRoutes);
-app.use('/ecosystem', ecosystemRoutes);
+// ResumeAI Core API Routes (Supported with and without /api prefix for Vercel Serverless Functions)
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/resumes', '/resumes'], resumeRoutes);
+app.use(['/api/jobs', '/jobs'], jobRoutes);
+app.use(['/api/recruiter', '/recruiter'], recruiterRoutes);
+app.use(['/api/ecosystem', '/ecosystem'], ecosystemRoutes);
 
 // Base Health Check
 app.get(['/api/health', '/health'], (req, res) => {
@@ -73,6 +76,14 @@ app.get(['/api/health', '/health'], (req, res) => {
     status: 'ok',
     service: 'ResumeAI Engine',
     timestamp: new Date().toISOString()
+  });
+});
+
+// 404 JSON Fallback Handler for API Routes
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `API endpoint not found: ${req.method} ${req.originalUrl || req.url}`
   });
 });
 
