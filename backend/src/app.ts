@@ -41,11 +41,21 @@ app.use(limiter);
 // URL Normalization Middleware for Vercel Serverless Functions
 app.use((req, res, next) => {
   let url = req.url || '/';
-  if (url.startsWith('/api/index.ts')) {
-    url = url.replace('/api/index.ts', '') || '/';
-  } else if (url.startsWith('/index.ts')) {
-    url = url.replace('/index.ts', '') || '/';
+  
+  // Remove any Vercel internal function filename prefixes (e.g. /api/index.ts, /api/[...path].ts, /api/index, /api/[...path], /index.ts)
+  url = url.replace(/^\/api\/(?:index(?:\.ts|\.js)?|\[\.\.\.path\](?:\.ts|\.js)?)/, '');
+  url = url.replace(/^\/(?:index(?:\.ts|\.js)?|\[\.\.\.path\](?:\.ts|\.js)?)/, '');
+
+  // If url is empty or doesn't start with '/', default to '/'
+  if (!url || !url.startsWith('/')) {
+    url = '/' + url;
   }
+
+  // Ensure url has /api prefix if it matches core routes without /api
+  if (!url.startsWith('/api')) {
+    url = '/api' + url;
+  }
+
   req.url = url;
   next();
 });
