@@ -118,11 +118,11 @@ app.use((req, res, next) => {
 });
 
 // ResumeAI Core API Routes (Supported with and without /api prefix for Vercel Serverless Functions)
-app.use(['/api/auth', '/auth'], authRoutes);
-app.use(['/api/resumes', '/resumes'], resumeRoutes);
-app.use(['/api/jobs', '/jobs'], jobRoutes);
-app.use(['/api/recruiter', '/recruiter'], recruiterRoutes);
-app.use(['/api/ecosystem', '/ecosystem'], ecosystemRoutes);
+app.use(['/api/auth', '/auth', '/api/index/auth'], authRoutes);
+app.use(['/api/resumes', '/resumes', '/api/index/resumes'], resumeRoutes);
+app.use(['/api/jobs', '/jobs', '/api/index/jobs'], jobRoutes);
+app.use(['/api/recruiter', '/recruiter', '/api/index/recruiter'], recruiterRoutes);
+app.use(['/api/ecosystem', '/ecosystem', '/api/index/ecosystem'], ecosystemRoutes);
 
 // Base Health Check
 app.get(['/api/health', '/health'], (req, res) => {
