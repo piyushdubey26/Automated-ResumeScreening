@@ -13,21 +13,34 @@ export const PricingPage: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [activeSub, setActiveSub] = useState<any>(null);
 
+  const [pendingRequest, setPendingRequest] = useState<any>(null);
+
   const isAdmin = user?.userType === 'admin' || user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com';
   const isSeeker = user?.userType === 'seeker';
   const isRecruiter = user?.userType === 'recruiter';
 
-  useEffect(() => {
-    if (user && isSeeker) {
-      authApi.getSubscription()
-        .then(res => {
-          if (res && res.subscription) {
-            setActiveSub(res.subscription);
-          }
-        })
-        .catch(console.error);
+  const fetchSubscriptionData = async () => {
+    if (user) {
+      try {
+        const subRes = await authApi.getSubscription().catch(() => null);
+        if (subRes && subRes.subscription) {
+          setActiveSub(subRes.subscription);
+        }
+
+        const reqRes = await authApi.getSubscriptionRequests().catch(() => null);
+        if (reqRes && reqRes.requests) {
+          const pending = reqRes.requests.find((r: any) => r.status === 'pending');
+          setPendingRequest(pending || null);
+        }
+      } catch (err) {
+        console.error('Failed to load subscription data:', err);
+      }
     }
-  }, [user, isSeeker]);
+  };
+
+  useEffect(() => {
+    fetchSubscriptionData();
+  }, [user]);
 
   const requestPro = async (tier = 'Job Seeker Pro') => {
     if (!user) {
@@ -41,20 +54,20 @@ export const PricingPage: React.FC = () => {
     const targetPlanId = tier === 'Career Max' ? 'career-max' : 'job_seeker_pro';
     
     try {
-      const res = await authApi.purchaseSubscription(targetPlanId);
-      setActiveSub(res.subscription);
-      setNotice(`Successfully subscribed to ${tier}! Your plan is active.`);
+      const res = await authApi.requestSubscriptionUpgrade(targetPlanId);
+      setPendingRequest(res.request);
+      setNotice(`Upgrade request for ${tier} submitted successfully! Your request is waiting for administrator approval.`);
       
       const updated: User = {
         ...user,
-        plan: targetPlanId,
-        subscriptionStatus: 'approved'
+        subscriptionStatus: 'pending_approval'
       };
 
       localStorage.setItem('resumeai_user', JSON.stringify(updated));
       window.dispatchEvent(new Event('resumeai-subscription-updated'));
     } catch (err: any) {
-      setNotice(`Subscription failed: ${err.response?.data?.error || err.message}`);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to submit upgrade request.';
+      setNotice(errorMsg);
     }
   };
 
@@ -95,49 +108,73 @@ export const PricingPage: React.FC = () => {
         );
       }
 
+      const activePlanId = user?.plan || 'free';
+
       if (plan.id === 'free') {
-        const isCurrentActive = !activeSub || activeSub.status !== 'active';
+        const isCurrentActive = activePlanId === 'free' && (!activeSub || activeSub.status !== 'active');
         return (
           <button disabled className="w-full py-2.5 bg-slate-900 border border-slate-800 text-slate-400 font-semibold text-xs rounded-xl cursor-default">
-            {isCurrentActive ? 'Current Active Plan' : 'Basic Tier Included'}
+            {isCurrentActive ? 'Current Plan (Active)' : 'Basic Tier Included'}
           </button>
         );
       }
 
       if (plan.id === 'pro') {
-        const isCurrentActive = activeSub && activeSub.status === 'active' && (activeSub.planId === 'job_seeker_pro' || activeSub.planId === 'pro');
-        const isExpired = activeSub && activeSub.status === 'expired' && (activeSub.planId === 'job_seeker_pro' || activeSub.planId === 'pro');
+        const isCurrentActive = (activePlanId === 'job_seeker_pro' || activePlanId === 'pro') && activeSub && activeSub.status === 'active';
+        const isPending = pendingRequest && (pendingRequest.requestedPlan === 'job_seeker_pro' || pendingRequest.requestedPlan === 'pro') && pendingRequest.status === 'pending';
+
+        if (isCurrentActive) {
+          return (
+            <button disabled className="w-full py-2.5 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold text-xs rounded-xl cursor-default">
+              Current Plan (Active)
+            </button>
+          );
+        }
+
+        if (isPending) {
+          return (
+            <button disabled className="w-full py-2.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl cursor-default animate-pulse">
+              Approval Pending
+            </button>
+          );
+        }
         
         return (
           <button
-            onClick={() => !isCurrentActive && requestPro('Job Seeker Pro')}
-            disabled={isCurrentActive}
-            className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer ${
-              isCurrentActive
-                ? 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 cursor-default'
-                : 'bg-[#a84c38] hover:bg-[#8e3f2e] text-white'
-            }`}
+            onClick={() => requestPro('Job Seeker Pro')}
+            className="w-full py-2.5 bg-[#a84c38] hover:bg-[#8e3f2e] text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
           >
-            {isCurrentActive ? 'Current Plan (Active)' : isExpired ? 'Reactivate Pro ($12/mo)' : 'Subscribe to Pro ($12/mo)'}
+            Upgrade to Job Seeker Pro ($12/mo)
           </button>
         );
       }
 
       if (plan.id === 'career-max') {
-        const isCurrentActive = activeSub && activeSub.status === 'active' && activeSub.planId === 'career-max';
-        const isExpired = activeSub && activeSub.status === 'expired' && activeSub.planId === 'career-max';
+        const isCurrentActive = activePlanId === 'career-max' && activeSub && activeSub.status === 'active';
+        const isPending = pendingRequest && pendingRequest.requestedPlan === 'career-max' && pendingRequest.status === 'pending';
         
+        if (isCurrentActive) {
+          return (
+            <button disabled className="w-full py-2.5 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold text-xs rounded-xl cursor-default">
+              Current Plan (Active)
+            </button>
+          );
+        }
+
+        if (isPending) {
+          return (
+            <button disabled className="w-full py-2.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl cursor-default animate-pulse">
+              Approval Pending
+            </button>
+          );
+        }
+
         return (
           <button
-            onClick={() => !isCurrentActive && requestPro('Career Max')}
-            disabled={isCurrentActive}
-            className={`w-full py-2.5 font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer ${
-              isCurrentActive
-                ? 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 cursor-default'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-            }`}
+            onClick={() => requestPro('Career Max')}
+            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
           >
-            {isCurrentActive ? 'Current Plan (Active)' : isExpired ? 'Reactivate Career Max ($49/mo)' : activeSub && activeSub.status === 'active' ? 'Upgrade to Career Max ($49/mo)' : 'Subscribe to Career Max ($49/mo)'}
+            Upgrade to Career Max ($49/mo)
           </button>
         );
       }

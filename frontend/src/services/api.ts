@@ -471,7 +471,23 @@ export const authApi = {
     return res.data;
   },
   purchaseSubscription: async (planId: string) => {
-    const res = await api.post('/auth/subscription/purchase', { planId });
+    const res = await api.post('/auth/subscription/request', { planId });
+    return res.data;
+  },
+  requestSubscriptionUpgrade: async (planId: string) => {
+    const res = await api.post('/auth/subscription/request', { planId });
+    return res.data;
+  },
+  getSubscriptionRequests: async () => {
+    const res = await api.get('/auth/subscription/requests');
+    return res.data;
+  },
+  approveSubscriptionRequest: async (id: string) => {
+    const res = await api.post(`/auth/subscription/requests/${id}/approve`);
+    return res.data;
+  },
+  rejectSubscriptionRequest: async (id: string) => {
+    const res = await api.post(`/auth/subscription/requests/${id}/reject`);
     return res.data;
   },
   cancelSubscription: async () => {

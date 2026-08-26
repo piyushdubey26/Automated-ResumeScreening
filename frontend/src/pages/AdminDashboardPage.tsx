@@ -79,6 +79,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   // Dynamic user database state loaded from LocalStorage
   const [usersDb, setUsersDb] = useState<AdminUserRecord[]>([]);
+  const [subscriptionRequests, setSubscriptionRequests] = useState<any[]>([]);
 
   const mapToAdminUser = (u: any): AdminUserRecord => ({
     id: u.id,
@@ -95,6 +96,42 @@ export const AdminDashboardPage: React.FC = () => {
     lastActive: u.lastActive || 'Just now'
   });
 
+  const fetchSubscriptionRequests = async () => {
+    try {
+      const res = await authApi.getSubscriptionRequests();
+      if (res && res.requests) {
+        setSubscriptionRequests(res.requests);
+      }
+    } catch (err) {
+      console.error("Failed to fetch subscription requests:", err);
+    }
+  };
+
+  const handleApproveSubscriptionRequest = async (id: string) => {
+    try {
+      const res = await authApi.approveSubscriptionRequest(id);
+      alert(res.message || 'Subscription request approved!');
+      fetchSubscriptionRequests();
+      // Refresh user list as well
+      const userRes = await authApi.getAllUsers();
+      if (userRes && userRes.users) setUsersDb(userRes.users.map(mapToAdminUser));
+    } catch (err: any) {
+      alert(`Failed to approve request: ${err.response?.data?.error || err.message}`);
+    }
+  };
+
+  const handleRejectSubscriptionRequest = async (id: string) => {
+    try {
+      const res = await authApi.rejectSubscriptionRequest(id);
+      alert(res.message || 'Subscription request rejected');
+      fetchSubscriptionRequests();
+      const userRes = await authApi.getAllUsers();
+      if (userRes && userRes.users) setUsersDb(userRes.users.map(mapToAdminUser));
+    } catch (err: any) {
+      alert(`Failed to reject request: ${err.response?.data?.error || err.message}`);
+    }
+  };
+
   // Load & poll users from server DB
   useEffect(() => {
     const fetchUsers = async () => {
@@ -109,6 +146,7 @@ export const AdminDashboardPage: React.FC = () => {
     };
 
     fetchUsers();
+    fetchSubscriptionRequests();
     const interval = setInterval(fetchUsers, 5000);
 
     return () => {
@@ -1078,9 +1116,92 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="bg-slate-900/50 border border-slate-900 rounded-2xl p-5">
                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Pending Upgrade Requests</span>
                 <div className="text-2xl font-bold text-amber-400 mt-2">
-                  {usersDb.filter(u => u.subscriptionStatus === 'pending').length}
+                  {subscriptionRequests.filter(r => r.status === 'pending').length}
                 </div>
                 <span className="text-[10px] text-amber-500/80 font-semibold block mt-1.5">Requires admin approval</span>
+              </div>
+            </div>
+
+            {/* SUBSCRIPTION REQUESTS AUDIT TABLE */}
+            <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-900 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest block">ADMIN CONTROL CENTER</span>
+                  <h2 className="text-lg font-serif font-bold text-white mt-0.5">Subscription Upgrade Requests</h2>
+                </div>
+                <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs rounded-full">
+                  {subscriptionRequests.filter(r => r.status === 'pending').length} Pending Requests
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                      <th className="p-3">User</th>
+                      <th className="p-3">Current Plan</th>
+                      <th className="p-3">Requested Plan</th>
+                      <th className="p-3">Requested Date</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/50">
+                    {subscriptionRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-6 text-center text-slate-500 italic">No subscription requests found.</td>
+                      </tr>
+                    ) : (
+                      subscriptionRequests.map(req => (
+                        <tr key={req.id} className="hover:bg-slate-850/50 transition-colors">
+                          <td className="p-3 font-semibold text-white">
+                            <div>{req.userName}</div>
+                            <div className="text-[10px] text-slate-400 font-mono">{req.userEmail}</div>
+                          </td>
+                          <td className="p-3 uppercase text-slate-400 font-bold">{req.currentPlan || 'free'}</td>
+                          <td className="p-3 font-bold text-amber-300">{req.requestedPlanName}</td>
+                          <td className="p-3 text-slate-400">{new Date(req.requestedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                          <td className="p-3">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                              req.status === 'pending'
+                                ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30 animate-pulse'
+                                : req.status === 'approved'
+                                ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+                                : 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+                            }`}>
+                              {req.status === 'pending' ? 'Pending Approval' : req.status === 'approved' ? 'Approved' : 'Rejected'}
+                            </span>
+                            {req.status !== 'pending' && (
+                              <div className="text-[9px] text-slate-500 mt-1">
+                                by {req.approvedByName || req.rejectedByName || 'Admin'}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3 text-right">
+                            {req.status === 'pending' ? (
+                              <div className="flex items-center justify-end space-x-2">
+                                <button
+                                  onClick={() => handleApproveSubscriptionRequest(req.id)}
+                                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleRejectSubscriptionRequest(req.id)}
+                                  className="px-3 py-1.5 bg-rose-600/80 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-[10px] text-slate-500 italic">Completed</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 

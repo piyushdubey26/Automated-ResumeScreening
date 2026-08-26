@@ -34,6 +34,24 @@ export interface Subscription {
   priceId?: string;
 }
 
+export interface SubscriptionRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  currentPlan: string;
+  requestedPlan: string;
+  requestedPlanName: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  rejectedAt?: string;
+  rejectedBy?: string;
+  rejectedByName?: string;
+}
+
 export interface UserApplication {
   id: string;
   userId: string;
@@ -329,7 +347,8 @@ export const mockDb = {
   applications: [] as UserApplication[],
   jdMatches: [] as JDMatchRecord[],
   activities: [] as ActivityItem[],
-  subscriptions: [] as Subscription[]
+  subscriptions: [] as Subscription[],
+  subscriptionRequests: [] as SubscriptionRequest[]
 };
 
 // Simple local JSON database path
@@ -369,6 +388,7 @@ const loadDb = () => {
       if (parsed.jdMatches) mockDb.jdMatches = parsed.jdMatches;
       if (parsed.activities) mockDb.activities = parsed.activities;
       if (parsed.subscriptions) mockDb.subscriptions = parsed.subscriptions;
+      if (parsed.subscriptionRequests) mockDb.subscriptionRequests = parsed.subscriptionRequests;
     } else {
       // Create initial DB file from seeds
       saveDb();

@@ -183,7 +183,8 @@ export const getUserSubscription = (req: Request, res: Response) => {
   return res.json({ subscription: sub || null });
 };
 
-export const purchaseSubscription = (req: Request, res: Response) => {
+// User creates a subscription upgrade request (Pending Admin Approval)
+export const requestSubscriptionUpgrade = (req: Request, res: Response) => {
   const authUserId = req.user?.userId;
   if (!authUserId) {
     return res.status(401).json({ error: 'Authentication required' });
@@ -199,16 +200,105 @@ export const purchaseSubscription = (req: Request, res: Response) => {
     return res.status(404).json({ error: 'User not found' });
   }
 
+  // Duplicate Protection: Check if a pending request for this user already exists
+  const existingPending = mockDb.subscriptionRequests.find(r => r.userId === authUserId && r.status === 'pending');
+  if (existingPending) {
+    const planLabel = existingPending.requestedPlanName || 'subscription upgrade';
+    return res.status(400).json({
+      success: false,
+      code: 'DUPLICATE_PENDING',
+      error: `Your ${planLabel} upgrade request is already pending approval.`,
+      request: existingPending
+    });
+  }
+
+  const requestedPlanName = (planId === 'job_seeker_pro' || planId === 'pro') ? 'Job Seeker Pro' : 'Career Max';
+  const targetPlanId = (planId === 'job_seeker_pro' || planId === 'pro') ? 'job_seeker_pro' : 'career-max';
+
+  const newRequest: any = {
+    id: `subreq-${Date.now()}`,
+    userId: user.id,
+    userName: user.name,
+    userEmail: user.email,
+    currentPlan: user.plan || 'free',
+    requestedPlan: targetPlanId,
+    requestedPlanName,
+    status: 'pending',
+    requestedAt: new Date().toISOString()
+  };
+
+  mockDb.subscriptionRequests.unshift(newRequest);
+  user.subscriptionStatus = 'pending_approval';
+  saveDb();
+
+  return res.status(201).json({
+    success: true,
+    message: 'Subscription upgrade request submitted. Waiting for administrator approval.',
+    request: newRequest
+  });
+};
+
+// Deprecated direct purchase - mapped to requestSubscriptionUpgrade for security
+export const purchaseSubscription = requestSubscriptionUpgrade;
+
+export const getSubscriptionRequests = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const authUser = mockDb.users.find(u => u.id === authUserId);
+  if (authUser?.userType === 'admin') {
+    return res.json({ requests: mockDb.subscriptionRequests });
+  }
+
+  const userRequests = mockDb.subscriptionRequests.filter(r => r.userId === authUserId);
+  return res.json({ requests: userRequests });
+};
+
+export const approveSubscriptionRequest = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const adminUser = mockDb.users.find(u => u.id === authUserId);
+  if (!adminUser || adminUser.userType !== 'admin') {
+    return res.status(403).json({ error: 'Access denied. Administrator privileges required.' });
+  }
+
+  const { id } = req.params;
+  const reqItem = mockDb.subscriptionRequests.find(r => r.id === id);
+  if (!reqItem) {
+    return res.status(404).json({ error: 'Subscription request not found' });
+  }
+
+  if (reqItem.status !== 'pending') {
+    return res.status(400).json({ error: `Request has already been ${reqItem.status}` });
+  }
+
+  const targetUser = mockDb.users.find(u => u.id === reqItem.userId);
+  if (!targetUser) {
+    return res.status(404).json({ error: 'Target user account not found' });
+  }
+
   const now = new Date();
   const expiresAt = addOneMonth(now);
 
-  const planName = planId === 'job_seeker_pro' ? 'Job Seeker Pro' : 'Career Max';
+  // Mark request approved
+  reqItem.status = 'approved';
+  reqItem.approvedAt = now.toISOString();
+  reqItem.approvedBy = adminUser.id;
+  reqItem.approvedByName = adminUser.name;
 
-  let sub = mockDb.subscriptions.find(s => s.userId === authUserId);
+  // Activate user plan
+  targetUser.plan = reqItem.requestedPlan;
+  targetUser.subscriptionStatus = 'approved';
 
+  let sub = mockDb.subscriptions.find(s => s.userId === targetUser.id);
   if (sub) {
-    sub.planId = planId;
-    sub.planName = planName;
+    sub.planId = reqItem.requestedPlan;
+    sub.planName = reqItem.requestedPlanName;
     sub.status = 'active';
     sub.startedAt = now.toISOString();
     sub.expiresAt = expiresAt.toISOString();
@@ -217,9 +307,9 @@ export const purchaseSubscription = (req: Request, res: Response) => {
   } else {
     sub = {
       id: `sub-${Date.now()}`,
-      userId: authUserId,
-      planId,
-      planName,
+      userId: targetUser.id,
+      planId: reqItem.requestedPlan,
+      planName: reqItem.requestedPlanName,
       status: 'active',
       billingInterval: 'monthly',
       startedAt: now.toISOString(),
@@ -231,12 +321,56 @@ export const purchaseSubscription = (req: Request, res: Response) => {
     mockDb.subscriptions.push(sub);
   }
 
-  user.plan = planId;
-  user.subscriptionStatus = 'approved';
+  saveDb();
+
+  return res.json({
+    success: true,
+    message: `Successfully approved ${reqItem.requestedPlanName} plan for ${targetUser.name}`,
+    request: reqItem,
+    subscription: sub
+  });
+};
+
+export const rejectSubscriptionRequest = (req: Request, res: Response) => {
+  const authUserId = req.user?.userId;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const adminUser = mockDb.users.find(u => u.id === authUserId);
+  if (!adminUser || adminUser.userType !== 'admin') {
+    return res.status(403).json({ error: 'Access denied. Administrator privileges required.' });
+  }
+
+  const { id } = req.params;
+  const reqItem = mockDb.subscriptionRequests.find(r => r.id === id);
+  if (!reqItem) {
+    return res.status(404).json({ error: 'Subscription request not found' });
+  }
+
+  if (reqItem.status !== 'pending') {
+    return res.status(400).json({ error: `Request has already been ${reqItem.status}` });
+  }
+
+  const targetUser = mockDb.users.find(u => u.id === reqItem.userId);
+
+  const now = new Date();
+  reqItem.status = 'rejected';
+  reqItem.rejectedAt = now.toISOString();
+  reqItem.rejectedBy = adminUser.id;
+  reqItem.rejectedByName = adminUser.name;
+
+  if (targetUser) {
+    targetUser.subscriptionStatus = 'rejected';
+  }
 
   saveDb();
 
-  return res.json({ subscription: sub });
+  return res.json({
+    success: true,
+    message: `Subscription request for ${reqItem.userName} was rejected`,
+    request: reqItem
+  });
 };
 
 export const cancelSubscription = (req: Request, res: Response) => {

@@ -31,7 +31,8 @@
       "createdAt": "2026-08-25T13:31:04.615Z",
       "monthlyUsage": 0,
       "plan": "free",
-      "usageMonth": "2026-08"
+      "usageMonth": "2026-08",
+      "subscriptionStatus": "rejected"
     },
     {
       "id": "user-seeker-1",
@@ -82,83 +83,13 @@
         "coding": ""
       },
       "interviewScore": null,
-      "monthlyUsage": 1,
-      "plan": "career-max",
-      "subscriptionStatus": "approved"
+      "monthlyUsage": 0,
+      "plan": "job_seeker_pro",
+      "subscriptionStatus": "approved",
+      "usageMonth": "2026-08"
     }
   ],
   "resumes": [
-    {
-      "id": "resume-1787734941705",
-      "userId": "user-sakshi",
-      "filename": "Uploaded_Resume.pdf",
-      "targetRole": "sde",
-      "rawText": "Sample software developer resume with python javascript and react skills.",
-      "parsedSections": {
-        "contact": {
-          "name": "Candidate"
-        },
-        "skills": [
-          "javascript",
-          "react",
-          "python"
-        ],
-        "experience": [
-          "Developed microservices and REST APIs with high availability.",
-          "Optimized database queries and improved system throughput."
-        ],
-        "projects": [
-          "Automated Resume Screening Platform with role rubrics."
-        ],
-        "education": [
-          "B.S. in Computer Science"
-        ]
-      },
-      "score": 67,
-      "scoreBreakdown": {
-        "structure": 85,
-        "clarity": 67,
-        "impact": 48,
-        "skills": 60,
-        "projects": 80,
-        "ats": 80
-      },
-      "feedback": [
-        {
-          "id": "fb-struct-1",
-          "category": "Structure",
-          "severity": "medium",
-          "title": "Add GitHub / Code Portfolio Link",
-          "description": "Recruiters expect a link to your public code repositories for SDE roles.",
-          "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
-        },
-        {
-          "id": "fb-clarity-1",
-          "category": "Clarity",
-          "severity": "high",
-          "title": "Use Strong Action Verbs",
-          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
-          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
-        },
-        {
-          "id": "fb-impact-1",
-          "category": "Impact",
-          "severity": "high",
-          "title": "Missing Quantifiable Metrics",
-          "description": "Bullet points list responsibilities rather than measured outcomes.",
-          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
-        },
-        {
-          "id": "fb-skills-1",
-          "category": "Skills",
-          "severity": "medium",
-          "title": "Missing Essential Software Development Engineer Keywords",
-          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
-          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
-        }
-      ],
-      "createdAt": "2026-08-26T09:02:21.705Z"
-    },
     {
       "id": "resume-1787732222442",
       "userId": "user-1787731211731",
@@ -227,6 +158,81 @@
         }
       ],
       "createdAt": "2026-08-26T08:17:02.442Z"
+    },
+    {
+      "id": "resume-1787729458522",
+      "userId": "user-sakshi",
+      "filename": "Uploaded_Resume.pdf",
+      "targetRole": "sde",
+      "rawText": "Sakshi Sharma Senior Software Engineer React TypeScript Node.js PostgreSQL AWS Docker c++",
+      "parsedSections": {
+        "contact": {
+          "name": "Candidate"
+        },
+        "skills": [
+          "typescript",
+          "react",
+          "node.js",
+          "c++",
+          "postgresql",
+          "aws",
+          "docker"
+        ],
+        "experience": [
+          "Developed microservices and REST APIs with high availability.",
+          "Optimized database queries and improved system throughput."
+        ],
+        "projects": [
+          "Automated Resume Screening Platform with role rubrics."
+        ],
+        "education": [
+          "B.S. in Computer Science"
+        ]
+      },
+      "score": 71,
+      "scoreBreakdown": {
+        "structure": 85,
+        "clarity": 67,
+        "impact": 48,
+        "skills": 80,
+        "projects": 80,
+        "ats": 80
+      },
+      "feedback": [
+        {
+          "id": "fb-struct-1",
+          "category": "Structure",
+          "severity": "medium",
+          "title": "Add GitHub / Code Portfolio Link",
+          "description": "Recruiters expect a link to your public code repositories for SDE roles.",
+          "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
+        },
+        {
+          "id": "fb-clarity-1",
+          "category": "Clarity",
+          "severity": "high",
+          "title": "Use Strong Action Verbs",
+          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
+          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
+        },
+        {
+          "id": "fb-impact-1",
+          "category": "Impact",
+          "severity": "high",
+          "title": "Missing Quantifiable Metrics",
+          "description": "Bullet points list responsibilities rather than measured outcomes.",
+          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
+        },
+        {
+          "id": "fb-skills-1",
+          "category": "Skills",
+          "severity": "medium",
+          "title": "Missing Essential Software Development Engineer Keywords",
+          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
+          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
+        }
+      ],
+      "createdAt": "2026-08-26T07:30:58.522Z"
     },
     {
       "id": "resume-sde-1",
@@ -538,15 +544,44 @@
     {
       "id": "sub-1787734363870",
       "userId": "user-1787731211731",
+      "planId": "job_seeker_pro",
+      "planName": "Job Seeker Pro",
+      "status": "active",
+      "billingInterval": "monthly",
+      "startedAt": "2026-08-26T09:04:53.095Z",
+      "expiresAt": "2026-09-26T09:04:53.095Z",
+      "autoRenew": true,
+      "createdAt": "2026-08-26T08:52:43.870Z",
+      "updatedAt": "2026-08-26T09:04:53.095Z"
+    },
+    {
+      "id": "sub-1787735434153",
+      "userId": "user-sakshi",
       "planId": "career-max",
       "planName": "Career Max",
       "status": "active",
       "billingInterval": "monthly",
-      "startedAt": "2026-08-26T08:53:10.295Z",
-      "expiresAt": "2026-09-26T08:53:10.295Z",
+      "startedAt": "2026-08-26T09:10:34.153Z",
+      "expiresAt": "2026-09-26T09:10:34.153Z",
       "autoRenew": true,
-      "createdAt": "2026-08-26T08:52:43.870Z",
-      "updatedAt": "2026-08-26T08:53:10.295Z"
+      "createdAt": "2026-08-26T09:10:34.153Z",
+      "updatedAt": "2026-08-26T09:10:34.153Z"
+    }
+  ],
+  "subscriptionRequests": [
+    {
+      "id": "subreq-1787735434156",
+      "userId": "user-sakshi",
+      "userName": "Sakshi",
+      "userEmail": "sakshi@gmail.com",
+      "currentPlan": "free",
+      "requestedPlan": "job_seeker_pro",
+      "requestedPlanName": "Job Seeker Pro",
+      "status": "rejected",
+      "requestedAt": "2026-08-26T09:10:34.156Z",
+      "rejectedAt": "2026-08-26T09:10:34.159Z",
+      "rejectedBy": "admin-piyush",
+      "rejectedByName": "Piyush Dubey"
     }
   ]
 }
