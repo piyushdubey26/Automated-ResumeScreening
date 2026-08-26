@@ -125,8 +125,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('resumeai_token');
     localStorage.removeItem('resumeai_user');
     localStorage.removeItem('resumeai_active_mode');
+
+    // Clean up all cached user items on logout
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('resumeai_cache_') || key.startsWith('resumeai_user_activity_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch {}
+
     setToken(null);
     setUser(null);
+    window.dispatchEvent(new Event('resumeai-user-updated'));
   };
 
   const switchMode = (newMode: 'seeker' | 'recruiter' | 'admin') => {

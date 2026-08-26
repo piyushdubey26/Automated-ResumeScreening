@@ -184,9 +184,12 @@ export const DashboardPage: React.FC = () => {
     if (cachedMatch) {
       try {
         const parsedMatch = JSON.parse(cachedMatch);
-        setJdMatchResult(parsedMatch);
-        setJdInput(parsedMatch.jdText || '');
-        hasCachedData = true;
+        if (parsedMatch && (parsedMatch.matchPct !== undefined || parsedMatch.match?.matchPct !== undefined)) {
+          const matchObj = parsedMatch.match || parsedMatch;
+          setJdMatchResult(matchObj);
+          setJdInput(matchObj.jdText || '');
+          hasCachedData = true;
+        }
       } catch {}
     }
 
@@ -246,9 +249,15 @@ export const DashboardPage: React.FC = () => {
             localStorage.setItem(`resumeai_cache_resume_${userId}`, JSON.stringify(resumeRes.resume));
           }
           if (matchRes) {
-            setJdMatchResult(matchRes);
-            setJdInput(matchRes.jdText || '');
-            localStorage.setItem(`resumeai_cache_match_${userId}`, JSON.stringify(matchRes));
+            const matchObj = matchRes.match || (matchRes.matchPct !== undefined ? matchRes : null);
+            if (matchObj && matchObj.matchPct !== undefined) {
+              setJdMatchResult(matchObj);
+              setJdInput(matchObj.jdText || '');
+              localStorage.setItem(`resumeai_cache_match_${userId}`, JSON.stringify(matchObj));
+            } else {
+              setJdMatchResult(null);
+              localStorage.removeItem(`resumeai_cache_match_${userId}`);
+            }
           }
           if (appsRes && appsRes.applications) {
             setApplications(appsRes.applications);
@@ -428,6 +437,10 @@ export const DashboardPage: React.FC = () => {
       const resume = await resumeApi.uploadAndParse(textToUse, 'My_Resume.pdf', targetRole);
       
       setResumeRecord(resume.resume);
+      if (userId) {
+        localStorage.setItem(`resumeai_cache_resume_${userId}`, JSON.stringify(resume.resume));
+      }
+      window.dispatchEvent(new Event('resumeai-resume-updated'));
 
       // Instantly synchronize server-authoritative monthly usage count
       await refreshUser();
@@ -723,10 +736,10 @@ export const DashboardPage: React.FC = () => {
                   },
                   {
                     label: "JOB MATCHES",
-                    val: jdMatchResult ? `${jdMatchResult.matchPct}%` : "0%",
-                    change: jdMatchResult ? `Top match: ${jdMatchResult.matchPct}%` : "No matches yet",
-                    col: jdMatchResult ? "text-purple-400" : "text-slate-500",
-                    desc: jdMatchResult ? "Based on target JD" : "Compare against a JD",
+                    val: (jdMatchResult && jdMatchResult.matchPct !== undefined) ? `${jdMatchResult.matchPct}%` : "0%",
+                    change: (jdMatchResult && jdMatchResult.matchPct !== undefined) ? `Top match: ${jdMatchResult.matchPct}%` : "No matches yet",
+                    col: (jdMatchResult && jdMatchResult.matchPct !== undefined) ? "text-purple-400" : "text-slate-500",
+                    desc: (jdMatchResult && jdMatchResult.matchPct !== undefined) ? "Based on target JD" : "Compare against a JD",
                     onClick: () => handleNavigate("Job Matches")
                   },
                   {

@@ -21,19 +21,42 @@ export const LandingPage: React.FC = () => {
   useEffect(() => {
     if (user && user.userType === 'seeker') {
       let active = true;
-      resumeApi.getLatest()
-        .then(res => {
-          if (active && res && res.resume) {
-            setUserResumeRecord(res.resume);
-          }
-        })
-        .catch(() => {
-          if (active) {
-            setUserResumeRecord(null);
-          }
-        });
+
+      // 1. Instant Cache Hydration (<5ms)
+      const cached = localStorage.getItem(`resumeai_cache_resume_${user.id}`);
+      if (cached) {
+        try {
+          setUserResumeRecord(JSON.parse(cached));
+        } catch {}
+      }
+
+      // 2. Fetch latest from API
+      const syncResume = () => {
+        resumeApi.getLatest()
+          .then(res => {
+            if (active && res && res.resume) {
+              setUserResumeRecord(res.resume);
+              localStorage.setItem(`resumeai_cache_resume_${user.id}`, JSON.stringify(res.resume));
+            }
+          })
+          .catch(() => {
+            if (active && !cached) {
+              setUserResumeRecord(null);
+            }
+          });
+      };
+
+      syncResume();
+
+      window.addEventListener('resumeai-subscription-updated', syncResume);
+      window.addEventListener('resumeai-user-updated', syncResume);
+      window.addEventListener('resumeai-resume-updated', syncResume);
+
       return () => {
         active = false;
+        window.removeEventListener('resumeai-subscription-updated', syncResume);
+        window.removeEventListener('resumeai-user-updated', syncResume);
+        window.removeEventListener('resumeai-resume-updated', syncResume);
       };
     } else {
       setUserResumeRecord(null);
