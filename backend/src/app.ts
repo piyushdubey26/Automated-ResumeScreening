@@ -40,7 +40,13 @@ app.use(limiter);
 
 // URL Normalization Middleware for Vercel Serverless Functions
 app.use((req, res, next) => {
-  let url = req.url || '/';
+  // Prefer req.originalUrl (which holds the client's actual request path like /api/auth/signup) over internal rewrite req.url
+  let url = req.originalUrl || req.url || '/';
+
+  // Strip query string if present in url (Express router handles query params via req.query)
+  if (url.includes('?')) {
+    url = url.split('?')[0];
+  }
 
   // If Vercel catch-all router populated req.query.path or req.query.slug, reconstruct the real request URL
   if (req.query && (req.query.path || req.query.slug)) {

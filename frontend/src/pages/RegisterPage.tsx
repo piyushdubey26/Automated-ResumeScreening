@@ -35,7 +35,8 @@ export const RegisterPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to create account.');
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err?.message || 'Failed to create account.';
+      setError(errorMsg);
     }
   };
 

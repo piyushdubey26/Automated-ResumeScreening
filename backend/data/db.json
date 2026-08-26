@@ -89,10 +89,10 @@
       "usageMonth": "2026-08"
     },
     {
-      "id": "user-1787744990211",
-      "name": "New Candidate",
-      "email": "newcandidate_1787744990210@example.com",
-      "password": "Password123!",
+      "id": "user-1787745643154",
+      "name": "piyush",
+      "email": "piyush@gmail.com",
+      "password": "piyush",
       "rolePreference": "sde",
       "userType": "seeker",
       "badges": [
@@ -100,8 +100,8 @@
         "ATS Ready"
       ],
       "points": 500,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=New%20Candidate",
-      "createdAt": "2026-08-26T11:49:50.211Z",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=piyush",
+      "createdAt": "2026-08-26T12:00:43.154Z",
       "profileLinks": {
         "github": "",
         "linkedin": "",
@@ -109,15 +109,16 @@
         "coding": ""
       },
       "interviewScore": null,
-      "monthlyUsage": 0,
+      "monthlyUsage": 1,
       "plan": "free",
-      "subscriptionStatus": "free"
+      "subscriptionStatus": "free",
+      "usageMonth": "2026-08"
     },
     {
-      "id": "user-1787745481607",
-      "name": "New Candidate",
-      "email": "candidate_1787745481603@gmail.com",
-      "password": "Password123!",
+      "id": "user-1787747541314",
+      "name": "Newly Registered User",
+      "email": "registered_user_1787747541312@example.com",
+      "password": "SecurePass123!",
       "rolePreference": "sde",
       "userType": "seeker",
       "badges": [
@@ -125,8 +126,8 @@
         "ATS Ready"
       ],
       "points": 500,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=New%20Candidate",
-      "createdAt": "2026-08-26T11:58:01.607Z",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Newly%20Registered%20User",
+      "createdAt": "2026-08-26T12:32:21.314Z",
       "profileLinks": {
         "github": "",
         "linkedin": "",
@@ -140,6 +141,75 @@
     }
   ],
   "resumes": [
+    {
+      "id": "resume-1787745949479",
+      "userId": "user-1787745643154",
+      "filename": "My_Resume.pdf",
+      "targetRole": "sde",
+      "rawText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "parsedSections": {
+        "contact": {
+          "name": "Candidate"
+        },
+        "skills": [
+          "python"
+        ],
+        "experience": [
+          "Developed microservices and REST APIs with high availability.",
+          "Optimized database queries and improved system throughput."
+        ],
+        "projects": [
+          "Automated Resume Screening Platform with role rubrics."
+        ],
+        "education": [
+          "B.S. in Computer Science"
+        ]
+      },
+      "score": 68,
+      "scoreBreakdown": {
+        "structure": 85,
+        "clarity": 67,
+        "impact": 48,
+        "skills": 55,
+        "projects": 80,
+        "ats": 100
+      },
+      "feedback": [
+        {
+          "id": "fb-struct-1",
+          "category": "Structure",
+          "severity": "medium",
+          "title": "Add GitHub / Code Portfolio Link",
+          "description": "Recruiters expect a link to your public code repositories for SDE roles.",
+          "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
+        },
+        {
+          "id": "fb-clarity-1",
+          "category": "Clarity",
+          "severity": "high",
+          "title": "Use Strong Action Verbs",
+          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
+          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
+        },
+        {
+          "id": "fb-impact-1",
+          "category": "Impact",
+          "severity": "high",
+          "title": "Missing Quantifiable Metrics",
+          "description": "Bullet points list responsibilities rather than measured outcomes.",
+          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
+        },
+        {
+          "id": "fb-skills-1",
+          "category": "Skills",
+          "severity": "medium",
+          "title": "Missing Essential Software Development Engineer Keywords",
+          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
+          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
+        }
+      ],
+      "createdAt": "2026-08-26T12:05:49.479Z"
+    },
     {
       "id": "resume-1787737781702",
       "userId": "admin-piyush",
