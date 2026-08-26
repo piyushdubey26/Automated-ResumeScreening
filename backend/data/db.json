@@ -31,7 +31,7 @@
       "points": 500,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
       "createdAt": "2026-08-25T13:31:04.615Z",
-      "monthlyUsage": 0,
+      "monthlyUsage": 1,
       "usageMonth": "2026-08"
     },
     {
@@ -138,9 +138,109 @@
       "monthlyUsage": 0,
       "plan": "free",
       "subscriptionStatus": "free"
+    },
+    {
+      "id": "user-1787749374227",
+      "name": "Verification User",
+      "email": "verify_1787749374225@example.com",
+      "password": "Password123!",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Verification%20User",
+      "createdAt": "2026-08-26T13:02:54.227Z",
+      "profileLinks": {
+        "github": "",
+        "linkedin": "",
+        "project": "",
+        "coding": ""
+      },
+      "interviewScore": null,
+      "monthlyUsage": 0,
+      "plan": "free",
+      "subscriptionStatus": "free"
     }
   ],
   "resumes": [
+    {
+      "id": "resume-1787749894813",
+      "userId": "user-sakshi",
+      "filename": "Alex_Rivera_Resume.pdf",
+      "targetRole": "sde",
+      "rawText": "Alex Rivera\nEmail: alex.rivera@example.com | GitHub: github.com/arivera | LinkedIn: linkedin.com/in/alex-rivera-dev\n\nSUMMARY\nResults-driven Software Engineer with 3+ years experience building Node.js, Express, React, TypeScript applications.\n\nSKILLS\nTypeScript, JavaScript, Node.js, Express, React, PostgreSQL, Docker, AWS, Redis, REST API, Git\n\nEXPERIENCE\nSoftware Engineer | Tech Corp (2024 - Present)\n- Built scalable microservices handling 2M+ daily active requests with 99.9% uptime.\n- Reduced PostgreSQL latency by 45% using Redis caching.",
+      "parsedSections": {
+        "contact": {
+          "name": "Alex Rivera",
+          "email": "alex.rivera@example.com",
+          "github": "github.com/arivera",
+          "linkedin": "linkedin.com/in/alex-rivera-dev"
+        },
+        "skills": [
+          "javascript",
+          "typescript",
+          "react",
+          "node.js",
+          "express",
+          "postgresql",
+          "redis",
+          "aws",
+          "docker",
+          "git",
+          "rest api",
+          "microservices"
+        ],
+        "experience": [
+          "Built scalable microservices handling 2M+ daily active requests with 99.9% uptime.",
+          "Reduced PostgreSQL latency by 45% using Redis caching."
+        ],
+        "projects": [
+          "Automated Resume Screening Platform with role rubrics."
+        ],
+        "education": [
+          "B.S. in Computer Science"
+        ]
+      },
+      "score": 86,
+      "scoreBreakdown": {
+        "structure": 100,
+        "clarity": 67,
+        "impact": 80,
+        "skills": 100,
+        "projects": 80,
+        "ats": 80
+      },
+      "feedback": [
+        {
+          "id": "fb-clarity-1",
+          "category": "Clarity",
+          "severity": "high",
+          "title": "Use Strong Action Verbs",
+          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
+          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
+        },
+        {
+          "id": "fb-impact-2",
+          "category": "Impact",
+          "severity": "success",
+          "title": "Quantified Accomplishments",
+          "description": "Detected 2 metric figures (latency reductions, user numbers, percentage gains).",
+          "suggestion": "Highlight top 2 metric achievements in the resume summary."
+        },
+        {
+          "id": "fb-skills-1",
+          "category": "Skills",
+          "severity": "medium",
+          "title": "Missing Essential Software Development Engineer Keywords",
+          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
+          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
+        }
+      ],
+      "createdAt": "2026-08-26T13:11:34.813Z"
+    },
     {
       "id": "resume-1787745949479",
       "userId": "user-1787745643154",
@@ -347,81 +447,6 @@
         }
       ],
       "createdAt": "2026-08-26T08:17:02.442Z"
-    },
-    {
-      "id": "resume-1787729458522",
-      "userId": "user-sakshi",
-      "filename": "Uploaded_Resume.pdf",
-      "targetRole": "sde",
-      "rawText": "Sakshi Sharma Senior Software Engineer React TypeScript Node.js PostgreSQL AWS Docker c++",
-      "parsedSections": {
-        "contact": {
-          "name": "Candidate"
-        },
-        "skills": [
-          "typescript",
-          "react",
-          "node.js",
-          "c++",
-          "postgresql",
-          "aws",
-          "docker"
-        ],
-        "experience": [
-          "Developed microservices and REST APIs with high availability.",
-          "Optimized database queries and improved system throughput."
-        ],
-        "projects": [
-          "Automated Resume Screening Platform with role rubrics."
-        ],
-        "education": [
-          "B.S. in Computer Science"
-        ]
-      },
-      "score": 71,
-      "scoreBreakdown": {
-        "structure": 85,
-        "clarity": 67,
-        "impact": 48,
-        "skills": 80,
-        "projects": 80,
-        "ats": 80
-      },
-      "feedback": [
-        {
-          "id": "fb-struct-1",
-          "category": "Structure",
-          "severity": "medium",
-          "title": "Add GitHub / Code Portfolio Link",
-          "description": "Recruiters expect a link to your public code repositories for SDE roles.",
-          "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
-        },
-        {
-          "id": "fb-clarity-1",
-          "category": "Clarity",
-          "severity": "high",
-          "title": "Use Strong Action Verbs",
-          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
-          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
-        },
-        {
-          "id": "fb-impact-1",
-          "category": "Impact",
-          "severity": "high",
-          "title": "Missing Quantifiable Metrics",
-          "description": "Bullet points list responsibilities rather than measured outcomes.",
-          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
-        },
-        {
-          "id": "fb-skills-1",
-          "category": "Skills",
-          "severity": "medium",
-          "title": "Missing Essential Software Development Engineer Keywords",
-          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
-          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
-        }
-      ],
-      "createdAt": "2026-08-26T07:30:58.522Z"
     },
     {
       "id": "resume-sde-1",

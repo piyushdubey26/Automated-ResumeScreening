@@ -40,8 +40,19 @@ app.use(limiter);
 
 // URL Normalization Middleware for Vercel Serverless Functions
 app.use((req, res, next) => {
-  // Prefer req.originalUrl (which holds the client's actual request path like /api/auth/signup) over internal rewrite req.url
-  let url = req.originalUrl || req.url || '/';
+  // 1. Inspect Vercel Edge headers for the original client request URI before Vercel rewrites
+  const vercelForwardedUri = req.headers['x-forwarded-uri'] as string;
+  const vercelInvokePath = req.headers['x-invoke-path'] as string;
+  const vercelRewriteUrl = req.headers['x-rewrite-url'] as string;
+
+  let url = vercelForwardedUri || vercelInvokePath || vercelRewriteUrl || req.originalUrl || req.url || '/';
+
+  // If url is an internal script name like /api/index.ts, fallback to req.url
+  if (url === '/api/index.ts' || url === '/api/index' || url === '/api' || url === '/index.ts') {
+    if (req.url && req.url !== url && !req.url.startsWith('/api/index')) {
+      url = req.url;
+    }
+  }
 
   // Strip query string if present in url (Express router handles query params via req.query)
   if (url.includes('?')) {

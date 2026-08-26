@@ -35,7 +35,14 @@ export const RegisterPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || err.response?.data?.message || err?.message || 'Failed to create account.';
+      const errorData = err.response?.data?.error;
+      const errorMsg = typeof errorData === 'string'
+        ? errorData
+        : typeof err.response?.data?.message === 'string'
+        ? err.response.data.message
+        : typeof err?.message === 'string'
+        ? err.message
+        : 'Failed to create account.';
       setError(errorMsg);
     }
   };
@@ -54,7 +61,7 @@ export const RegisterPage: React.FC = () => {
         {error && (
           <div className="p-4 bg-rose-950/80 border border-rose-800 text-rose-300 text-xs rounded-2xl space-y-2">
             <p className="font-semibold">{error}</p>
-            {error.includes('already exists') && (
+            {typeof error === 'string' && error.includes('already exists') && (
               <button
                 type="button"
                 onClick={() => navigate(`/login?email=${encodeURIComponent(email)}`)}
