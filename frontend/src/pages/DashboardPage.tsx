@@ -167,34 +167,30 @@ export const DashboardPage: React.FC = () => {
     async function loadData() {
       setIsLoadingData(true);
       try {
-        // Fetch active subscription
-        const subRes = await authApi.getSubscription().catch(() => null);
-        if (active && subRes) {
-          setActiveSub(subRes.subscription || null);
-        }
+        // Parallelize initial network requests
+        const [subRes, resumeRes, matchRes, appsRes] = await Promise.all([
+          authApi.getSubscription().catch(() => null),
+          resumeApi.getLatest().catch(() => null),
+          jobApi.getLatestMatch().catch(() => null),
+          resumeApi.getApplications().catch(() => null)
+        ]);
 
-        // Fetch latest resume
-        const resumeRes = await resumeApi.getLatest().catch(() => null);
-        if (active && resumeRes && resumeRes.resume) {
-          setResumeRecord(resumeRes.resume);
-          setResumeInput(resumeRes.resume.rawText || '');
-        }
-
-        // Fetch latest JD match
-        const matchRes = await jobApi.getLatestMatch().catch(() => null);
-        if (active && matchRes) {
-          setJdMatchResult(matchRes);
-          setJdInput(matchRes.jdText || '');
-        }
-
-        // Fetch job applications
-        const appsRes = await resumeApi.getApplications().catch(() => null);
-        if (active && appsRes && appsRes.applications) {
-          setApplications(appsRes.applications);
-        }
-
-        // Fetch links & interview score & activities from the user profile
         if (active) {
+          if (subRes) {
+            setActiveSub(subRes.subscription || null);
+          }
+          if (resumeRes && resumeRes.resume) {
+            setResumeRecord(resumeRes.resume);
+            setResumeInput(resumeRes.resume.rawText || '');
+          }
+          if (matchRes) {
+            setJdMatchResult(matchRes);
+            setJdInput(matchRes.jdText || '');
+          }
+          if (appsRes && appsRes.applications) {
+            setApplications(appsRes.applications);
+          }
+
           setProfileLinks({
             github: user?.profileLinks?.github || '',
             linkedin: user?.profileLinks?.linkedin || '',
