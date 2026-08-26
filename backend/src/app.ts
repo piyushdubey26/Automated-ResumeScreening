@@ -49,17 +49,26 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later' }
 });
-app.use('/api/', limiter);
+app.use(limiter);
 
-// ResumeAI Core API Routes
+// ResumeAI Core API Routes (Supported with and without /api prefix for Vercel Serverless Function routing)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/resumes', resumeRoutes);
+app.use('/resumes', resumeRoutes);
+
 app.use('/api/jobs', jobRoutes);
+app.use('/jobs', jobRoutes);
+
 app.use('/api/recruiter', recruiterRoutes);
+app.use('/recruiter', recruiterRoutes);
+
 app.use('/api/ecosystem', ecosystemRoutes);
+app.use('/ecosystem', ecosystemRoutes);
 
 // Base Health Check
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({
     status: 'ok',
     service: 'ResumeAI Engine',
