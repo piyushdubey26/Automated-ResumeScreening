@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Clock3, ShieldCheck, Shield, Settings, ArrowRight, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Check, Clock3, ShieldCheck, Shield, Settings, ArrowRight, AlertTriangle, RefreshCw, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { PLANS, type PricingPlan } from '../data/plans';
 import { authApi } from '../services/api';
@@ -208,9 +208,10 @@ export const PricingPage: React.FC = () => {
         return (
           <button
             disabled
-            className="w-full py-2.5 bg-slate-900/90 border border-slate-800/80 text-slate-500 font-semibold text-[11px] rounded-xl cursor-not-allowed opacity-60 text-center"
+            className="w-full py-2.5 bg-slate-900/90 border border-slate-800/80 text-slate-500 font-semibold text-[11px] rounded-xl cursor-not-allowed opacity-60 flex items-center justify-center space-x-1.5"
           >
-            Unavailable while another subscription is pending
+            <Lock className="w-3.5 h-3.5 text-slate-500" />
+            <span>Locked (Action Pending)</span>
           </button>
         );
       }
@@ -229,9 +230,10 @@ export const PricingPage: React.FC = () => {
             <button
               disabled={isProcessing}
               onClick={() => setModalConfig({ type: 'cancel_12', currentPlanName: 'Job Seeker Pro ($12)' })}
-              className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5"
             >
-              Cancel $12
+              <Lock className="w-3.5 h-3.5 text-rose-400" />
+              <span>Cancel $12</span>
             </button>
           );
         }
@@ -240,9 +242,10 @@ export const PricingPage: React.FC = () => {
             <button
               disabled={isProcessing}
               onClick={() => setModalConfig({ type: 'cancel_49', currentPlanName: 'Career Max ($49)' })}
-              className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5"
             >
-              Cancel $49
+              <Lock className="w-3.5 h-3.5 text-rose-400" />
+              <span>Cancel $49</span>
             </button>
           );
         }
@@ -255,8 +258,9 @@ export const PricingPage: React.FC = () => {
         if (isPending) {
           return (
             <div className="space-y-2">
-              <span className="block text-center text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-1.5 rounded-xl animate-pulse">
-                Waiting for Confirmation
+              <span className="block text-center text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-1.5 rounded-xl animate-pulse flex items-center justify-center space-x-1.5">
+                <Clock3 className="w-3.5 h-3.5 text-amber-400" />
+                <span>Waiting for Confirmation</span>
               </span>
               <button
                 disabled={isProcessing}
@@ -283,9 +287,10 @@ export const PricingPage: React.FC = () => {
             <button
               disabled={isProcessing}
               onClick={() => setModalConfig({ type: 'switch_49_to_12', currentPlanName: 'Career Max ($49)', targetPlanName: 'Job Seeker Pro ($12)' })}
-              className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5"
             >
-              Cancel $49 to Switch
+              <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cancel $49 to Switch</span>
             </button>
           );
         }
@@ -308,8 +313,9 @@ export const PricingPage: React.FC = () => {
         if (isPending) {
           return (
             <div className="space-y-2">
-              <span className="block text-center text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-1.5 rounded-xl animate-pulse">
-                Waiting for Confirmation
+              <span className="block text-center text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-1.5 rounded-xl animate-pulse flex items-center justify-center space-x-1.5">
+                <Clock3 className="w-3.5 h-3.5 text-amber-400" />
+                <span>Waiting for Confirmation</span>
               </span>
               <button
                 disabled={isProcessing}
@@ -336,9 +342,10 @@ export const PricingPage: React.FC = () => {
             <button
               disabled={isProcessing}
               onClick={() => setModalConfig({ type: 'switch_12_to_49', currentPlanName: 'Job Seeker Pro ($12)', targetPlanName: 'Career Max ($49)' })}
-              className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5"
             >
-              Cancel $12 to Switch
+              <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cancel $12 to Switch</span>
             </button>
           );
         }
