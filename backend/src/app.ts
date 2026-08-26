@@ -28,6 +28,21 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Body Normalization Middleware for Vercel Serverless Functions
+app.use((req, res, next) => {
+  if (typeof req.body === 'string') {
+    try {
+      req.body = JSON.parse(req.body);
+    } catch (e) {
+      // Ignore parse error
+    }
+  }
+  if (!req.body) {
+    req.body = {};
+  }
+  next();
+});
+
 // Rate Limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
