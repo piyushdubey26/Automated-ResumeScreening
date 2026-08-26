@@ -57,14 +57,7 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
 
     const activeSub = getActiveSubscription(authUserId);
     if (!activeSub) {
-      const usage = userRecord.monthlyUsage || 0;
-      if (usage >= 5) {
-        return res.status(403).json({
-          success: false,
-          error: 'Monthly free limit reached (5 reviews). Please upgrade to a paid plan for unlimited access.'
-        });
-      }
-      userRecord.monthlyUsage = usage + 1;
+      userRecord.monthlyUsage = (userRecord.monthlyUsage || 0) + 1;
     }
 
     const parsed = ParserService.parseText(rawText);

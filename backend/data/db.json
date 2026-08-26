@@ -29,7 +29,7 @@
       "points": 500,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
       "createdAt": "2026-08-25T13:31:04.615Z",
-      "monthlyUsage": 5
+      "monthlyUsage": 6
     },
     {
       "id": "user-seeker-1",
@@ -62,80 +62,43 @@
   ],
   "resumes": [
     {
-      "id": "resume-1787683761261",
+      "id": "resume-1787729458522",
       "userId": "user-sakshi",
-      "filename": "My_Resume.pdf",
+      "filename": "Uploaded_Resume.pdf",
       "targetRole": "sde",
-      "rawText": "PIYUSH DUBEY\nLucknow, Uttar Pradesh\n+91 9696261063 | Piyushdubey447@gmail.com | LinkedIn | GitHub\nEDUCATION\nBabu Banarasi Das University, Lucknow \tAug 2023 – Present\nB.Tech in Computer Science & Engineering | CGPA: 8.0/10\nKunwar Convent School, Ballia, Uttar Pradesh\nIntermediate (Class XII) | Percentage: 63%\nTECHNICAL SKILLS\nProgramming Languages: Java, Python, JavaScript, C\nFrontend Development: React.js, Next.js, HTML5, CSS3, Tailwind CSS\nBackend Development: Node.js, Express.js, REST API Design\nDatabases: SQL, MySQL, MongoDB\nTools & Platforms: Git, GitHub, VS Code, Firebase, Vercel\nCore Subjects: Data Structures & Algorithms, DBMS, OOP, Operating Systems\nAI / Machine Learning: Machine Learning Fundamentals, NLP, Pandas, NumPy\nWORK EXPERIENCE\nMERN Stack Intern Trainee | Grastech\nCompleted practical, project-based training in full-stack MERN Stack Development.\nBuilt responsive full-stack web applications using React.js, Node.js, Express.js, and MongoDB.\nDeveloped and consumed REST APIs, integrating frontend and backend systems end-to-end.\nCollaborated using Git/GitHub for version control across team-based project workflows.\nParticipated in debugging, unit testing, and deployment of production-ready features.\nPROJECTS\nStyleSphere AI — AI-Powered Fashion Recommendation\nPlatform\nReact.js, Node.js, Express.js, MongoDB, Tailwind\nCSS\nDeveloped a full-stack AI-powered fashion recommendation platform with a modern, responsive UI/UX.\nIntegrated frontend and backend modules using the MERN stack for a seamless end-to-end user experience.\nImplemented AI-driven recommendation logic to personalize content for individual users.\nArchitected a scalable application structure using modern web development best practices.\nLive Demo: https://style-sphere-ai-awqf.vercel.app/\nShopSphere — Full Stack E-Commerce Platform \tReact.js, Node.js, Express.js, MongoDB\nBuilt a complete MERN-based e-commerce platform supporting product browsing and secure checkout.\nImplemented user authentication, product management, and RESTful API endpoints.\nIntegrated MongoDB with a responsive frontend to support real-time data-driven UI updates.\nDeveloped secure CRUD operations for products, orders, and user accounts.\nLive Demo: https://shopsphere-ecommerce-six.vercel.app/\nACHIEVEMENTS & CERTIFICATIONS\nMERN Stack Development Internship Certificate — Grastech.\nWeb Development Fundamentals Certificate — IBM.\nBuilt and deployed multiple full-stack web applications using the MERN Stack.\nDeveloped AI-powered and database-driven software projects from concept to completion.\nStrong foundation in Data Structures, Algorithms, and problem-solving techniques.\nActive learner consistently upskilling in Software Development, AI/ML, and Web Technologies.\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n•\n\n-- 1 of 1 --\n\n",
+      "rawText": "Sakshi Sharma Senior Software Engineer React TypeScript Node.js PostgreSQL AWS Docker c++",
       "parsedSections": {
         "contact": {
-          "name": "PIYUSH DUBEY",
-          "email": "Piyushdubey447@gmail.com",
-          "phone": "+91 9696261063"
+          "name": "Candidate"
         },
         "skills": [
-          "javascript",
+          "typescript",
           "react",
-          "next.js",
           "node.js",
-          "express",
-          "python",
-          "java",
-          "sql",
-          "mongodb",
-          "git",
-          "rest api",
-          "pandas",
-          "numpy"
+          "c++",
+          "postgresql",
+          "aws",
+          "docker"
         ],
         "experience": [
           "Developed microservices and REST APIs with high availability.",
           "Optimized database queries and improved system throughput."
         ],
         "projects": [
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "- 1 of 1 --"
+          "Automated Resume Screening Platform with role rubrics."
         ],
         "education": [
-          "Babu Banarasi Das University, Lucknow \tAug 2023 – Present",
-          "B.Tech in Computer Science & Engineering | CGPA: 8.0/10",
-          "Kunwar Convent School, Ballia, Uttar Pradesh",
-          "Intermediate (Class XII) | Percentage: 63%"
+          "B.S. in Computer Science"
         ]
       },
-      "score": 86,
+      "score": 71,
       "scoreBreakdown": {
-        "structure": 100,
-        "clarity": 100,
+        "structure": 85,
+        "clarity": 67,
         "impact": 48,
-        "skills": 95,
-        "projects": 100,
-        "ats": 100
+        "skills": 80,
+        "projects": 80,
+        "ats": 80
       },
       "feedback": [
         {
@@ -147,12 +110,12 @@
           "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
         },
         {
-          "id": "fb-clarity-2",
+          "id": "fb-clarity-1",
           "category": "Clarity",
-          "severity": "success",
-          "title": "Strong Action Phrasing",
-          "description": "Found 10 impactful action verbs across experience bullets.",
-          "suggestion": "Maintain action-oriented verb tense consistency."
+          "severity": "high",
+          "title": "Use Strong Action Verbs",
+          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
+          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
         },
         {
           "id": "fb-impact-1",
@@ -171,7 +134,7 @@
           "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
         }
       ],
-      "createdAt": "2026-08-25T18:49:21.261Z"
+      "createdAt": "2026-08-26T07:30:58.522Z"
     },
     {
       "id": "resume-sde-1",
@@ -316,6 +279,29 @@
   ],
   "applications": [],
   "jdMatches": [
+    {
+      "id": "match-1787729458531",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Looking for a Senior React Engineer with TypeScript Node.js experience",
+      "targetRole": "sde",
+      "matchPct": 89,
+      "keywordScore": 100,
+      "embeddingScore": 78,
+      "matchedKeywords": [
+        "typescript",
+        "node.js",
+        "react"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T07:30:58.531Z"
+    },
     {
       "id": "match-1787683752555",
       "userId": "user-sakshi",

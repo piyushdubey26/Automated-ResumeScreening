@@ -32,18 +32,6 @@ export const getJobs = (req: Request, res: Response) => {
 
 export const matchResumeWithJD = (req: Request, res: Response) => {
   const authUserId = req.user?.userId;
-  if (authUserId) {
-    const userRecord = mockDb.users.find(u => u.id === authUserId);
-    const activeSub = getActiveSubscription(authUserId);
-    if (!activeSub && userRecord) {
-      const usage = userRecord.monthlyUsage || 0;
-      if (usage >= 5) {
-        return res.status(403).json({
-          error: 'Monthly free limit reached (5 reviews & matches). Please upgrade to a paid plan for unlimited access.'
-        });
-      }
-    }
-  }
 
   const { resumeId, resumeText, jdId, jdText, targetRole } = req.body;
 
