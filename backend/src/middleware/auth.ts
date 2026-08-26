@@ -76,8 +76,11 @@ export const requirePlan = (requiredPlan: 'pro' | 'career-max') => {
     }
 
     const activeSub = getActiveSubscription(user.id);
-    const isPro = user.plan === 'pro' || user.plan === 'job_seeker_pro' || (activeSub && (activeSub.planId === 'pro' || activeSub.planId === 'job_seeker_pro'));
-    const isCareerMax = user.plan === 'career-max' || (activeSub && activeSub.planId === 'career-max');
+    const hasActiveSub = !!activeSub && activeSub.status === 'active';
+    const isApprovedStatus = user.subscriptionStatus === 'approved' || user.subscriptionStatus === 'active' || hasActiveSub;
+
+    const isPro = (user.plan === 'pro' || user.plan === 'job_seeker_pro' || (activeSub && (activeSub.planId === 'pro' || activeSub.planId === 'job_seeker_pro'))) && isApprovedStatus;
+    const isCareerMax = (user.plan === 'career-max' || (activeSub && activeSub.planId === 'career-max')) && isApprovedStatus;
 
     if (requiredPlan === 'pro') {
       if (!isPro && !isCareerMax) {
