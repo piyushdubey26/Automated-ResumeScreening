@@ -27,7 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const name = u.name
       ? u.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
       : '';
-    return { ...u, name };
+    const activeMode = (localStorage.getItem('resumeai_active_mode') as 'seeker' | 'recruiter' | 'admin') || u.userType;
+    return { ...u, name, userType: activeMode };
   };
 
   const refreshUser = async () => {
@@ -123,12 +124,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('resumeai_token');
     localStorage.removeItem('resumeai_user');
+    localStorage.removeItem('resumeai_active_mode');
     setToken(null);
     setUser(null);
   };
 
   const switchMode = (newMode: 'seeker' | 'recruiter' | 'admin') => {
     if (user) {
+      localStorage.setItem('resumeai_active_mode', newMode);
       const updatedUser = { ...user, userType: newMode };
       setUser(updatedUser);
       localStorage.setItem('resumeai_user', JSON.stringify(updatedUser));
