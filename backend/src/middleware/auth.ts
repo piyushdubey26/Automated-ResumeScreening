@@ -61,7 +61,6 @@ export const requirePlan = (requiredPlan: 'pro' | 'career-max') => {
     }
 
     const { mockDb } = require('../utils/mockDb');
-    const { getActiveSubscription } = require('../utils/auth');
 
     const user = mockDb.users.find((u: any) => u.id === req.user?.userId);
     if (!user) {
@@ -75,12 +74,9 @@ export const requirePlan = (requiredPlan: 'pro' | 'career-max') => {
       return;
     }
 
-    const activeSub = getActiveSubscription(user.id);
-    const hasActiveSub = !!activeSub && activeSub.status === 'active';
-    const isApprovedStatus = user.subscriptionStatus === 'approved' || user.subscriptionStatus === 'active' || hasActiveSub;
-
-    const isPro = (user.plan === 'pro' || user.plan === 'job_seeker_pro' || (activeSub && (activeSub.planId === 'pro' || activeSub.planId === 'job_seeker_pro'))) && isApprovedStatus;
-    const isCareerMax = (user.plan === 'career-max' || (activeSub && activeSub.planId === 'career-max')) && isApprovedStatus;
+    const plan = user.plan || 'free';
+    const isPro = plan === 'pro' || plan === 'job_seeker_pro';
+    const isCareerMax = plan === 'career-max';
 
     if (requiredPlan === 'pro') {
       if (!isPro && !isCareerMax) {
