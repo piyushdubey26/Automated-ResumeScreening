@@ -158,16 +158,75 @@ export const DashboardPage: React.FC = () => {
   const [activeSub, setActiveSub] = useState<any>(null);
   const [countdownText, setCountdownText] = useState<string>('');
 
-  // Sync data from database on mount or when user changes
+  // Sync data from database on mount or when user changes with Stale-While-Revalidate strategy
   useEffect(() => {
     if (!userId || userId === 'guest') return;
 
     let active = true;
 
-    async function loadData() {
-      setIsLoadingData(true);
+    // 1. Instant Cache Hydration (<10ms load time)
+    const cachedResume = localStorage.getItem(`resumeai_cache_resume_${userId}`);
+    const cachedMatch = localStorage.getItem(`resumeai_cache_match_${userId}`);
+    const cachedApps = localStorage.getItem(`resumeai_cache_apps_${userId}`);
+    const cachedSub = localStorage.getItem(`resumeai_cache_sub_${userId}`);
+
+    let hasCachedData = false;
+
+    if (cachedResume) {
       try {
-        // Parallelize initial network requests
+        const parsedResume = JSON.parse(cachedResume);
+        setResumeRecord(parsedResume);
+        setResumeInput(parsedResume.rawText || '');
+        hasCachedData = true;
+      } catch {}
+    }
+
+    if (cachedMatch) {
+      try {
+        const parsedMatch = JSON.parse(cachedMatch);
+        setJdMatchResult(parsedMatch);
+        setJdInput(parsedMatch.jdText || '');
+        hasCachedData = true;
+      } catch {}
+    }
+
+    if (cachedApps) {
+      try {
+        setApplications(JSON.parse(cachedApps));
+        hasCachedData = true;
+      } catch {}
+    }
+
+    if (cachedSub) {
+      try {
+        setActiveSub(JSON.parse(cachedSub));
+        hasCachedData = true;
+      } catch {}
+    }
+
+    setProfileLinks({
+      github: user?.profileLinks?.github || '',
+      linkedin: user?.profileLinks?.linkedin || '',
+      project: user?.profileLinks?.project || '',
+      coding: user?.profileLinks?.coding || ''
+    });
+    setInterviewScore(user?.interviewScore || null);
+
+    const savedActivity = localStorage.getItem(`resumeai_user_activity_${userId}`);
+    if (savedActivity) {
+      try { setRecentActivity(JSON.parse(savedActivity)); } catch {}
+    }
+
+    // If cached data is present, unblock UI immediately (<10ms render)
+    if (hasCachedData) {
+      setIsLoadingData(false);
+    } else {
+      setIsLoadingData(true);
+    }
+
+    // 2. Background Revalidation via parallel API calls
+    async function revalidateData() {
+      try {
         const [subRes, resumeRes, matchRes, appsRes] = await Promise.all([
           authApi.getSubscription().catch(() => null),
           resumeApi.getLatest().catch(() => null),
@@ -177,36 +236,27 @@ export const DashboardPage: React.FC = () => {
 
         if (active) {
           if (subRes) {
-            setActiveSub(subRes.subscription || null);
+            const sub = subRes.subscription || null;
+            setActiveSub(sub);
+            if (sub) localStorage.setItem(`resumeai_cache_sub_${userId}`, JSON.stringify(sub));
           }
           if (resumeRes && resumeRes.resume) {
             setResumeRecord(resumeRes.resume);
             setResumeInput(resumeRes.resume.rawText || '');
+            localStorage.setItem(`resumeai_cache_resume_${userId}`, JSON.stringify(resumeRes.resume));
           }
           if (matchRes) {
             setJdMatchResult(matchRes);
             setJdInput(matchRes.jdText || '');
+            localStorage.setItem(`resumeai_cache_match_${userId}`, JSON.stringify(matchRes));
           }
           if (appsRes && appsRes.applications) {
             setApplications(appsRes.applications);
-          }
-
-          setProfileLinks({
-            github: user?.profileLinks?.github || '',
-            linkedin: user?.profileLinks?.linkedin || '',
-            project: user?.profileLinks?.project || '',
-            coding: user?.profileLinks?.coding || ''
-          });
-          setInterviewScore(user?.interviewScore || null);
-
-          // Load local activities
-          const savedActivity = localStorage.getItem(`resumeai_user_activity_${userId}`);
-          if (savedActivity) {
-            try { setRecentActivity(JSON.parse(savedActivity)); } catch {}
+            localStorage.setItem(`resumeai_cache_apps_${userId}`, JSON.stringify(appsRes.applications));
           }
         }
       } catch (err) {
-        console.error("Error loading user data:", err);
+        console.error("Error revalidating user data:", err);
       } finally {
         if (active) {
           setIsLoadingData(false);
@@ -214,12 +264,12 @@ export const DashboardPage: React.FC = () => {
       }
     }
 
-    loadData();
+    revalidateData();
 
     return () => {
       active = false;
     };
-  }, [userId]);
+  }, [userId, user]);
 
   // Live subscription countdown timer
   useEffect(() => {
