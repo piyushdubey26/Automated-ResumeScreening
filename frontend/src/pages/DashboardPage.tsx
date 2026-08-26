@@ -1351,10 +1351,10 @@ export const DashboardPage: React.FC = () => {
                       <div>
                         <h4 className="font-bold text-emerald-400 mb-2 flex items-center space-x-1">
                           <Check className="w-4 h-4" />
-                          <span>Matched Keywords ({jdMatchResult.matchedKeywords.length})</span>
+                          <span>Matched Keywords ({(jdMatchResult.matchedKeywords || []).length})</span>
                         </h4>
                         <div className="flex flex-wrap gap-1.5">
-                          {jdMatchResult.matchedKeywords.map((kw, i) => (
+                          {(jdMatchResult.matchedKeywords || []).map((kw, i) => (
                             <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-semibold">
                               ✓ {kw}
                             </span>
@@ -1401,7 +1401,7 @@ export const DashboardPage: React.FC = () => {
                           <span>Improvement Recommendations:</span>
                         </h4>
                         <div className="space-y-2">
-                          {jdMatchResult.recommendations.map((rec, idx) => (
+                          {(jdMatchResult.recommendations || []).map((rec, idx) => (
                             <div key={idx} className="flex items-start space-x-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
                               <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                               <span className="text-xs text-slate-300 leading-relaxed">{rec}</span>
