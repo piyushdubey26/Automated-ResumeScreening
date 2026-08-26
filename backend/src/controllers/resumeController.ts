@@ -116,8 +116,7 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
       createdAt: new Date().toISOString()
     };
 
-    mockDb.resumes = mockDb.resumes.filter(r => r.userId !== authUserId);
-    mockDb.resumes.unshift(newResume);
+    mockDb.resumes = [newResume, ...mockDb.resumes.filter(r => r.id !== newResume.id)];
     saveDb();
 
     const finalUsage = userRecord.monthlyUsage || 0;
@@ -163,14 +162,17 @@ export const getLatestResume = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
-    const userResume = mockDb.resumes.find(r => r.userId === authUserId);
-    if (!userResume) {
+    const userResumes = mockDb.resumes
+      .filter(r => r.userId === authUserId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    if (userResumes.length === 0) {
       return res.json({ success: true, resume: null });
     }
 
     return res.json({
       success: true,
-      resume: userResume
+      resume: userResumes[0]
     });
   } catch (err: any) {
     console.error('Error fetching latest resume:', err);
