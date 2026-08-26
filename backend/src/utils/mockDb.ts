@@ -166,7 +166,7 @@ export interface RecruiterCandidateRecord {
 // Initial Seed Users
 const users: User[] = [
   {
-    id: 'admin-piyush',
+    id: 'user-admin-1',
     name: 'Piyush Dubey',
     email: 'piyushdubey447@gmail.com',
     password: 'piyush26',
@@ -175,7 +175,11 @@ const users: User[] = [
     badges: ['Platform Founder', 'Admin'],
     points: 10000,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Piyush%20Dubey',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    monthlyUsage: 0,
+    usageMonth: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
+    plan: 'enterprise',
+    subscriptionStatus: 'approved'
   },
   {
     id: 'user-sakshi',
@@ -187,7 +191,11 @@ const users: User[] = [
     badges: ['New Explorer', 'ATS Ready'],
     points: 500,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    monthlyUsage: 0,
+    usageMonth: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
+    plan: 'free',
+    subscriptionStatus: 'free'
   },
   {
     id: 'user-seeker-1',
@@ -199,7 +207,11 @@ const users: User[] = [
     badges: ['ATS Ninja', 'Metric Machine', 'Role Ready'],
     points: 1450,
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    monthlyUsage: 0,
+    usageMonth: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
+    plan: 'free',
+    subscriptionStatus: 'free'
   },
   {
     id: 'user-recruiter-1',
@@ -211,7 +223,11 @@ const users: User[] = [
     badges: ['Top Talent Scout'],
     points: 3200,
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    monthlyUsage: 0,
+    usageMonth: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
+    plan: 'recruiter',
+    subscriptionStatus: 'approved'
   }
 ];
 
@@ -389,9 +405,12 @@ const loadDb = () => {
       if (parsed.users) {
         const userMap = new Map<string, User>();
         // Load hardcoded seed users first
-        users.forEach(u => userMap.set(u.email.toLowerCase(), u));
-        // Merge loaded users
-        parsed.users.forEach((u: any) => userMap.set(u.email.toLowerCase(), u));
+        users.forEach(u => userMap.set(u.email.toLowerCase(), { ...u }));
+        // Merge loaded users from disk (saved user properties overwrite defaults)
+        parsed.users.forEach((u: any) => {
+          const existing = userMap.get(u.email.toLowerCase()) || {};
+          userMap.set(u.email.toLowerCase(), { ...existing, ...u });
+        });
         mockDb.users = Array.from(userMap.values());
       }
       if (parsed.resumes) mockDb.resumes = parsed.resumes;

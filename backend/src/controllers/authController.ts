@@ -57,6 +57,18 @@ export const login = (req: Request, res: Response) => {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
+  // Calendar month reset check during login
+  const d = new Date();
+  const currentMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  if (user.usageMonth !== currentMonth) {
+    user.usageMonth = currentMonth;
+    user.monthlyUsage = 0;
+    saveDb();
+  } else if (user.monthlyUsage === undefined) {
+    user.monthlyUsage = 0;
+    saveDb();
+  }
+
   const token = generateAccessToken({ userId: user.id, role: user.userType });
   const userResponse = { ...user };
   delete userResponse.password;
