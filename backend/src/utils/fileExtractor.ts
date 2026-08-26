@@ -1,3 +1,21 @@
+if (typeof globalThis.DOMMatrix === 'undefined') {
+  class SafeDOMMatrix {
+    a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+    constructor(init?: any) {
+      if (Array.isArray(init) && init.length === 6) {
+        [this.a, this.b, this.c, this.d, this.e, this.f] = init;
+      }
+    }
+    multiply() { return this; }
+    translate() { return this; }
+    scale() { return this; }
+    rotate() { return this; }
+    inverse() { return this; }
+    transformPoint(p: any) { return p || { x: 0, y: 0, z: 0, w: 1 }; }
+  }
+  (globalThis as any).DOMMatrix = SafeDOMMatrix;
+}
+
 import Tesseract from 'tesseract.js';
 
 function fallbackPdfTextExtraction(buffer: Buffer): string {
