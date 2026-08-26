@@ -189,72 +189,20 @@
       "plan": "career-max",
       "subscriptionStatus": "approved",
       "usageMonth": "2026-08"
-    },
-    {
-      "id": "user-1787759998779",
-      "name": "Hey User",
-      "email": "hey_1787759998692@gmail.com",
-      "password": "Password123!",
-      "rolePreference": "sde",
-      "userType": "seeker",
-      "badges": [
-        "New Explorer",
-        "ATS Ready"
-      ],
-      "points": 500,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Hey%20User",
-      "createdAt": "2026-08-26T15:59:58.779Z",
-      "profileLinks": {
-        "github": "",
-        "linkedin": "",
-        "project": "",
-        "coding": ""
-      },
-      "interviewScore": null,
-      "monthlyUsage": 0,
-      "plan": "free",
-      "subscriptionStatus": "free"
-    },
-    {
-      "id": "user-1787760214702",
-      "name": "Vercel Fix Candidate",
-      "email": "vercel_fix_1787760214700@gmail.com",
-      "password": "Password123!",
-      "rolePreference": "sde",
-      "userType": "seeker",
-      "badges": [
-        "New Explorer",
-        "ATS Ready"
-      ],
-      "points": 500,
-      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Vercel%20Fix%20Candidate",
-      "createdAt": "2026-08-26T16:03:34.702Z",
-      "profileLinks": {
-        "github": "",
-        "linkedin": "",
-        "project": "",
-        "coding": ""
-      },
-      "interviewScore": null,
-      "monthlyUsage": 0,
-      "plan": "free",
-      "subscriptionStatus": "free"
     }
   ],
   "resumes": [
     {
-      "id": "resume-1787750730303",
+      "id": "resume-1787762525029",
       "userId": "user-1787750534910",
       "filename": "My_Resume.pdf",
       "targetRole": "sde",
-      "rawText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "rawText": "8 bf i\nDISCIPLINE wccess o Process. SS\nTODAY | ll _\nSUCCESS i\n— Mg EH ul A “\nTOMORROW ' —— By TRE\nLs Ale NN\na ts =a eRe i 7 ~~ it mh\n\\ a EC fil N= [8\n| g WE ie Pw . ae [11 core EE RC\n\\ 2s\" HE. mL Cas RS TE\n| : 11:10. = JUc=EE i\nSo Fa .\ny\nE aonsssees0s® ce” BR TUN apa\ner ol = 5 EE —— SN ~ </ ~,\nEL =a | <> ©\nCLEAN CODE = 4 = = ? BB\npo EPIC SHIT : = ede 3 =\n5s le aE 5h —-\nEa\na\n",
       "parsedSections": {
         "contact": {
-          "name": "Candidate"
+          "name": "8 bf i"
         },
-        "skills": [
-          "python"
-        ],
+        "skills": [],
         "experience": [
           "Developed microservices and REST APIs with high availability.",
           "Optimized database queries and improved system throughput."
@@ -266,14 +214,14 @@
           "B.S. in Computer Science"
         ]
       },
-      "score": 68,
+      "score": 64,
       "scoreBreakdown": {
-        "structure": 85,
+        "structure": 80,
         "clarity": 67,
         "impact": 48,
-        "skills": 55,
+        "skills": 50,
         "projects": 80,
-        "ats": 100
+        "ats": 80
       },
       "feedback": [
         {
@@ -309,7 +257,7 @@
           "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
         }
       ],
-      "createdAt": "2026-08-26T13:25:30.303Z"
+      "createdAt": "2026-08-26T16:42:05.029Z"
     },
     {
       "id": "resume-1787750470223",
@@ -736,6 +684,30 @@
   ],
   "applications": [],
   "jdMatches": [
+    {
+      "id": "match-1787762525040",
+      "userId": "user-1787750534910",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Job Description – Telecom NOC Associate Engineer\nJob Details\n Job Title: Associate Support Engineer\n Location: Noida\n Salary: ₹3.6 LPA (post successful completion of the probation period)\n Stipend during probation: ₹9,000 per month\n Probation period: 6 – 10 Months\n Service Agreement: 2 years with an exit clause of ₹2,00,000\n Shift: 24x7 rotational shifts\nAbout the Role\nInfinite is seeking motivated engineering graduates to join our Telecom Network\nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile,\nFixed, and Transport network operations, where interns will monitor network health,\nanalyze alarms, troubleshoot incidents, and support service restoration while learning\ntelecom technologies and operational processes.\nKey Responsibilities\n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS\ntools.\n Perform first-level incident analysis, ticket creation, tracking, and escalation as\nper SLA.\n Troubleshoot telecom network faults and coordinate with domain/inter domain\nT2/SMEs and field teams.\n Support service restoration activities and perform basic health checks.\n Monitor incident queues and ensure SLA compliance in a 24x7 environment.\n Prepare shift handovers, reports, and RCA inputs.\n Document troubleshooting steps and update operational knowledge.\n Collaborate with Operations, Engineering, Automation, and Customer teams.\nMandatory Skills\n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing &\nSwitching). CCNA certification will be plus point.\n\n-- 1 of 2 --\n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks.\n Familiarity with Python, Linux, networking commands, or scripting is an added\nadvantage.\n Understanding of NOC operations and alarm monitoring is preferred.\n Strong troubleshooting and analytical skills.\n Good verbal and written communication skills.\nPreferred Qualifications\n Bachelor’s degree in Electronics & Communication Engineering or a related\nElectronics discipline.\n 2027 graduates with no active backlogs.\n Basic understanding of IP networking, telecom fundamentals, and MS Office.\n Customer-focused mindset with a willingness to learn and work in a fast-paced\nsupport environment.\n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate\nto any Infinite office location based on business requirements.\nKey Competencies\n Customer service orientation\n Problem-solving and analytical thinking\n Effective communication\n Team collaboration\n Time management\n Adaptability and willingness to learn\n\n-- 2 of 2 --\n\n",
+      "targetRole": "sde",
+      "matchPct": 28,
+      "keywordScore": 0,
+      "embeddingScore": 55,
+      "matchedKeywords": [],
+      "missingKeywords": [
+        "python"
+      ],
+      "missingCoreSkills": [
+        "python"
+      ],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Explicitly incorporate target skills: python into your Skills section or experience bullet points.",
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T16:42:05.040Z"
+    },
     {
       "id": "match-1787751046573",
       "userId": "user-1787745643154",

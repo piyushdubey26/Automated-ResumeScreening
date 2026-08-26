@@ -1,5 +1,5 @@
 import http from 'http';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import app from './app';
 import dotenv from 'dotenv';
 
@@ -17,7 +17,7 @@ export const io = new Server(server, {
   }
 });
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: Socket) => {
   console.log(`Socket client connected: ${socket.id}`);
 
   socket.on('join_room', (roomId: string) => {

@@ -2,6 +2,10 @@
   "name": "resumeai-monorepo",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "build": "npm --prefix backend run build && npm --prefix frontend run build"
   },
