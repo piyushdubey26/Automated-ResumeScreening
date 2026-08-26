@@ -7,6 +7,9 @@ export type FeatureKey =
   | 'ai.bulletRewriter'
   | 'ai.mockInterview'
   | 'portfolio.analysis'
+  | 'candidate.applications'
+  | 'candidate.leaderboard'
+  | 'candidate.profile'
   | 'recruiter.hub'
   | 'recruiter.candidateUpload'
   | 'recruiter.screening'
@@ -48,29 +51,50 @@ export const FEATURE_GATE_INFO: Record<FeatureKey, FeatureGateInfo> = {
     featureKey: 'resume.jdMatch',
     title: 'Advanced JD Match & Skills Gap Analysis',
     description: 'Compare your resume against any custom job description with AI keyword overlap scoring.',
-    requiredPlanName: 'Job Seeker Pro',
-    badgeText: '✦ PRO FEATURE'
+    requiredPlanName: 'Job Seeker Pro ($12)',
+    badgeText: '✦ PRO FEATURE ($12/MO)'
   },
   'ai.bulletRewriter': {
     featureKey: 'ai.bulletRewriter',
     title: 'AI Resume Bullet Enhancer',
     description: 'Transform weak bullet points into high-impact, quantified statements tailored for ATS.',
-    requiredPlanName: 'Job Seeker Pro',
-    badgeText: '✦ PRO FEATURE'
+    requiredPlanName: 'Job Seeker Pro ($12)',
+    badgeText: '✦ PRO FEATURE ($12/MO)'
   },
   'ai.mockInterview': {
     featureKey: 'ai.mockInterview',
     title: 'AI Mock Interview Generator',
     description: 'Generate customized technical and behavioral interview questions based on your resume and target JD.',
-    requiredPlanName: 'Job Seeker Pro',
-    badgeText: '✦ PRO FEATURE'
+    requiredPlanName: 'Job Seeker Pro ($12)',
+    badgeText: '✦ PRO FEATURE ($12/MO)'
   },
   'portfolio.analysis': {
     featureKey: 'portfolio.analysis',
     title: 'Portfolio & Public GitHub Signal Analysis',
     description: 'Validate public repositories, code commits, and project metrics automatically.',
-    requiredPlanName: 'Job Seeker Pro',
-    badgeText: '✦ PRO FEATURE'
+    requiredPlanName: 'Career Max ($49)',
+    badgeText: '✦ CAREER MAX FEATURE ($49/MO)'
+  },
+  'candidate.applications': {
+    featureKey: 'candidate.applications',
+    title: 'Applications Tracker',
+    description: 'Track and manage your job applications across recruiters and companies.',
+    requiredPlanName: 'Free',
+    badgeText: 'FREE FEATURE'
+  },
+  'candidate.leaderboard': {
+    featureKey: 'candidate.leaderboard',
+    title: 'Leaderboard & Badges',
+    description: 'Earn points and badges by improving your resume and mastering interview topics.',
+    requiredPlanName: 'Free',
+    badgeText: 'FREE FEATURE'
+  },
+  'candidate.profile': {
+    featureKey: 'candidate.profile',
+    title: 'Profile Settings & Links',
+    description: 'Manage your GitHub, LinkedIn, and personal portfolio links.',
+    requiredPlanName: 'Free',
+    badgeText: 'FREE FEATURE'
   },
   'recruiter.hub': {
     featureKey: 'recruiter.hub',
@@ -203,16 +227,30 @@ export const canAccessFeature = (user: User | null, featureKey: FeatureKey): Acc
     case 'resume.jdMatch':
     case 'ai.bulletRewriter':
     case 'ai.mockInterview':
-    case 'portfolio.analysis':
       if (!isProPlan) {
         return {
           allowed: false,
           reason: 'upgrade_required',
-          requiredPlan: 'Job Seeker Pro'
+          requiredPlan: 'Job Seeker Pro ($12)'
         };
       }
       return { allowed: true };
 
+    case 'portfolio.analysis': {
+      const isMaxPlan = user.plan === 'career-max' && isSubscriptionActive(user);
+      if (!isMaxPlan) {
+        return {
+          allowed: false,
+          reason: 'upgrade_required',
+          requiredPlan: 'Career Max ($49)'
+        };
+      }
+      return { allowed: true };
+    }
+
+    case 'candidate.applications':
+    case 'candidate.leaderboard':
+    case 'candidate.profile':
     default:
       return { allowed: true };
   }

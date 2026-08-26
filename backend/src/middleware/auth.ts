@@ -52,3 +52,53 @@ export const requireRole = (roles: string[]) => {
     next();
   };
 };
+
+export const requirePlan = (requiredPlan: 'pro' | 'career-max') => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const { mockDb } = require('../utils/mockDb');
+    const { getActiveSubscription } = require('../utils/auth');
+
+    const user = mockDb.users.find((u: any) => u.id === req.user?.userId);
+    if (!user) {
+      res.status(404).json({ error: 'User account not found' });
+      return;
+    }
+
+    // Admin users bypass plan restrictions
+    if (user.userType === 'admin' || user.email === 'admin@resumeai.com' || user.email === 'piyushdubey447@gmail.com') {
+      next();
+      return;
+    }
+
+    const activeSub = getActiveSubscription(user.id);
+    const isPro = user.plan === 'pro' || user.plan === 'job_seeker_pro' || (activeSub && (activeSub.planId === 'pro' || activeSub.planId === 'job_seeker_pro'));
+    const isCareerMax = user.plan === 'career-max' || (activeSub && activeSub.planId === 'career-max');
+
+    if (requiredPlan === 'pro') {
+      if (!isPro && !isCareerMax) {
+        res.status(403).json({
+          error: 'Forbidden: Upgrade to Job Seeker Pro ($12) or Career Max ($49) to access this feature.',
+          code: 'PLAN_UPGRADE_REQUIRED',
+          requiredPlan: 'Job Seeker Pro'
+        });
+        return;
+      }
+    } else if (requiredPlan === 'career-max') {
+      if (!isCareerMax) {
+        res.status(403).json({
+          error: 'Forbidden: Upgrade to Career Max ($49) to access this feature.',
+          code: 'PLAN_UPGRADE_REQUIRED',
+          requiredPlan: 'Career Max'
+        });
+        return;
+      }
+    }
+
+    next();
+  };
+};

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { authenticateJWT } from '../middleware/auth';
+import { authenticateJWT, requirePlan } from '../middleware/auth';
 import {
   uploadAndParseResume,
   getResumeById,
@@ -40,8 +40,8 @@ router.post('/extract-text', authenticateJWT, upload.single('file'), async (req,
   }
 });
 
-router.post('/rewrite', authenticateJWT, rewriteBullet);
-router.post('/mock-interview', authenticateJWT, generateMockInterview);
+router.post('/rewrite', authenticateJWT, requirePlan('pro'), rewriteBullet);
+router.post('/mock-interview', authenticateJWT, requirePlan('pro'), generateMockInterview);
 
 // Static routes first
 router.get('/latest', authenticateJWT, getLatestResume);

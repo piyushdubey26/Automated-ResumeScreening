@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { sampleResumesText, sampleJDsText, resumeApi, jobApi, authApi } from '../services/api';
 import { FileUpload } from '../components/upload/FileUpload';
-import { canAccessFeature } from '../utils/permissions';
+import { canAccessFeature, type FeatureKey } from '../utils/permissions';
 import UpgradeGate from '../components/auth/UpgradeGate';
 import type {
   ResumeRecord,
@@ -30,7 +30,8 @@ import {
   Plus,
   Trash2,
   Upload,
-  Clock3
+  Clock3,
+  Lock
 } from 'lucide-react';
 
 interface ActivityItem {
@@ -594,12 +595,14 @@ export const DashboardPage: React.FC = () => {
                 { name: "AI Bullet Rewriter", label: "AI Bullet Rewriter", icon: Zap, feature: 'ai.bulletRewriter' },
                 { name: "Portfolio & Learning", label: "Portfolio & Learning", icon: BookOpen, feature: 'portfolio.analysis' },
                 { name: "AI Mock Interview", label: "AI Mock Interview", icon: HelpCircle, feature: 'ai.mockInterview' },
-                { name: "Applications", label: "Applications", icon: FileCheck2, feature: null },
-                { name: "Leaderboard & Badges", label: "Leaderboard & Badges", icon: Award, feature: null },
-                { name: "Profile", label: "Profile", icon: User, feature: null }
+                { name: "Applications", label: "Applications", icon: FileCheck2, feature: 'candidate.applications' },
+                { name: "Leaderboard & Badges", label: "Leaderboard & Badges", icon: Award, feature: 'candidate.leaderboard' },
+                { name: "Profile", label: "Profile", icon: User, feature: 'candidate.profile' }
               ].map(item => {
                 const Icon = item.icon;
                 const isActive = activeNav === item.name;
+                const access = item.feature ? canAccessFeature(user, item.feature as FeatureKey) : { allowed: true };
+                const isLocked = !access.allowed;
 
                 return (
                   <button
@@ -615,6 +618,9 @@ export const DashboardPage: React.FC = () => {
                       <Icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </div>
+                    {isLocked && (
+                      <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0 ml-2" />
+                    )}
                   </button>
                 );
               })}
@@ -686,28 +692,34 @@ export const DashboardPage: React.FC = () => {
           {/* HORIZONTAL FEATURE TABS NAVIGATION */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-4 border-b border-slate-900 scrollbar-none">
             {[
-              { name: "Dashboard", label: "Dashboard" },
-              { name: "Resume Review", label: "Resume Review" },
-              { name: "Job Matches", label: "Job Matches" },
-              { name: "AI Bullet Rewriter", label: "AI Bullet Rewriter" },
-              { name: "Portfolio & Learning", label: "Portfolio & Learning" },
-              { name: "AI Mock Interview", label: "AI Mock Interview" },
-              { name: "Applications", label: "Applications" },
-              { name: "Leaderboard & Badges", label: "Leaderboard & Badges" },
-              { name: "Profile", label: "Profile" }
+              { name: "Dashboard", label: "Dashboard", feature: null },
+              { name: "Resume Review", label: "Resume Review", feature: 'resume.basicReview' },
+              { name: "Job Matches", label: "Job Matches", feature: 'resume.jdMatch' },
+              { name: "AI Bullet Rewriter", label: "AI Bullet Rewriter", feature: 'ai.bulletRewriter' },
+              { name: "Portfolio & Learning", label: "Portfolio & Learning", feature: 'portfolio.analysis' },
+              { name: "AI Mock Interview", label: "AI Mock Interview", feature: 'ai.mockInterview' },
+              { name: "Applications", label: "Applications", feature: 'candidate.applications' },
+              { name: "Leaderboard & Badges", label: "Leaderboard & Badges", feature: 'candidate.leaderboard' },
+              { name: "Profile", label: "Profile", feature: 'candidate.profile' }
             ].map(tab => {
               const isActive = activeNav === tab.name;
+              const access = tab.feature ? canAccessFeature(user, tab.feature as FeatureKey) : { allowed: true };
+              const isLocked = !access.allowed;
+
               return (
                 <button
                   key={tab.name}
                   onClick={() => handleNavigate(tab.name as any)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border flex items-center space-x-1.5 ${
                     isActive
                       ? "bg-[#a84c38] text-white border-[#a84c38] shadow-md shadow-[#a84c38]/15 font-extrabold"
                       : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {isLocked && (
+                    <Lock className="w-3 h-3 text-amber-400 shrink-0" />
+                  )}
                 </button>
               );
             })}
