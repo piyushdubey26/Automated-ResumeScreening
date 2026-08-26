@@ -43,7 +43,7 @@ interface ActivityItem {
 
 
 export const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const userId = user?.id || 'guest';
 
   // Storage Keys scoped per authenticated user ID
@@ -382,6 +382,9 @@ export const DashboardPage: React.FC = () => {
       const resume = await resumeApi.uploadAndParse(textToUse, 'My_Resume.pdf', targetRole);
       
       setResumeRecord(resume.resume);
+
+      // Instantly synchronize server-authoritative monthly usage count
+      await refreshUser();
 
       if (hasJD) {
         const match = await jobApi.matchJD(textToUse, jdInput, targetRole);

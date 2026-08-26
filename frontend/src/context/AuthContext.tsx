@@ -12,6 +12,7 @@ interface AuthContextType {
   logout: () => void;
   demoLogin: (role: 'seeker' | 'recruiter' | 'admin') => Promise<void>;
   switchMode: (newMode: 'seeker' | 'recruiter' | 'admin') => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +28,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ? u.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
       : '';
     return { ...u, name };
+  };
+
+  const refreshUser = async () => {
+    const curToken = token || localStorage.getItem('resumeai_token');
+    if (curToken) {
+      try {
+        const res = await authApi.getMe();
+        if (res.user) {
+          const formatted = formatUser(res.user);
+          setUser(formatted);
+          if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
+        }
+      } catch (err) {
+        console.error('Failed to refresh user profile:', err);
+      }
+    }
   };
 
   useEffect(() => {
@@ -57,13 +74,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   useEffect(() => {
-    const syncSubscription = () => {
+    const syncUser = async () => {
       const savedUser = localStorage.getItem('resumeai_user');
       if (savedUser) setUser(formatUser(JSON.parse(savedUser)));
+      await refreshUser();
     };
-    window.addEventListener('resumeai-subscription-updated', syncSubscription);
-    return () => window.removeEventListener('resumeai-subscription-updated', syncSubscription);
-  }, []);
+    window.addEventListener('resumeai-subscription-updated', syncUser);
+    window.addEventListener('resumeai-user-updated', syncUser);
+    return () => {
+      window.removeEventListener('resumeai-subscription-updated', syncUser);
+      window.removeEventListener('resumeai-user-updated', syncUser);
+    };
+  }, [token]);
 
   const login = async (email: string, password?: string) => {
     setIsLoading(true);
@@ -124,7 +146,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signup,
       logout,
       demoLogin,
-      switchMode
+      switchMode,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>
