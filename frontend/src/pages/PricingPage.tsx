@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Clock3, ShieldCheck, Shield, Settings, ArrowRight } from 'lucide-react';
+import { Check, Clock3, ShieldCheck, Shield, Settings, ArrowRight, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { PLANS, type PricingPlan } from '../data/plans';
 import { authApi } from '../services/api';
-import type { User } from '../types';
 
 export const PricingPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [notice, setNotice] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [activeSub, setActiveSub] = useState<any>(null);
-
   const [pendingRequest, setPendingRequest] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Modal dialog state
+  const [modalConfig, setModalConfig] = useState<{
+    type: 'cancel_12' | 'cancel_49' | 'switch_12_to_49' | 'switch_49_to_12' | null;
+    currentPlanName: string;
+    targetPlanName?: string;
+  }>({ type: null, currentPlanName: '' });
 
   const isAdmin = user?.userType === 'admin' || user?.email === 'admin@resumeai.com' || user?.email === 'piyushdubey447@gmail.com';
   const isSeeker = user?.userType === 'seeker';
@@ -25,12 +31,16 @@ export const PricingPage: React.FC = () => {
         const subRes = await authApi.getSubscription().catch(() => null);
         if (subRes && subRes.subscription) {
           setActiveSub(subRes.subscription);
+        } else {
+          setActiveSub(null);
         }
 
         const reqRes = await authApi.getSubscriptionRequests().catch(() => null);
         if (reqRes && reqRes.requests) {
           const pending = reqRes.requests.find((r: any) => r.status === 'pending');
           setPendingRequest(pending || null);
+        } else {
+          setPendingRequest(null);
         }
       } catch (err) {
         console.error('Failed to load subscription data:', err);
@@ -41,6 +51,12 @@ export const PricingPage: React.FC = () => {
   useEffect(() => {
     fetchSubscriptionData();
   }, [user]);
+
+  // Current plan helpers
+  const activePlanId = user?.plan || 'free';
+  const isProActive = (activePlanId === 'job_seeker_pro' || activePlanId === 'pro') && activeSub && activeSub.status === 'active';
+  const isMaxActive = activePlanId === 'career-max' && activeSub && activeSub.status === 'active';
+  const isFreeActive = !isProActive && !isMaxActive;
 
   const requestPro = async (tier = 'Job Seeker Pro') => {
     if (!user) {
@@ -53,21 +69,61 @@ export const PricingPage: React.FC = () => {
     }
     const targetPlanId = tier === 'Career Max' ? 'career-max' : 'job_seeker_pro';
     
+    setIsProcessing(true);
     try {
       const res = await authApi.requestSubscriptionUpgrade(targetPlanId);
       setPendingRequest(res.request);
       setNotice(`Upgrade request for ${tier} submitted successfully! Your request is waiting for administrator approval.`);
       
-      const updated: User = {
-        ...user,
-        subscriptionStatus: 'pending_approval'
-      };
-
-      localStorage.setItem('resumeai_user', JSON.stringify(updated));
+      await refreshUser();
+      await fetchSubscriptionData();
       window.dispatchEvent(new Event('resumeai-subscription-updated'));
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || err.message || 'Failed to submit upgrade request.';
       setNotice(errorMsg);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Execution of cancellation
+  const handleConfirmCancellation = async () => {
+    setIsProcessing(true);
+    try {
+      await authApi.cancelSubscription();
+      await refreshUser();
+      await fetchSubscriptionData();
+      window.dispatchEvent(new Event('resumeai-subscription-updated'));
+      setNotice('Subscription cancelled successfully. Your plan is now Free.');
+      setModalConfig({ type: null, currentPlanName: '' });
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to cancel subscription.';
+      setNotice(errorMsg);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Execution of plan switch (Cancel existing -> Upgrade to new)
+  const handleConfirmSwitch = async (targetPlanId: string, targetTierName: string) => {
+    setIsProcessing(true);
+    try {
+      // Step A: Cancel current active subscription
+      await authApi.cancelSubscription();
+      // Step B: Submit upgrade request for new target plan
+      const res = await authApi.requestSubscriptionUpgrade(targetPlanId);
+      setPendingRequest(res.request);
+      
+      await refreshUser();
+      await fetchSubscriptionData();
+      window.dispatchEvent(new Event('resumeai-subscription-updated'));
+      setNotice(`Plan switch requested! Current subscription cancelled and upgrade request for ${targetTierName} submitted.`);
+      setModalConfig({ type: null, currentPlanName: '' });
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to switch subscription plan.';
+      setNotice(errorMsg);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -108,25 +164,59 @@ export const PricingPage: React.FC = () => {
         );
       }
 
-      const activePlanId = user?.plan || 'free';
-
+      // FREE PLAN CARD
       if (plan.id === 'free') {
-        const isCurrentActive = activePlanId === 'free' && (!activeSub || activeSub.status !== 'active');
-        return (
-          <button disabled className="w-full py-2.5 bg-slate-900 border border-slate-800 text-slate-400 font-semibold text-xs rounded-xl cursor-default">
-            {isCurrentActive ? 'Current Plan (Active)' : 'Basic Tier Included'}
-          </button>
-        );
+        if (isFreeActive) {
+          return (
+            <button disabled className="w-full py-2.5 bg-slate-900 border border-slate-800 text-slate-400 font-semibold text-xs rounded-xl cursor-default">
+              Current Plan
+            </button>
+          );
+        }
+        if (isProActive) {
+          return (
+            <button
+              disabled={isProcessing}
+              onClick={() => setModalConfig({ type: 'cancel_12', currentPlanName: 'Job Seeker Pro ($12)' })}
+              className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              Cancel $12
+            </button>
+          );
+        }
+        if (isMaxActive) {
+          return (
+            <button
+              disabled={isProcessing}
+              onClick={() => setModalConfig({ type: 'cancel_49', currentPlanName: 'Career Max ($49)' })}
+              className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              Cancel $49
+            </button>
+          );
+        }
       }
 
+      // $12 PLAN CARD (JOB SEEKER PRO)
       if (plan.id === 'pro') {
-        const isCurrentActive = (activePlanId === 'job_seeker_pro' || activePlanId === 'pro') && activeSub && activeSub.status === 'active';
         const isPending = pendingRequest && (pendingRequest.requestedPlan === 'job_seeker_pro' || pendingRequest.requestedPlan === 'pro') && pendingRequest.status === 'pending';
 
-        if (isCurrentActive) {
+        if (isProActive) {
           return (
             <button disabled className="w-full py-2.5 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold text-xs rounded-xl cursor-default">
-              Current Plan (Active)
+              Current Plan
+            </button>
+          );
+        }
+
+        if (isMaxActive) {
+          return (
+            <button
+              disabled={isProcessing}
+              onClick={() => setModalConfig({ type: 'switch_49_to_12', currentPlanName: 'Career Max ($49)', targetPlanName: 'Job Seeker Pro ($12)' })}
+              className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              Cancel $49 to Switch
             </button>
           );
         }
@@ -141,22 +231,35 @@ export const PricingPage: React.FC = () => {
         
         return (
           <button
+            disabled={isProcessing}
             onClick={() => requestPro('Job Seeker Pro')}
             className="w-full py-2.5 bg-[#a84c38] hover:bg-[#8e3f2e] text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
           >
-            Upgrade to Job Seeker Pro ($12/mo)
+            Upgrade to $12
           </button>
         );
       }
 
+      // $49 PLAN CARD (CAREER MAX)
       if (plan.id === 'career-max') {
-        const isCurrentActive = activePlanId === 'career-max' && activeSub && activeSub.status === 'active';
         const isPending = pendingRequest && pendingRequest.requestedPlan === 'career-max' && pendingRequest.status === 'pending';
         
-        if (isCurrentActive) {
+        if (isMaxActive) {
           return (
             <button disabled className="w-full py-2.5 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold text-xs rounded-xl cursor-default">
-              Current Plan (Active)
+              Current Plan
+            </button>
+          );
+        }
+
+        if (isProActive) {
+          return (
+            <button
+              disabled={isProcessing}
+              onClick={() => setModalConfig({ type: 'switch_12_to_49', currentPlanName: 'Job Seeker Pro ($12)', targetPlanName: 'Career Max ($49)' })}
+              className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+            >
+              Cancel $12 to Switch
             </button>
           );
         }
@@ -171,10 +274,11 @@ export const PricingPage: React.FC = () => {
 
         return (
           <button
+            disabled={isProcessing}
             onClick={() => requestPro('Career Max')}
             className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
           >
-            Upgrade to Career Max ($49/mo)
+            Upgrade to $49
           </button>
         );
       }
@@ -336,12 +440,16 @@ export const PricingPage: React.FC = () => {
                   <div className="mt-4 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
                     <div className="flex justify-between items-center font-bold text-white mb-1">
                       <span className="text-slate-400 text-[10px] uppercase tracking-wider">Current Usage</span>
-                      <span className={(user.monthlyUsage || 0) >= 5 ? "text-rose-400 font-extrabold" : "text-emerald-400 font-bold"}>
-                        {user.monthlyUsage || 0} / 5 used
+                      <span className={((user.monthlyUsage || 0) >= 5 && isFreeActive) ? "text-rose-400 font-extrabold" : "text-emerald-400 font-bold"}>
+                        {isFreeActive ? `${user.monthlyUsage || 0} / 5 used` : 'Unlimited'}
                       </span>
                     </div>
                     <div className="text-[10px] text-slate-400">
-                      {(user.monthlyUsage || 0) >= 5 ? "Limit reached for this month" : `${Math.max(0, 5 - (user.monthlyUsage || 0))} reviews remaining`}
+                      {!isFreeActive
+                        ? 'Unlimited access on your active plan'
+                        : (user.monthlyUsage || 0) >= 5
+                        ? 'Limit reached for this month'
+                        : `${Math.max(0, 5 - (user.monthlyUsage || 0))} reviews remaining`}
                     </div>
                   </div>
                 )}
@@ -370,6 +478,91 @@ export const PricingPage: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* SAFE PLAN TRANSITION CONFIRMATION MODAL */}
+      {modalConfig.type && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-5 relative">
+            <div className="flex items-center space-x-3 text-amber-400">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-serif font-bold text-white">
+                  {modalConfig.type.startsWith('switch') ? 'Switch Subscription Plan' : 'Confirm Subscription Cancellation'}
+                </h3>
+                <span className="text-xs text-slate-400 block">Single Active Plan Safeguard</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-850 space-y-2 text-xs">
+              <p className="text-slate-300 font-semibold">
+                You currently have an active <span className="text-amber-300 font-bold">{modalConfig.currentPlanName}</span> subscription.
+              </p>
+              <p className="text-slate-400 leading-relaxed">
+                {modalConfig.type === 'cancel_12' && 'Cancel your $12 subscription before switching to the Free plan.'}
+                {modalConfig.type === 'cancel_49' && 'Cancel your $49 subscription before switching to the Free plan.'}
+                {modalConfig.type === 'switch_12_to_49' && 'Cancel your current $12 subscription before switching to the $49 plan.'}
+                {modalConfig.type === 'switch_49_to_12' && 'Cancel your current $49 subscription before switching to the $12 plan.'}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+              <button
+                disabled={isProcessing}
+                onClick={() => setModalConfig({ type: null, currentPlanName: '' })}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-bold transition-all cursor-pointer"
+              >
+                {modalConfig.type === 'cancel_12' || modalConfig.type === 'switch_12_to_49' ? 'Keep $12 Plan' : 'Keep $49 Plan'}
+              </button>
+
+              {modalConfig.type === 'cancel_12' && (
+                <button
+                  disabled={isProcessing}
+                  onClick={handleConfirmCancellation}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  {isProcessing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Cancel $12 Subscription</span>
+                </button>
+              )}
+
+              {modalConfig.type === 'cancel_49' && (
+                <button
+                  disabled={isProcessing}
+                  onClick={handleConfirmCancellation}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  {isProcessing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Cancel $49 Subscription</span>
+                </button>
+              )}
+
+              {modalConfig.type === 'switch_12_to_49' && (
+                <button
+                  disabled={isProcessing}
+                  onClick={() => handleConfirmSwitch('career-max', 'Career Max ($49)')}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  {isProcessing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Cancel $12 & Switch to $49</span>
+                </button>
+              )}
+
+              {modalConfig.type === 'switch_49_to_12' && (
+                <button
+                  disabled={isProcessing}
+                  onClick={() => handleConfirmSwitch('job_seeker_pro', 'Job Seeker Pro ($12)')}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  {isProcessing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Cancel $49 & Switch to $12</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

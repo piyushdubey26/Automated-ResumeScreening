@@ -200,6 +200,34 @@ export const requestSubscriptionUpgrade = (req: Request, res: Response) => {
     return res.status(404).json({ error: 'User not found' });
   }
 
+  const targetPlanId = (planId === 'job_seeker_pro' || planId === 'pro') ? 'job_seeker_pro' : 'career-max';
+  const requestedPlanName = targetPlanId === 'job_seeker_pro' ? 'Job Seeker Pro' : 'Career Max';
+
+  // Backend active subscription check: prevent multi-paid plan collision
+  const activeSub = getActiveSubscription(authUserId);
+  const currentPlan = user.plan || 'free';
+  const isCurrentlyPaid = (currentPlan === 'job_seeker_pro' || currentPlan === 'pro' || currentPlan === 'career-max') && activeSub && activeSub.status === 'active';
+
+  if (isCurrentlyPaid) {
+    const isSamePlan = currentPlan === targetPlanId || (currentPlan === 'pro' && targetPlanId === 'job_seeker_pro');
+    if (isSamePlan) {
+      return res.status(400).json({
+        success: false,
+        code: 'ALREADY_ON_PLAN',
+        error: `You are already subscribed to the ${requestedPlanName} plan.`,
+        currentPlan
+      });
+    }
+
+    const activePlanName = (currentPlan === 'job_seeker_pro' || currentPlan === 'pro') ? 'Job Seeker Pro ($12)' : 'Career Max ($49)';
+    return res.status(400).json({
+      success: false,
+      code: 'CURRENT_SUBSCRIPTION_ACTIVE',
+      error: `You currently have an active ${activePlanName} subscription. Cancel your existing subscription before switching to the ${requestedPlanName} plan.`,
+      currentPlan
+    });
+  }
+
   // Duplicate Protection: Check if a pending request for this user already exists
   const existingPending = mockDb.subscriptionRequests.find(r => r.userId === authUserId && r.status === 'pending');
   if (existingPending) {
@@ -212,15 +240,12 @@ export const requestSubscriptionUpgrade = (req: Request, res: Response) => {
     });
   }
 
-  const requestedPlanName = (planId === 'job_seeker_pro' || planId === 'pro') ? 'Job Seeker Pro' : 'Career Max';
-  const targetPlanId = (planId === 'job_seeker_pro' || planId === 'pro') ? 'job_seeker_pro' : 'career-max';
-
   const newRequest: any = {
     id: `subreq-${Date.now()}`,
     userId: user.id,
     userName: user.name,
     userEmail: user.email,
-    currentPlan: user.plan || 'free',
+    currentPlan,
     requestedPlan: targetPlanId,
     requestedPlanName,
     status: 'pending',
@@ -233,7 +258,7 @@ export const requestSubscriptionUpgrade = (req: Request, res: Response) => {
 
   return res.status(201).json({
     success: true,
-    message: 'Subscription upgrade request submitted. Waiting for administrator approval.',
+    message: `Subscription upgrade request for ${requestedPlanName} submitted. Waiting for administrator approval.`,
     request: newRequest
   });
 };
@@ -379,17 +404,35 @@ export const cancelSubscription = (req: Request, res: Response) => {
     return res.status(401).json({ error: 'Authentication required' });
   }
 
-  const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
-  if (!sub) {
-    return res.status(404).json({ error: 'No subscription found' });
+  const user = mockDb.users.find(u => u.id === authUserId);
+  if (!user) {
+    return res.status(404).json({ error: 'User account not found' });
   }
 
-  sub.autoRenew = false;
-  sub.updatedAt = new Date().toISOString();
+  const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
+  if (sub) {
+    sub.autoRenew = false;
+    sub.status = 'expired';
+    sub.updatedAt = new Date().toISOString();
+  }
+
+  user.plan = 'free';
+  user.subscriptionStatus = 'free';
+
+  // Remove any pending subscription requests
+  mockDb.subscriptionRequests = mockDb.subscriptionRequests.filter(r => r.userId !== authUserId);
 
   saveDb();
 
-  return res.json({ subscription: sub });
+  const userResponse = { ...user };
+  delete userResponse.password;
+
+  return res.json({
+    success: true,
+    message: 'Subscription cancelled successfully.',
+    subscription: sub || null,
+    user: userResponse
+  });
 };
 
 export const reactivateSubscription = (req: Request, res: Response) => {
