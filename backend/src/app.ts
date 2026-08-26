@@ -55,7 +55,7 @@ app.use(limiter);
 
 // URL Normalization Middleware for Vercel Serverless Functions
 app.use((req, res, next) => {
-  let url = req.url || '/';
+  let url = (req.originalUrl && req.originalUrl !== '/' && !req.originalUrl.startsWith('/api/index')) ? req.originalUrl : (req.url || '/');
 
   // 1. Inspect req.query.path (populated by Vercel rewrite /api/(.*) -> /api/index.ts?path=$1)
   if (req.query && req.query.path) {
