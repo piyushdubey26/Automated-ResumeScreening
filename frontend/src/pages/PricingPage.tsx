@@ -25,16 +25,34 @@ export const PricingPage: React.FC = () => {
   const isSeeker = user?.userType === 'seeker';
   const isRecruiter = user?.userType === 'recruiter';
 
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
+
   const fetchSubscriptionData = async () => {
-    if (user) {
-      try {
-        const subRes = await authApi.getSubscription().catch(() => null);
-        if (subRes && subRes.subscription) {
+    if (!user) {
+      setIsLoadingSubscription(false);
+      return;
+    }
+    try {
+      const subRes = await authApi.getSubscription().catch(() => null);
+      if (subRes) {
+        if (subRes.subscription) {
           setActiveSub(subRes.subscription);
         } else {
           setActiveSub(null);
         }
 
+        if (subRes.pendingRequest !== undefined) {
+          setPendingRequest(subRes.pendingRequest);
+        } else {
+          const reqRes = await authApi.getSubscriptionRequests().catch(() => null);
+          if (reqRes && reqRes.requests) {
+            const pending = reqRes.requests.find((r: any) => r.status === 'pending');
+            setPendingRequest(pending || null);
+          } else {
+            setPendingRequest(null);
+          }
+        }
+      } else {
         const reqRes = await authApi.getSubscriptionRequests().catch(() => null);
         if (reqRes && reqRes.requests) {
           const pending = reqRes.requests.find((r: any) => r.status === 'pending');
@@ -42,14 +60,22 @@ export const PricingPage: React.FC = () => {
         } else {
           setPendingRequest(null);
         }
-      } catch (err) {
-        console.error('Failed to load subscription data:', err);
       }
+    } catch (err) {
+      console.error('Failed to load subscription data:', err);
+    } finally {
+      setIsLoadingSubscription(false);
     }
   };
 
   useEffect(() => {
     fetchSubscriptionData();
+
+    const handleSync = () => fetchSubscriptionData();
+    window.addEventListener('resumeai-subscription-updated', handleSync);
+    return () => {
+      window.removeEventListener('resumeai-subscription-updated', handleSync);
+    };
   }, [user]);
 
   // Current plan helpers
@@ -156,6 +182,15 @@ export const PricingPage: React.FC = () => {
 
     // 3. Candidate (Seeker)
     if (isSeeker) {
+      if (isLoadingSubscription) {
+        return (
+          <button disabled className="w-full py-2.5 bg-slate-900 border border-slate-800 text-slate-500 font-semibold text-xs rounded-xl cursor-wait flex items-center justify-center space-x-1.5">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#a84c38]" />
+            <span>Checking Status...</span>
+          </button>
+        );
+      }
+
       if (plan.targetRole === 'recruiter' || plan.targetRole === 'enterprise') {
         return (
           <span className="block text-center text-xs text-slate-500 py-2 italic">

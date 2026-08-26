@@ -179,8 +179,20 @@ export const getUserSubscription = (req: Request, res: Response) => {
   // Trigger auto expiry check
   getActiveSubscription(authUserId);
 
+  const user = mockDb.users.find(u => u.id === authUserId);
   const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
-  return res.json({ subscription: sub || null });
+  const pendingRequest = mockDb.subscriptionRequests.find(r => r.userId === authUserId && r.status === 'pending') || null;
+
+  return res.json({
+    success: true,
+    plan: user?.plan || 'free',
+    subscriptionStatus: user?.subscriptionStatus || 'free',
+    subscription: sub || null,
+    pendingRequest: pendingRequest,
+    hasPendingAction: !!pendingRequest,
+    pendingPlan: pendingRequest ? pendingRequest.requestedPlan : null,
+    canChooseAnotherPlan: !pendingRequest && (!sub || sub.status !== 'active')
+  });
 };
 
 // User creates a subscription upgrade request (Pending Admin Approval)
