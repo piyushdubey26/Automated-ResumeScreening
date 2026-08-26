@@ -338,6 +338,7 @@ const recruiterCandidates: RecruiterCandidateRecord[] = [
 
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 export const mockDb = {
   users,
@@ -351,8 +352,20 @@ export const mockDb = {
   subscriptionRequests: [] as SubscriptionRequest[]
 };
 
-// Simple local JSON database path
-const DB_FILE = path.join(__dirname, '../../data/db.json');
+// Safe database path resolution for both Local Dev and Vercel Serverless Function environment
+const getDbFilePath = () => {
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    return path.join(os.tmpdir(), 'resumeai_db.json');
+  }
+  const rootDir = process.cwd();
+  const primaryPath = path.join(rootDir, 'backend/data/db.json');
+  if (fs.existsSync(primaryPath)) {
+    return primaryPath;
+  }
+  return path.join(__dirname, '../../data/db.json');
+};
+
+const DB_FILE = getDbFilePath();
 
 // Helper to save current database to file
 export const saveDb = () => {

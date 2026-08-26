@@ -31,7 +31,8 @@
       "points": 500,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
       "createdAt": "2026-08-25T13:31:04.615Z",
-      "monthlyUsage": 6
+      "monthlyUsage": 0,
+      "usageMonth": "2026-08"
     },
     {
       "id": "user-seeker-1",
