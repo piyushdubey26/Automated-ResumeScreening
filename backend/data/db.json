@@ -163,6 +163,31 @@
       "monthlyUsage": 0,
       "plan": "free",
       "subscriptionStatus": "free"
+    },
+    {
+      "id": "user-1787750361900",
+      "name": "Final Verification",
+      "email": "auth_final_1787750361897@example.com",
+      "password": "Password123!",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Final%20Verification",
+      "createdAt": "2026-08-26T13:19:21.900Z",
+      "profileLinks": {
+        "github": "",
+        "linkedin": "",
+        "project": "",
+        "coding": ""
+      },
+      "interviewScore": null,
+      "monthlyUsage": 0,
+      "plan": "free",
+      "subscriptionStatus": "free"
     }
   ],
   "resumes": [

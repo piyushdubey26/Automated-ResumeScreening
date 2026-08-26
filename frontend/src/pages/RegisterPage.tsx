@@ -75,9 +75,12 @@ export const RegisterPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+            <label htmlFor="reg-name" className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
             <input
+              id="reg-name"
+              name="name"
               type="text"
+              autoComplete="name"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -87,9 +90,12 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label htmlFor="reg-email" className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
             <input
+              id="reg-email"
+              name="email"
               type="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -99,9 +105,12 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Create Password</label>
+            <label htmlFor="reg-password" className="block text-xs font-semibold text-slate-300 mb-1">Create Password</label>
             <input
+              id="reg-password"
+              name="password"
               type="password"
+              autoComplete="new-password"
               required
               minLength={6}
               value={password}
@@ -113,8 +122,10 @@ export const RegisterPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Account Type</label>
+              <label htmlFor="reg-usertype" className="block text-xs font-semibold text-slate-300 mb-1">Account Type</label>
               <select
+                id="reg-usertype"
+                name="userType"
                 value={userType}
                 onChange={(e) => setUserType(e.target.value as any)}
                 className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
@@ -125,8 +136,10 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Target Role</label>
+              <label htmlFor="reg-targetrole" className="block text-xs font-semibold text-slate-300 mb-1">Target Role</label>
               <select
+                id="reg-targetrole"
+                name="rolePreference"
                 value={rolePreference}
                 onChange={(e) => setRolePreference(e.target.value)}
                 className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"

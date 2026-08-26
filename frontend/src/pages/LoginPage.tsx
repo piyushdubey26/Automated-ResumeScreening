@@ -86,9 +86,12 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label htmlFor="login-email" className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
             <input
+              id="login-email"
+              name="email"
               type="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -99,7 +102,7 @@ export const LoginPage: React.FC = () => {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-slate-300">Password</label>
+              <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300">Password</label>
               <button
                 type="button"
                 onClick={() => { setResetEmail(email); setForgotOpen(true); }}
@@ -109,7 +112,10 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
             <input
+              id="login-password"
+              name="password"
               type="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -170,9 +176,12 @@ export const LoginPage: React.FC = () => {
             ) : (
               <form onSubmit={handleSendReset} className="space-y-3 text-left">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Account Email</label>
+                  <label htmlFor="reset-email" className="block text-[11px] font-semibold text-slate-400 mb-1">Account Email</label>
                   <input
+                    id="reset-email"
+                    name="resetEmail"
                     type="email"
+                    autoComplete="email"
                     required
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
