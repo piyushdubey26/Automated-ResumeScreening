@@ -36,6 +36,20 @@ interface AdminUserRecord {
   subscriptionRequestedAt?: string;
   joinedDate: string;
   lastActive: string;
+  monthlyUsage?: number;
+  monthlyLimit?: number | null;
+  remainingScans?: number | null;
+  isUnlimited?: boolean;
+  totalScans?: number;
+  latestScanDate?: string | null;
+  scanHistory?: Array<{
+    id: string;
+    filename: string;
+    score: number;
+    targetRole?: string;
+    createdAt: string;
+    status: string;
+  }>;
 }
 
 export const AdminDashboardPage: React.FC = () => {
@@ -93,7 +107,14 @@ export const AdminDashboardPage: React.FC = () => {
     subscriptionStatus: u.subscriptionStatus || 'free',
     subscriptionRequestedAt: u.subscriptionRequestedAt || u.createdAt,
     joinedDate: u.createdAt || new Date().toISOString(),
-    lastActive: u.lastActive || 'Just now'
+    lastActive: u.lastActive || 'Just now',
+    monthlyUsage: u.monthlyUsage || 0,
+    monthlyLimit: u.monthlyLimit,
+    remainingScans: u.remainingScans,
+    isUnlimited: u.isUnlimited,
+    totalScans: u.totalScans || 0,
+    latestScanDate: u.latestScanDate || null,
+    scanHistory: u.scanHistory || []
   });
 
   const fetchSubscriptionRequests = async () => {
@@ -660,10 +681,10 @@ export const AdminDashboardPage: React.FC = () => {
                       <th className="px-5 py-4">Role</th>
                       <th className="px-5 py-4">Plan</th>
                       <th className="px-5 py-4">Status</th>
-                      <th className="px-5 py-4">Joined Date</th>
-                      <th className="px-5 py-4">Last Active</th>
-                      <th className="px-5 py-4">Resume</th>
-                      <th className="px-5 py-4">Applications</th>
+                      <th className="px-5 py-4">Monthly Scans</th>
+                      <th className="px-5 py-4">Remaining</th>
+                      <th className="px-5 py-4">Lifetime Total</th>
+                      <th className="px-5 py-4">Latest Scan</th>
                       <th className="px-5 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -678,26 +699,6 @@ export const AdminDashboardPage: React.FC = () => {
                         : user.plan === 'pro' 
                         ? 'Job Seeker Pro' 
                         : 'Free Seeker';
-
-                      const resumeKey = `resumeai_user_resume_${user.id}`;
-                      const savedResume = localStorage.getItem(resumeKey);
-                      let resumeStatus = 'Not uploaded';
-                      if (savedResume) {
-                        try {
-                          const parsed = JSON.parse(savedResume);
-                          if (parsed) resumeStatus = 'Uploaded';
-                        } catch {}
-                      }
-
-                      const appsKey = `resumeai_user_apps_${user.id}`;
-                      const savedApps = localStorage.getItem(appsKey);
-                      let appsCount = 0;
-                      if (savedApps) {
-                        try {
-                          const parsed = JSON.parse(savedApps);
-                          if (Array.isArray(parsed)) appsCount = parsed.length;
-                        } catch {}
-                      }
 
                       return (
                         <tr key={user.id} className="hover:bg-slate-900/20 transition-colors">
@@ -740,21 +741,25 @@ export const AdminDashboardPage: React.FC = () => {
                               {user.status}
                             </span>
                           </td>
-                          <td className="px-5 py-3.5 text-slate-400">
-                            {new Date(user.joinedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                          <td className="px-5 py-3.5 font-bold text-white">
+                            {user.monthlyUsage || 0} / {user.isUnlimited ? '∞' : (user.monthlyLimit || 5)}
                           </td>
-                          <td className="px-5 py-3.5 text-slate-400">{user.lastActive}</td>
                           <td className="px-5 py-3.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              resumeStatus === 'Uploaded' 
-                                ? 'bg-emerald-500/10 text-emerald-400' 
-                                : 'bg-slate-800 text-slate-500'
+                              user.isUnlimited
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : (user.remainingScans || 0) === 0
+                                ? "bg-rose-500/10 text-rose-400 font-extrabold"
+                                : "bg-amber-500/10 text-amber-400"
                             }`}>
-                              {resumeStatus}
+                              {user.isUnlimited ? 'Unlimited' : `${user.remainingScans || 0} left`}
                             </span>
                           </td>
-                          <td className="px-5 py-3.5 text-slate-350 font-bold">
-                            {appsCount}
+                          <td className="px-5 py-3.5 text-indigo-400 font-extrabold text-xs">
+                            {user.totalScans || 0} scans
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-400 text-[11px]">
+                            {user.latestScanDate ? new Date(user.latestScanDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'None'}
                           </td>
                           <td className="px-5 py-3.5 text-right">
                             <div className="flex items-center justify-end gap-1.5">
@@ -1529,6 +1534,22 @@ export const AdminDashboardPage: React.FC = () => {
                 </span>
               </div>
               <div className="flex justify-between">
+                <span className="text-slate-500">Monthly Usage</span>
+                <span className="font-bold text-white">
+                  {selectedUser.monthlyUsage || 0} / {selectedUser.isUnlimited ? '∞ (Unlimited)' : (selectedUser.monthlyLimit || 5)} scans
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Remaining Scans</span>
+                <span className={selectedUser.isUnlimited ? "font-bold text-emerald-400" : (selectedUser.remainingScans || 0) === 0 ? "font-extrabold text-rose-400" : "font-bold text-amber-400"}>
+                  {selectedUser.isUnlimited ? 'Unlimited' : `${selectedUser.remainingScans || 0} left`}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Lifetime Total Scans</span>
+                <span className="font-extrabold text-indigo-400">{selectedUser.totalScans || 0}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-slate-500">Joined Date</span>
                 <span className="font-semibold text-slate-200">
                   {new Date(selectedUser.joinedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -1537,6 +1558,29 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-slate-500">Last Session</span>
                 <span className="font-semibold text-slate-200">{selectedUser.lastActive}</span>
+              </div>
+            </div>
+
+            {/* Scan History Table */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Scan History ({selectedUser.scanHistory?.length || 0})</span>
+              <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
+                {selectedUser.scanHistory && selectedUser.scanHistory.length > 0 ? (
+                  selectedUser.scanHistory.map(scan => (
+                    <div key={scan.id} className="p-2 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-[11px]">
+                      <div>
+                        <p className="font-bold text-slate-200 truncate max-w-[180px]">{scan.filename}</p>
+                        <p className="text-[9px] text-slate-500">{new Date(scan.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} · Role: {scan.targetRole?.toUpperCase() || 'SDE'}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-extrabold text-emerald-400 block">{scan.score}/100</span>
+                        <span className="text-[9px] text-slate-500">{scan.status}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-[11px] text-slate-500 italic py-2 text-center">No scan history recorded for this user.</p>
+                )}
               </div>
             </div>
 

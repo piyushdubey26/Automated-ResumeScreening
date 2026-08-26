@@ -117,9 +117,19 @@ export const getAllUsers = (req: Request, res: Response) => {
   }
 
   const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
   const usersResponse = mockDb.users.map(u => {
     const userCopy = { ...u };
     delete userCopy.password;
+
+    // Check monthly period reset
+    if (u.usageMonth !== currentMonthStr) {
+      u.usageMonth = currentMonthStr;
+      u.monthlyUsage = 0;
+      userCopy.usageMonth = currentMonthStr;
+      userCopy.monthlyUsage = 0;
+    }
 
     // Attach latest subscription info
     const sub = mockDb.subscriptions.find(s => s.userId === u.id);
@@ -131,16 +141,33 @@ export const getAllUsers = (req: Request, res: Response) => {
       }
     }
 
-    // Attach latest resume info
-    const userResumes = mockDb.resumes.filter(r => r.userId === u.id);
-    if (userResumes.length > 0) {
-      const latestResume = userResumes[userResumes.length - 1];
-      (userCopy as any).hasResume = true;
-      (userCopy as any).latestResumeScore = latestResume.score;
-    } else {
-      (userCopy as any).hasResume = false;
-      (userCopy as any).latestResumeScore = null;
-    }
+    // Attach complete scan history and usage analytics
+    const userResumes = mockDb.resumes
+      .filter(r => r.userId === u.id)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const activeSub = getActiveSubscription(u.id);
+    const isPaid = u.plan === 'job_seeker_pro' || u.plan === 'pro' || u.plan === 'career-max' || u.userType === 'recruiter' || u.userType === 'admin' || (activeSub && activeSub.status === 'active');
+    const monthlyLimit = isPaid ? null : 5;
+    const monthlyUsed = u.monthlyUsage || 0;
+    const remainingScans = isPaid ? null : Math.max(0, 5 - monthlyUsed);
+
+    (userCopy as any).monthlyUsage = monthlyUsed;
+    (userCopy as any).monthlyLimit = monthlyLimit;
+    (userCopy as any).remainingScans = remainingScans;
+    (userCopy as any).isUnlimited = isPaid;
+    (userCopy as any).totalScans = userResumes.length;
+    (userCopy as any).latestScanDate = userResumes.length > 0 ? userResumes[0].createdAt : null;
+    (userCopy as any).latestResumeScore = userResumes.length > 0 ? userResumes[0].score : null;
+    (userCopy as any).hasResume = userResumes.length > 0;
+    (userCopy as any).scanHistory = userResumes.map(r => ({
+      id: r.id,
+      filename: r.filename,
+      score: r.score,
+      targetRole: r.targetRole,
+      createdAt: r.createdAt,
+      status: 'Completed'
+    }));
 
     return userCopy;
   });
