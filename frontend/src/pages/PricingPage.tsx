@@ -94,7 +94,7 @@ export const PricingPage: React.FC = () => {
       await refreshUser();
       await fetchSubscriptionData();
       window.dispatchEvent(new Event('resumeai-subscription-updated'));
-      setNotice('Subscription cancelled successfully. Your plan is now Free.');
+      setNotice('Subscription / pending request cancelled successfully. Your plan is unlocked.');
       setModalConfig({ type: null, currentPlanName: '' });
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || err.message || 'Failed to cancel subscription.';
@@ -164,6 +164,22 @@ export const PricingPage: React.FC = () => {
         );
       }
 
+      // Check if there is an active pending subscription action
+      const hasPendingAction = !!pendingRequest && pendingRequest.status === 'pending';
+      const pendingPlanId = pendingRequest ? (pendingRequest.requestedPlan === 'job_seeker_pro' || pendingRequest.requestedPlan === 'pro' ? 'pro' : 'career-max') : null;
+
+      // STRICT ACTION LOCK: If another plan action is pending, block all non-pending plan buttons!
+      if (hasPendingAction && plan.id !== pendingPlanId) {
+        return (
+          <button
+            disabled
+            className="w-full py-2.5 bg-slate-900/90 border border-slate-800/80 text-slate-500 font-semibold text-[11px] rounded-xl cursor-not-allowed opacity-60 text-center"
+          >
+            Unavailable while another subscription is pending
+          </button>
+        );
+      }
+
       // FREE PLAN CARD
       if (plan.id === 'free') {
         if (isFreeActive) {
@@ -199,7 +215,25 @@ export const PricingPage: React.FC = () => {
 
       // $12 PLAN CARD (JOB SEEKER PRO)
       if (plan.id === 'pro') {
-        const isPending = pendingRequest && (pendingRequest.requestedPlan === 'job_seeker_pro' || pendingRequest.requestedPlan === 'pro') && pendingRequest.status === 'pending';
+        const isPending = hasPendingAction && pendingPlanId === 'pro';
+
+        if (isPending) {
+          return (
+            <div className="space-y-2">
+              <span className="block text-center text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-1.5 rounded-xl animate-pulse">
+                Waiting for Confirmation
+              </span>
+              <button
+                disabled={isProcessing}
+                onClick={handleConfirmCancellation}
+                className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+              >
+                {isProcessing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
+                <span>{isProcessing ? 'Cancelling...' : 'Cancel Subscription'}</span>
+              </button>
+            </div>
+          );
+        }
 
         if (isProActive) {
           return (
@@ -221,14 +255,6 @@ export const PricingPage: React.FC = () => {
           );
         }
 
-        if (isPending) {
-          return (
-            <button disabled className="w-full py-2.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl cursor-default animate-pulse">
-              Approval Pending
-            </button>
-          );
-        }
-        
         return (
           <button
             disabled={isProcessing}
@@ -242,7 +268,25 @@ export const PricingPage: React.FC = () => {
 
       // $49 PLAN CARD (CAREER MAX)
       if (plan.id === 'career-max') {
-        const isPending = pendingRequest && pendingRequest.requestedPlan === 'career-max' && pendingRequest.status === 'pending';
+        const isPending = hasPendingAction && pendingPlanId === 'career-max';
+
+        if (isPending) {
+          return (
+            <div className="space-y-2">
+              <span className="block text-center text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-1.5 rounded-xl animate-pulse">
+                Waiting for Confirmation
+              </span>
+              <button
+                disabled={isProcessing}
+                onClick={handleConfirmCancellation}
+                className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+              >
+                {isProcessing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
+                <span>{isProcessing ? 'Cancelling...' : 'Cancel Subscription'}</span>
+              </button>
+            </div>
+          );
+        }
         
         if (isMaxActive) {
           return (
@@ -260,14 +304,6 @@ export const PricingPage: React.FC = () => {
               className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               Cancel $12 to Switch
-            </button>
-          );
-        }
-
-        if (isPending) {
-          return (
-            <button disabled className="w-full py-2.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl cursor-default animate-pulse">
-              Approval Pending
             </button>
           );
         }

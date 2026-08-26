@@ -234,8 +234,8 @@ export const requestSubscriptionUpgrade = (req: Request, res: Response) => {
     const planLabel = existingPending.requestedPlanName || 'subscription upgrade';
     return res.status(400).json({
       success: false,
-      code: 'DUPLICATE_PENDING',
-      error: `Your ${planLabel} upgrade request is already pending approval.`,
+      code: 'SUBSCRIPTION_ACTION_PENDING',
+      error: `Your ${planLabel} upgrade request is already pending. Cancel the existing request before choosing another plan.`,
       request: existingPending
     });
   }
