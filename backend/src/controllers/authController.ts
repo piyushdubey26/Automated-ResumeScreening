@@ -374,7 +374,11 @@ export const approveSubscriptionRequest = (req: Request, res: Response) => {
     return res.status(400).json({ error: `Request has already been ${reqItem.status}` });
   }
 
-  const targetUser = mockDb.users.find(u => u.id === reqItem.userId);
+  let targetUser = mockDb.users.find(u => u.id === reqItem.userId);
+  if (!targetUser && reqItem.userEmail) {
+    targetUser = mockDb.users.find(u => u.email.toLowerCase() === reqItem.userEmail.toLowerCase());
+  }
+
   if (!targetUser) {
     return res.status(404).json({ error: 'Target user account not found' });
   }
@@ -387,8 +391,9 @@ export const approveSubscriptionRequest = (req: Request, res: Response) => {
   reqItem.approvedAt = now.toISOString();
   reqItem.approvedBy = adminUser.id;
   reqItem.approvedByName = adminUser.name;
+  reqItem.currentPlan = reqItem.requestedPlan;
 
-  // Activate user plan
+  // Activate user plan atomically
   targetUser.plan = reqItem.requestedPlan;
   targetUser.subscriptionStatus = 'approved';
 
