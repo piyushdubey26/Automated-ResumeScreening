@@ -32,6 +32,10 @@ export const LandingPage: React.FC = () => {
 
       // 2. Fetch latest from API
       const syncResume = () => {
+        if (!localStorage.getItem('resumeai_token')) {
+          setUserResumeRecord(null);
+          return;
+        }
         resumeApi.getLatest()
           .then(res => {
             if (active && res && res.resume) {

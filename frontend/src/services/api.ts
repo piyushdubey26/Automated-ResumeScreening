@@ -527,18 +527,21 @@ export const resumeApi = {
     return res.data;
   },
   getLatest: async (): Promise<{ resume: ResumeRecord | null }> => {
+    if (!localStorage.getItem('resumeai_token')) {
+      return { resume: null };
+    }
     try {
       const res = await api.get('/resumes/latest');
       return res.data;
     } catch (err: any) {
-      if (err.response?.status === 404) {
+      if (err.response?.status === 404 || err.response?.status === 401) {
         return { resume: null };
       }
       throw err;
     }
   },
   rewriteBullet: async (bulletText: string, focusMode: string, targetRole: string): Promise<RewriteResult> => {
-    const res = await api.post('/resumes/rewrite', { bulletText, focusMode, targetRole });
+    const res = await api.post('/resumes/rewrite-bullet', { bulletText, focusMode, targetRole });
     return res.data;
   },
   generateMockInterview: async (targetRole: string, resumeText?: string, jdText?: string): Promise<{ questions: InterviewQuestion[] }> => {
@@ -565,11 +568,14 @@ export const jobApi = {
     return res.data;
   },
   getLatestMatch: async (): Promise<JDMatchResult | null> => {
+    if (!localStorage.getItem('resumeai_token')) {
+      return null;
+    }
     try {
       const res = await api.get('/jobs/latest-match');
       return res.data;
     } catch (err: any) {
-      if (err.response?.status === 404) {
+      if (err.response?.status === 404 || err.response?.status === 401) {
         return null;
       }
       throw err;
