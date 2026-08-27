@@ -236,9 +236,29 @@ export const getUserSubscription = (req: Request, res: Response) => {
   // Trigger auto expiry check
   getActiveSubscription(authUserId);
 
-  const user = mockDb.users.find(u => u.id === authUserId);
-  const sub = mockDb.subscriptions.find(s => s.userId === authUserId);
-  const pendingRequest = mockDb.subscriptionRequests.find(r => r.userId === authUserId && r.status === 'pending') || null;
+  const user = findUserByIdOrEmail(authUserId, (req.user as any)?.email);
+  let sub = mockDb.subscriptions.find(s => s.userId === user?.id || s.userId === authUserId);
+
+  if (!sub && user && user.plan && user.plan !== 'free') {
+    const now = new Date();
+    sub = {
+      id: `sub-${user.id}`,
+      userId: user.id,
+      planId: user.plan,
+      planName: user.plan === 'career-max' ? 'Career Max' : 'Job Seeker Pro',
+      status: 'active',
+      billingInterval: 'monthly',
+      startedAt: user.createdAt || now.toISOString(),
+      expiresAt: addOneMonth(now).toISOString(),
+      autoRenew: true,
+      createdAt: user.createdAt || now.toISOString(),
+      updatedAt: now.toISOString()
+    };
+    mockDb.subscriptions.push(sub);
+    saveDb().catch(() => {});
+  }
+
+  const pendingRequest = mockDb.subscriptionRequests.find(r => (r.userId === user?.id || r.userId === authUserId) && r.status === 'pending') || null;
 
   return res.json({
     success: true,

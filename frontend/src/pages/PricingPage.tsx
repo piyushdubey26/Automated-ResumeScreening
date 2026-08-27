@@ -78,10 +78,10 @@ export const PricingPage: React.FC = () => {
     };
   }, [user]);
 
-  // Current plan helpers
-  const activePlanId = user?.plan || 'free';
-  const isProActive = (activePlanId === 'job_seeker_pro' || activePlanId === 'pro') && activeSub && activeSub.status === 'active';
-  const isMaxActive = activePlanId === 'career-max' && activeSub && activeSub.status === 'active';
+  // Current plan helpers - Authoritative resolution from user profile and active subscription
+  const activePlanId = (user?.plan || activeSub?.planId || 'free').toLowerCase();
+  const isProActive = activePlanId === 'job_seeker_pro' || activePlanId === 'pro';
+  const isMaxActive = activePlanId === 'career-max' || activePlanId === 'career_max';
   const isFreeActive = !isProActive && !isMaxActive;
 
   const requestPro = async (tier = 'Job Seeker Pro') => {
