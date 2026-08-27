@@ -395,6 +395,7 @@ export const syncFromCloud = async (): Promise<void> => {
       const json: any = await res.json();
       const parsed = json?.data;
       if (parsed && typeof parsed === 'object') {
+        // 1. Merge users (seeds + cloud + memory)
         if (parsed.users && Array.isArray(parsed.users)) {
           const userMap = new Map<string, User>();
           users.forEach(u => userMap.set(u.email.toLowerCase(), { ...u }));
@@ -402,16 +403,57 @@ export const syncFromCloud = async (): Promise<void> => {
             const existing = userMap.get(u.email.toLowerCase()) || {};
             userMap.set(u.email.toLowerCase(), { ...existing, ...u });
           });
+          mockDb.users.forEach((u: any) => {
+            const existing = userMap.get(u.email.toLowerCase()) || {};
+            userMap.set(u.email.toLowerCase(), { ...existing, ...u });
+          });
           mockDb.users = Array.from(userMap.values());
         }
-        if (parsed.resumes && Array.isArray(parsed.resumes)) mockDb.resumes = parsed.resumes;
-        if (parsed.jobDescriptions && Array.isArray(parsed.jobDescriptions)) mockDb.jobDescriptions = parsed.jobDescriptions;
-        if (parsed.recruiterCandidates && Array.isArray(parsed.recruiterCandidates)) mockDb.recruiterCandidates = parsed.recruiterCandidates;
-        if (parsed.applications && Array.isArray(parsed.applications)) mockDb.applications = parsed.applications;
-        if (parsed.jdMatches && Array.isArray(parsed.jdMatches)) mockDb.jdMatches = parsed.jdMatches;
-        if (parsed.activities && Array.isArray(parsed.activities)) mockDb.activities = parsed.activities;
-        if (parsed.subscriptions && Array.isArray(parsed.subscriptions)) mockDb.subscriptions = parsed.subscriptions;
-        if (parsed.subscriptionRequests && Array.isArray(parsed.subscriptionRequests)) mockDb.subscriptionRequests = parsed.subscriptionRequests;
+
+        // 2. Merge resumes (seeds + cloud + memory)
+        if (parsed.resumes && Array.isArray(parsed.resumes)) {
+          const resumeMap = new Map<string, ResumeRecord>();
+          resumes.forEach(r => resumeMap.set(r.id, r));
+          parsed.resumes.forEach((r: any) => resumeMap.set(r.id, r));
+          mockDb.resumes.forEach(r => resumeMap.set(r.id, r));
+          mockDb.resumes = Array.from(resumeMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+
+        // 3. Merge subscription requests (cloud + memory)
+        if (parsed.subscriptionRequests && Array.isArray(parsed.subscriptionRequests)) {
+          const reqMap = new Map<string, SubscriptionRequest>();
+          parsed.subscriptionRequests.forEach((r: any) => reqMap.set(r.id, r));
+          mockDb.subscriptionRequests.forEach(r => reqMap.set(r.id, r));
+          mockDb.subscriptionRequests = Array.from(reqMap.values()).sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+        }
+
+        // 4. Merge subscriptions (cloud + memory)
+        if (parsed.subscriptions && Array.isArray(parsed.subscriptions)) {
+          const subMap = new Map<string, Subscription>();
+          parsed.subscriptions.forEach((s: any) => subMap.set(s.id || s.userId, s));
+          mockDb.subscriptions.forEach(s => subMap.set(s.id || s.userId, s));
+          mockDb.subscriptions = Array.from(subMap.values());
+        }
+
+        // 5. Merge applications, jdMatches, recruiterCandidates
+        if (parsed.applications && Array.isArray(parsed.applications)) {
+          const appMap = new Map<string, any>();
+          parsed.applications.forEach((a: any) => appMap.set(a.id, a));
+          mockDb.applications.forEach(a => appMap.set(a.id, a));
+          mockDb.applications = Array.from(appMap.values());
+        }
+        if (parsed.jdMatches && Array.isArray(parsed.jdMatches)) {
+          const matchMap = new Map<string, any>();
+          parsed.jdMatches.forEach((m: any) => matchMap.set(m.id, m));
+          mockDb.jdMatches.forEach(m => matchMap.set(m.id, m));
+          mockDb.jdMatches = Array.from(matchMap.values());
+        }
+        if (parsed.recruiterCandidates && Array.isArray(parsed.recruiterCandidates)) {
+          const candMap = new Map<string, any>();
+          parsed.recruiterCandidates.forEach((c: any) => candMap.set(c.id, c));
+          mockDb.recruiterCandidates.forEach(c => candMap.set(c.id, c));
+          mockDb.recruiterCandidates = Array.from(candMap.values());
+        }
 
         lastSyncTimestamp = Date.now();
         try {
