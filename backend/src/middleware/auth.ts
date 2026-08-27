@@ -65,9 +65,9 @@ export const requirePlan = (requiredPlan: 'pro' | 'career-max') => {
       return;
     }
 
-    const { mockDb } = require('../utils/mockDb');
+    const { findUserByIdOrEmail } = require('../utils/mockDb');
 
-    const user = mockDb.users.find((u: any) => u.id === req.user?.userId);
+    const user = findUserByIdOrEmail(req.user?.userId, (req.user as any)?.email);
     if (!user) {
       res.status(404).json({ error: 'User account not found' });
       return;
