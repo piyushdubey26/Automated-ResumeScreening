@@ -485,7 +485,7 @@ export const ensureDbLoaded = async (): Promise<void> => {
 };
 
 // Helper to save current database to file
-export const saveDb = () => {
+export const saveDb = async (): Promise<void> => {
   try {
     const dir = path.dirname(DB_FILE);
     if (!fs.existsSync(dir)) {
@@ -495,8 +495,11 @@ export const saveDb = () => {
   } catch (e) {
     console.error('Error writing to local JSON database:', e);
   }
-  // Async push to persistent cloud database
-  syncToCloud().catch(() => {});
+  try {
+    await syncToCloud();
+  } catch (e) {
+    console.error('Cloud DB push error:', e);
+  }
 };
 
 // Load database from file on start

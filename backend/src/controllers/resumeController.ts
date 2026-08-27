@@ -117,7 +117,7 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
     };
 
     mockDb.resumes = [newResume, ...mockDb.resumes.filter(r => r.id !== newResume.id)];
-    saveDb();
+    await saveDb();
 
     const finalUsage = userRecord.monthlyUsage || 0;
 

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { mockDb, User, saveDb } from '../utils/mockDb';
 import { generateAccessToken, addOneMonth, getActiveSubscription } from '../utils/auth';
 
-export const signup = (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response) => {
   const { name, email, password, rolePreference, userType } = req.body;
   if (!email || !name || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
@@ -32,7 +32,7 @@ export const signup = (req: Request, res: Response) => {
   };
 
   mockDb.users.push(newUser);
-  saveDb();
+  await saveDb();
 
   const token = generateAccessToken({ userId: newUser.id, role: newUser.userType, email: newUser.email });
   res.cookie('access_token', token, {
@@ -353,7 +353,7 @@ export const getSubscriptionRequests = (req: Request, res: Response) => {
   return res.json({ requests: userRequests });
 };
 
-export const approveSubscriptionRequest = (req: Request, res: Response) => {
+export const approveSubscriptionRequest = async (req: Request, res: Response) => {
   const authUserId = req.user?.userId;
   if (!authUserId) {
     return res.status(401).json({ error: 'Authentication required' });
@@ -423,7 +423,7 @@ export const approveSubscriptionRequest = (req: Request, res: Response) => {
     mockDb.subscriptions.push(sub);
   }
 
-  saveDb();
+  await saveDb();
 
   return res.json({
     success: true,
