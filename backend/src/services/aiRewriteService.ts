@@ -17,56 +17,54 @@ export class AIRewriteService {
     if (!text) {
       return {
         originalBullet: '',
-        improvedBullet: 'Architected high-throughput microservices using Node.js & Redis, reducing latency by 45%.',
-        explanation: 'Default high-impact bullet point provided.',
-        strengthScore: 92
+        improvedBullet: 'Architected microservices and REST APIs to handle high-throughput requests.',
+        explanation: 'Default action-oriented bullet point provided.',
+        strengthScore: 88
       };
     }
 
     let improved = text;
-    let explanation = '';
+    let explanation = 'Enhanced phrasing with strong action verbs and crisp ATS structure.';
 
-    // Remove weak prefixes like "Responsible for", "Worked on", "Helped with"
+    // 1. Remove passive prefixes ("responsible for", "worked on", "helped with")
     improved = improved.replace(/^(was responsible for|responsible for|worked on|helped with|assisted in|involved in)\s*/i, '');
 
-    // Ensure initial verb is capitalized action verb
-    const firstWord = improved.split(' ')[0] || '';
-    const weakVerbs = ['developed', 'built', 'created', 'made', 'did', 'handled', 'used'];
-    if (weakVerbs.includes(firstWord.toLowerCase())) {
-      if (req.targetRole === 'sde' || !req.targetRole) {
-        improved = improved.replace(new RegExp(`^${firstWord}`, 'i'), 'Architected and engineered');
-      } else if (req.targetRole === 'data-science') {
-        improved = improved.replace(new RegExp(`^${firstWord}`, 'i'), 'Modeled and deployed');
-      } else if (req.targetRole === 'marketing') {
-        improved = improved.replace(new RegExp(`^${firstWord}`, 'i'), 'Spearheaded and scaled');
-      } else {
-        improved = improved.replace(new RegExp(`^${firstWord}`, 'i'), 'Orchestrated and launched');
-      }
+    // 2. Ensure starting with a strong action verb without inventing fake facts
+    const firstWord = (improved.split(/\s+/)[0] || '').toLowerCase();
+    const weakVerbs: Record<string, string> = {
+      'developed': 'Engineered',
+      'built': 'Architected',
+      'created': 'Designed',
+      'made': 'Formulated',
+      'did': 'Executed',
+      'handled': 'Managed',
+      'used': 'Leveraged',
+      'helped': 'Spearheaded'
+    };
+
+    if (weakVerbs[firstWord]) {
+      const strongVerb = weakVerbs[firstWord];
+      improved = strongVerb + improved.slice(firstWord.length);
+      explanation = `Replaced weak verb "${firstWord}" with strong action verb "${strongVerb}".`;
+    } else if (!/^[A-Z][a-z]*(ed|ed\b)/.test(improved)) {
+      improved = improved.charAt(0).toUpperCase() + improved.slice(1);
     }
 
-    // Apply Focus Mode Logic
-    if (req.focusMode === 'quantify') {
-      if (!/\d+/.test(improved)) {
-        improved += ', resulting in a 35% efficiency boost and 99.9% system uptime.';
-        explanation = 'Added quantifiable outcome metrics (35% efficiency boost, 99.9% uptime).';
-      } else {
-        explanation = 'Enhanced numeric precision and metric phrasing.';
-      }
-    } else if (req.focusMode === 'action') {
-      improved = 'Spearheaded end-to-end execution of ' + improved.charAt(0).toLowerCase() + improved.slice(1);
-      explanation = 'Transformed sentence starter into proactive leadership action verb.';
-    } else if (req.focusMode === 'concise') {
+    // 3. Apply Focus Mode without inventing metrics or technology claims
+    if (req.focusMode === 'concise') {
       improved = improved.replace(/\b(in order to|due to the fact that|as well as|along with)\b/gi, 'to');
-      explanation = 'Removed filler phrases for crisp ATS readability.';
-    } else {
-      // Role aligned
-      if (req.targetRole === 'sde' && !/typescript|docker|aws|api|redis/i.test(improved)) {
-        improved += ' utilizing TypeScript, Docker, and REST APIs on AWS.';
+      explanation = 'Streamlined phrasing and removed filler text for ATS readability.';
+    } else if (req.focusMode === 'action') {
+      explanation = 'Re-phrased to emphasize proactive technical ownership.';
+    } else if (req.focusMode === 'quantify') {
+      if (!/\d+/.test(improved)) {
+        explanation = 'Action phrasing improved. Note: Add exact factual metric numbers from your project if available.';
+      } else {
+        explanation = 'Highlighted and structured existing numerical outcomes.';
       }
-      explanation = 'Infused industry-standard role keywords.';
     }
 
-    // Ensure ending period
+    // Ensure ending punctuation
     if (!improved.endsWith('.')) {
       improved += '.';
     }
@@ -75,7 +73,7 @@ export class AIRewriteService {
       originalBullet: req.bulletText,
       improvedBullet: improved,
       explanation,
-      strengthScore: 94
+      strengthScore: 92
     };
   }
 }
