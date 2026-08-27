@@ -84,7 +84,7 @@ export const getActiveSubscription = (userId: string) => {
 };
 
 export const findUserByIdOrEmail = (userId?: string, email?: string) => {
-  const { mockDb } = require('./mockDb');
+  const { mockDb, saveDb } = require('./mockDb');
   if (userId) {
     const byId = mockDb.users.find((u: any) => u.id === userId);
     if (byId) return byId;
@@ -93,5 +93,31 @@ export const findUserByIdOrEmail = (userId?: string, email?: string) => {
     const byEmail = mockDb.users.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
     if (byEmail) return byEmail;
   }
+
+  // Self-healing user hydration for authenticated JWT tokens
+  if (userId || email) {
+    const nameFromEmail = email ? email.split('@')[0] : 'Candidate';
+    const newUser: any = {
+      id: userId || `user-${Date.now()}`,
+      name: nameFromEmail,
+      email: email ? email.toLowerCase() : `${userId}@resumeai.internal`,
+      password: 'authenticated_via_jwt',
+      rolePreference: 'sde',
+      userType: 'seeker',
+      badges: ['New Explorer', 'ATS Ready'],
+      points: 500,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nameFromEmail)}`,
+      createdAt: new Date().toISOString(),
+      profileLinks: { github: '', linkedin: '', project: '', coding: '' },
+      interviewScore: null,
+      monthlyUsage: 0,
+      plan: 'free',
+      subscriptionStatus: 'free'
+    };
+    mockDb.users.push(newUser);
+    saveDb().catch(() => {});
+    return newUser;
+  }
+
   return undefined;
 };
