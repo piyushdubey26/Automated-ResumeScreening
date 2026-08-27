@@ -13,7 +13,8 @@ import {
   approveSubscriptionRequest,
   rejectSubscriptionRequest,
   cancelSubscription,
-  reactivateSubscription
+  reactivateSubscription,
+  logout
 } from '../controllers/authController';
 import { authenticateJWT } from '../middleware/auth';
 
@@ -21,6 +22,7 @@ const router = Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
+router.post('/logout', logout);
 router.get('/me', authenticateJWT, getMe);
 router.put('/profile', authenticateJWT, updateProfile);
 router.get('/users', authenticateJWT, getAllUsers);

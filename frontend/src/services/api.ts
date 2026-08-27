@@ -443,6 +443,14 @@ export const authApi = {
     const res = await api.post('/auth/login', { email, password });
     return res.data;
   },
+  logout: async () => {
+    try {
+      const res = await api.post('/auth/logout');
+      return res.data;
+    } catch {
+      return { success: true };
+    }
+  },
   resetPassword: async (email: string, newPassword?: string) => {
     const res = await api.post('/auth/reset-password', { email, newPassword });
     return res.data;

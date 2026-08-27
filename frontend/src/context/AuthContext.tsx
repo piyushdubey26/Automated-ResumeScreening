@@ -133,7 +133,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await login(demoEmail);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch {}
+
     localStorage.removeItem('resumeai_token');
     localStorage.removeItem('resumeai_user');
     localStorage.removeItem('resumeai_active_mode');
@@ -150,6 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setUser(null);
     window.dispatchEvent(new Event('resumeai-user-updated'));
+    window.dispatchEvent(new Event('resumeai-subscription-updated'));
   };
 
   const switchMode = (newMode: 'seeker' | 'recruiter' | 'admin') => {

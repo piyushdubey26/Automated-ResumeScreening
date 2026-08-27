@@ -267,6 +267,7 @@ export const Navbar: React.FC = () => {
                   {/* Sign Out Button */}
                   <button
                     onClick={() => {
+                      setProfileOpen(false);
                       logout();
                       navigate('/');
                     }}

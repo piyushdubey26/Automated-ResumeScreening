@@ -546,3 +546,19 @@ export const reactivateSubscription = (req: Request, res: Response) => {
 
   return res.json({ subscription: sub });
 };
+
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie('access_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/'
+  });
+  res.clearCookie('refresh_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/api/auth/refresh'
+  });
+  return res.json({ success: true, message: 'Logged out successfully' });
+};
