@@ -32,30 +32,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshUser = async () => {
-    const curToken = token || localStorage.getItem('resumeai_token');
-    if (curToken) {
-      try {
-        const res = await authApi.getMe();
-        if (res.user) {
-          const formatted = formatUser(res.user);
-          setUser(formatted);
-          if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
-        }
-      } catch (err: any) {
-        console.error('Failed to refresh user profile:', err?.message || err);
-        const savedUser = localStorage.getItem('resumeai_user');
-        if (savedUser) {
-          try {
-            setUser(formatUser(JSON.parse(savedUser)));
-          } catch {}
-        }
+    const curToken = localStorage.getItem('resumeai_token');
+    if (!curToken) {
+      setUser(null);
+      return;
+    }
+    try {
+      const res = await authApi.getMe();
+      if (res && res.user) {
+        const formatted = formatUser(res.user);
+        setUser(formatted);
+        if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
+      }
+    } catch (err: any) {
+      const status = err.response?.status;
+      if (status === 401) {
+        // Expected unauthenticated status: clear user state silently without logging an error
+        localStorage.removeItem('resumeai_token');
+        localStorage.removeItem('resumeai_user');
+        localStorage.removeItem('resumeai_active_mode');
+        setToken(null);
+        setUser(null);
+      } else {
+        console.error('Network or server error while checking auth session:', err?.message || err);
       }
     }
   };
 
   useEffect(() => {
     const initAuth = async () => {
-      const curToken = token || localStorage.getItem('resumeai_token');
+      const curToken = localStorage.getItem('resumeai_token');
       if (curToken) {
         // Pre-hydrate from saved storage for instant rendering
         const savedUser = localStorage.getItem('resumeai_user');
@@ -67,19 +73,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         try {
           const res = await authApi.getMe();
-          if (res.user) {
+          if (res && res.user) {
             const formatted = formatUser(res.user);
             setUser(formatted);
             if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
           }
         } catch (err: any) {
-          if (err.response?.status === 401 && !localStorage.getItem('resumeai_user')) {
+          const status = err.response?.status;
+          if (status === 401) {
             localStorage.removeItem('resumeai_token');
             localStorage.removeItem('resumeai_user');
+            localStorage.removeItem('resumeai_active_mode');
             setToken(null);
             setUser(null);
+          } else {
+            console.error('Network or server error during auth init:', err?.message || err);
           }
         }
+      } else {
+        setUser(null);
       }
       setIsLoading(false);
     };
@@ -88,8 +100,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const syncUser = async () => {
+      const curToken = localStorage.getItem('resumeai_token');
+      if (!curToken) {
+        setUser(null);
+        return;
+      }
       const savedUser = localStorage.getItem('resumeai_user');
-      if (savedUser) setUser(formatUser(JSON.parse(savedUser)));
+      if (savedUser) {
+        try {
+          setUser(formatUser(JSON.parse(savedUser)));
+        } catch {}
+      }
       await refreshUser();
     };
     window.addEventListener('resumeai-subscription-updated', syncUser);
@@ -98,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.removeEventListener('resumeai-subscription-updated', syncUser);
       window.removeEventListener('resumeai-user-updated', syncUser);
     };
-  }, [token]);
+  }, []);
 
   const login = async (email: string, password?: string) => {
     setIsLoading(true);
