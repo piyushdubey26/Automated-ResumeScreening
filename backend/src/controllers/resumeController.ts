@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { getActiveSubscription, findUserByIdOrEmail } from '../utils/auth';
-import { mockDb, ResumeRecord, UserApplication, saveDb } from '../utils/mockDb';
+import { getActiveSubscription } from '../utils/auth';
+import { mockDb, ResumeRecord, UserApplication, saveDb, findUserByIdOrEmail } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
 import { AIRewriteService } from '../services/aiRewriteService';

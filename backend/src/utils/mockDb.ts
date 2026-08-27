@@ -502,6 +502,44 @@ export const saveDb = async (): Promise<void> => {
   }
 };
 
+export const findUserByIdOrEmail = (userId?: string, email?: string): User | undefined => {
+  if (userId) {
+    const byId = mockDb.users.find(u => u.id === userId);
+    if (byId) return byId;
+  }
+  if (email) {
+    const byEmail = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (byEmail) return byEmail;
+  }
+
+  // Self-healing user hydration for authenticated JWT tokens
+  if (userId || email) {
+    const nameFromEmail = email ? email.split('@')[0] : 'Candidate';
+    const newUser: User = {
+      id: userId || `user-${Date.now()}`,
+      name: nameFromEmail,
+      email: email ? email.toLowerCase() : `${userId}@resumeai.internal`,
+      password: 'authenticated_via_jwt',
+      rolePreference: 'sde',
+      userType: 'seeker',
+      badges: ['New Explorer', 'ATS Ready'],
+      points: 500,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nameFromEmail)}`,
+      createdAt: new Date().toISOString(),
+      profileLinks: { github: '', linkedin: '', project: '', coding: '' },
+      interviewScore: null,
+      monthlyUsage: 0,
+      plan: 'free',
+      subscriptionStatus: 'free'
+    };
+    mockDb.users.push(newUser);
+    saveDb().catch(() => {});
+    return newUser;
+  }
+
+  return undefined;
+};
+
 // Load database from file on start
 const loadDb = () => {
   try {
