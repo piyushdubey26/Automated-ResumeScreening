@@ -7,6 +7,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'supersecret_resume
 export interface TokenPayload {
   userId: string;
   role: string;
+  email?: string;
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {

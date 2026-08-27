@@ -41,15 +41,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(formatted);
           if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
         }
-      } catch (err) {
-        console.error('Failed to refresh user profile:', err);
+      } catch (err: any) {
+        console.error('Failed to refresh user profile:', err?.message || err);
+        const savedUser = localStorage.getItem('resumeai_user');
+        if (savedUser) {
+          try {
+            setUser(formatUser(JSON.parse(savedUser)));
+          } catch {}
+        }
       }
     }
   };
 
   useEffect(() => {
     const initAuth = async () => {
-      if (token) {
+      const curToken = token || localStorage.getItem('resumeai_token');
+      if (curToken) {
+        // Pre-hydrate from saved storage for instant rendering
+        const savedUser = localStorage.getItem('resumeai_user');
+        if (savedUser) {
+          try {
+            setUser(formatUser(JSON.parse(savedUser)));
+          } catch {}
+        }
+
         try {
           const res = await authApi.getMe();
           if (res.user) {
@@ -57,15 +72,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(formatted);
             if (formatted) localStorage.setItem('resumeai_user', JSON.stringify(formatted));
           }
-        } catch {
-          const savedUser = localStorage.getItem('resumeai_user');
-          if (savedUser) {
-            try {
-              setUser(formatUser(JSON.parse(savedUser)));
-            } catch {}
-          } else {
+        } catch (err: any) {
+          if (err.response?.status === 401 && !localStorage.getItem('resumeai_user')) {
             localStorage.removeItem('resumeai_token');
+            localStorage.removeItem('resumeai_user');
             setToken(null);
+            setUser(null);
           }
         }
       }

@@ -30,7 +30,8 @@ const getApiBase = () => {
 const API_BASE = getApiBase();
 
 export const api = axios.create({
-  baseURL: API_BASE
+  baseURL: API_BASE,
+  withCredentials: true
 });
 
 api.interceptors.request.use((config) => {

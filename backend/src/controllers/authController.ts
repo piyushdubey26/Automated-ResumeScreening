@@ -34,7 +34,15 @@ export const signup = (req: Request, res: Response) => {
   mockDb.users.push(newUser);
   saveDb();
 
-  const token = generateAccessToken({ userId: newUser.id, role: newUser.userType });
+  const token = generateAccessToken({ userId: newUser.id, role: newUser.userType, email: newUser.email });
+  res.cookie('access_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+
   const userResponse = { ...newUser };
   delete userResponse.password;
 
@@ -69,7 +77,15 @@ export const login = (req: Request, res: Response) => {
     saveDb();
   }
 
-  const token = generateAccessToken({ userId: user.id, role: user.userType });
+  const token = generateAccessToken({ userId: user.id, role: user.userType, email: user.email });
+  res.cookie('access_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+
   const userResponse = { ...user };
   delete userResponse.password;
 
@@ -80,9 +96,14 @@ export const getMe = (req: Request, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
-  const user = mockDb.users.find(u => u.id === req.user?.userId);
+
+  let user = mockDb.users.find(u => u.id === req.user?.userId);
+  if (!user && (req.user as any).email) {
+    user = mockDb.users.find(u => u.email.toLowerCase() === (req.user as any).email.toLowerCase());
+  }
+
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.status(401).json({ error: 'User account not found' });
   }
 
   // Calendar month reset check
