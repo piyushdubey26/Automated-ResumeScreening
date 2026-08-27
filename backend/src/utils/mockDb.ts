@@ -383,6 +383,65 @@ const getDbFilePath = () => {
 
 const DB_FILE = getDbFilePath();
 
+const CLOUD_DB_ID = 'ff8081819ff5b11001a041e75a6b2faa';
+const CLOUD_DB_URL = `https://api.restful-api.dev/objects/${CLOUD_DB_ID}`;
+
+let lastSyncTimestamp = 0;
+
+export const syncFromCloud = async (): Promise<void> => {
+  try {
+    const res = await fetch(CLOUD_DB_URL, { headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      const json: any = await res.json();
+      const parsed = json?.data;
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.users && Array.isArray(parsed.users)) {
+          const userMap = new Map<string, User>();
+          users.forEach(u => userMap.set(u.email.toLowerCase(), { ...u }));
+          parsed.users.forEach((u: any) => {
+            const existing = userMap.get(u.email.toLowerCase()) || {};
+            userMap.set(u.email.toLowerCase(), { ...existing, ...u });
+          });
+          mockDb.users = Array.from(userMap.values());
+        }
+        if (parsed.resumes && Array.isArray(parsed.resumes)) mockDb.resumes = parsed.resumes;
+        if (parsed.jobDescriptions && Array.isArray(parsed.jobDescriptions)) mockDb.jobDescriptions = parsed.jobDescriptions;
+        if (parsed.recruiterCandidates && Array.isArray(parsed.recruiterCandidates)) mockDb.recruiterCandidates = parsed.recruiterCandidates;
+        if (parsed.applications && Array.isArray(parsed.applications)) mockDb.applications = parsed.applications;
+        if (parsed.jdMatches && Array.isArray(parsed.jdMatches)) mockDb.jdMatches = parsed.jdMatches;
+        if (parsed.activities && Array.isArray(parsed.activities)) mockDb.activities = parsed.activities;
+        if (parsed.subscriptions && Array.isArray(parsed.subscriptions)) mockDb.subscriptions = parsed.subscriptions;
+        if (parsed.subscriptionRequests && Array.isArray(parsed.subscriptionRequests)) mockDb.subscriptionRequests = parsed.subscriptionRequests;
+
+        lastSyncTimestamp = Date.now();
+        try {
+          fs.writeFileSync(DB_FILE, JSON.stringify(mockDb, null, 2), 'utf8');
+        } catch {}
+      }
+    }
+  } catch (e) {
+    console.error('Cloud DB sync error:', e);
+  }
+};
+
+export const syncToCloud = async (): Promise<void> => {
+  try {
+    await fetch(CLOUD_DB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'resumeai_db', data: mockDb })
+    });
+  } catch (e) {
+    console.error('Cloud DB push error:', e);
+  }
+};
+
+export const ensureDbLoaded = async (): Promise<void> => {
+  if (Date.now() - lastSyncTimestamp > 3000) {
+    await syncFromCloud();
+  }
+};
+
 // Helper to save current database to file
 export const saveDb = () => {
   try {
@@ -394,6 +453,8 @@ export const saveDb = () => {
   } catch (e) {
     console.error('Error writing to local JSON database:', e);
   }
+  // Async push to persistent cloud database
+  syncToCloud().catch(() => {});
 };
 
 // Load database from file on start
@@ -404,9 +465,7 @@ const loadDb = () => {
       const parsed = JSON.parse(fileData);
       if (parsed.users) {
         const userMap = new Map<string, User>();
-        // Load hardcoded seed users first
         users.forEach(u => userMap.set(u.email.toLowerCase(), { ...u }));
-        // Merge loaded users from disk (saved user properties overwrite defaults)
         parsed.users.forEach((u: any) => {
           const existing = userMap.get(u.email.toLowerCase()) || {};
           userMap.set(u.email.toLowerCase(), { ...existing, ...u });
@@ -422,7 +481,6 @@ const loadDb = () => {
       if (parsed.subscriptions) mockDb.subscriptions = parsed.subscriptions;
       if (parsed.subscriptionRequests) mockDb.subscriptionRequests = parsed.subscriptionRequests;
     } else {
-      // Create initial DB file from seeds
       saveDb();
     }
   } catch (e) {
@@ -433,3 +491,4 @@ const loadDb = () => {
 // Initial load
 loadDb();
 saveDb();
+syncFromCloud().catch(() => {});

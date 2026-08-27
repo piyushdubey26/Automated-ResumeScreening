@@ -28,8 +28,10 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Body Normalization Middleware for Vercel Serverless Functions
-app.use((req, res, next) => {
+import { ensureDbLoaded } from './utils/mockDb';
+
+// Body Normalization & Cloud DB Synchronization Middleware
+app.use(async (req, res, next) => {
   if (typeof req.body === 'string') {
     try {
       req.body = JSON.parse(req.body);
@@ -40,6 +42,9 @@ app.use((req, res, next) => {
   if (!req.body) {
     req.body = {};
   }
+  try {
+    await ensureDbLoaded();
+  } catch {}
   next();
 });
 
