@@ -129,7 +129,7 @@ app.use(['/api/resumes', '/resumes', '/api/index/resumes'], resumeRoutes);
 app.use(['/api/jobs', '/jobs', '/api/index/jobs'], jobRoutes);
 app.use(['/api/recruiter', '/recruiter', '/api/index/recruiter'], recruiterRoutes);
 app.use(['/api/ecosystem', '/ecosystem', '/api/index/ecosystem'], ecosystemRoutes);
-app.use(['/api/admin/ai-quality', '/admin/ai-quality', '/api/index/admin/ai-quality'], adminAiQualityRoutes);
+app.use(['/api/admin/ai-quality', '/admin/ai-quality', '/api/index/admin/ai-quality', '/api/admin', '/admin'], adminAiQualityRoutes);
 
 // Base Health Check
 app.get(['/api/health', '/health'], (req, res) => {
