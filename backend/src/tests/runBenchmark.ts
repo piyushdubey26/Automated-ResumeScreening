@@ -1,10 +1,10 @@
-import { BenchmarkRunner } from '../services/atsEngine/benchmarkSuite';
-import { AtsScoringEngine } from '../services/atsEngine/scoringEngine';
+import { runAtsTestSuite } from './atsEngine.test';
+import { runContinuousLearningTestSuite } from './continuousLearning.test';
 
-const res = BenchmarkRunner.runAll();
-console.log('BENCHMARK RESULTS SUMMARY:');
-res.results.forEach(r => {
-  console.log(`- [${r.scorePassed ? 'PASS' : 'FAIL'}] ${r.name}`);
-  console.log(`  Actual Score: ${r.actualScore} | Expected Range: [${r.expectedScoreRange.join(', ')}]`);
-  console.log(`  Breakdown:`, r.breakdown);
-});
+console.log('====================================================');
+console.log(' RESUMOVA AI - AUTOMATED REGRESSION & BENCHMARK SUITE');
+console.log('====================================================\n');
+
+runAtsTestSuite();
+console.log('\n----------------------------------------------------\n');
+runContinuousLearningTestSuite();

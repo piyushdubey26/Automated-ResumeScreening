@@ -45,9 +45,24 @@ server.on('error', (err: any) => {
   }
 });
 
+import { ContinuousLearningEngine } from './services/continuousLearning';
+
+// Server-Side Daily Continuous Learning Automated Pipeline Scheduler (runs every 24 hours)
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+setInterval(() => {
+  try {
+    console.log('[ContinuousLearningEngine] Scheduled daily evaluation cycle triggered...');
+    const log = ContinuousLearningEngine.runDailyLearningCycle(3);
+    console.log(`[ContinuousLearningEngine] Daily cycle completed with decision: ${log.decision} (${log.reason})`);
+  } catch (err) {
+    console.error('[ContinuousLearningEngine] Failed daily cycle run:', err);
+  }
+}, TWENTY_FOUR_HOURS_MS);
+
 server.listen(PORT, () => {
   console.log(`===============================================`);
   console.log(` ResumeAI Engine Server is running on port ${currentPort}`);
   console.log(` Health check URL: http://localhost:${currentPort}/api/health`);
+  console.log(` Continuous Learning Scheduler: ACTIVE (Daily 24h Interval)`);
   console.log(`===============================================`);
 });

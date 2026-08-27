@@ -521,6 +521,29 @@ export const authApi = {
   }
 };
 
+export const adminAiQualityApi = {
+  getStats: async () => {
+    const res = await api.get('/admin/ai-quality/stats');
+    return res.data;
+  },
+  triggerCycle: async (minRequiredNewCandidates = 2) => {
+    const res = await api.post('/admin/ai-quality/run-cycle', { minRequiredNewCandidates });
+    return res.data;
+  },
+  getCandidateSkills: async () => {
+    const res = await api.get('/admin/ai-quality/candidate-skills');
+    return res.data;
+  },
+  promoteCandidateSkill: async (term: string) => {
+    const res = await api.post('/admin/ai-quality/candidate-skills/promote', { term });
+    return res.data;
+  },
+  rollback: async (version: string) => {
+    const res = await api.post('/admin/ai-quality/rollback', { version });
+    return res.data;
+  }
+};
+
 export const resumeApi = {
   uploadAndParse: async (text: string, filename?: string, targetRole: string = 'sde'): Promise<{ resume: ResumeRecord }> => {
     const res = await api.post('/resumes/upload', { text, filename, targetRole });

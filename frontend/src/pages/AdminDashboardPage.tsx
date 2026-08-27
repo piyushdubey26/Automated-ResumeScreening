@@ -20,9 +20,11 @@ import {
   Settings,
   AlertTriangle,
   X,
-  Edit2
+  Edit2,
+  Sparkles
 } from "lucide-react";
 import { authApi } from "../services/api";
+import { AdminAiQualityPanel } from "../components/admin/AdminAiQualityPanel";
 interface AdminUserRecord {
   id: string;
   name: string;
@@ -63,6 +65,7 @@ export const AdminDashboardPage: React.FC = () => {
     | "Jobs"
     | "Resumes"
     | "AI Usage"
+    | "AI Quality & Learning"
     | "Analytics"
     | "Subscriptions"
     | "Security"
@@ -345,6 +348,7 @@ export const AdminDashboardPage: React.FC = () => {
                 { name: "Jobs", icon: Briefcase },
                 { name: "Resumes", icon: FileText },
                 { name: "AI Usage", icon: Brain },
+                { name: "AI Quality & Learning", icon: Sparkles },
                 { name: "Analytics", icon: Activity },
                 { name: "Subscriptions", icon: CreditCard },
                 { name: "Security", icon: Lock },
@@ -392,6 +396,7 @@ export const AdminDashboardPage: React.FC = () => {
                 {activeNav === "Jobs" && "Monitor active and closed job vacancies."}
                 {activeNav === "Resumes" && "Review parsed documents, failure metrics, and status."}
                 {activeNav === "AI Usage" && "Real-time cost, token usage, and AI rubrics telemetry."}
+                {activeNav === "AI Quality & Learning" && "Monitor continuous-learning pipeline, gold benchmarks, and emerging skill drift."}
                 {activeNav === "Analytics" && "Understand user growth, distribution, and engagement."}
                 {activeNav === "Subscriptions" && "Approve plan upgrade requests and track monetization."}
                 {activeNav === "Security" && "Audit security events, API key status, and failed authorization logs."}
@@ -1481,6 +1486,11 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* 12. AI QUALITY & CONTROLLED CONTINUOUS LEARNING VIEW */}
+        {activeNav === "AI Quality & Learning" && (
+          <AdminAiQualityPanel />
         )}
 
       </main>

@@ -5,6 +5,7 @@ import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
 import { AIRewriteService } from '../services/aiRewriteService';
 import { AIInterviewService } from '../services/aiInterviewService';
+import { ContinuousLearningEngine } from '../services/continuousLearning';
 import { extractTextFromBuffer } from '../utils/fileExtractor';
 
 export const uploadAndParseResume = async (req: Request, res: Response) => {
@@ -119,6 +120,19 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
 
     mockDb.resumes = [newResume, ...mockDb.resumes.filter(r => r.id !== newResume.id)];
     await saveDb();
+
+    // Record anonymized analysis into Continuous Learning Queue
+    try {
+      ContinuousLearningEngine.recordAnalysis(
+        rawText,
+        `Target Role: ${role}`,
+        role,
+        scoreResult.score,
+        scoreResult.scoreBreakdown,
+        parsed.wordCount,
+        2
+      );
+    } catch (e) {}
 
     const finalUsage = userRecord.monthlyUsage || 0;
 
