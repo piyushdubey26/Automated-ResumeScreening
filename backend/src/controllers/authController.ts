@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { mockDb, User, saveDb } from '../utils/mockDb';
+import { mockDb, User, saveDb, findUserByIdOrEmail } from '../utils/mockDb';
 import { generateAccessToken, addOneMonth, getActiveSubscription } from '../utils/auth';
 
 export const signup = async (req: Request, res: Response) => {
@@ -97,10 +97,7 @@ export const getMe = (req: Request, res: Response) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  let user = mockDb.users.find(u => u.id === req.user?.userId);
-  if (!user && (req.user as any).email) {
-    user = mockDb.users.find(u => u.email.toLowerCase() === (req.user as any).email.toLowerCase());
-  }
+  let user = findUserByIdOrEmail(req.user?.userId, (req.user as any)?.email);
 
   if (!user) {
     return res.status(401).json({ error: 'User account not found' });
