@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getActiveSubscription } from '../utils/auth';
+import { getActiveSubscription, findUserByIdOrEmail } from '../utils/auth';
 import { mockDb, ResumeRecord, UserApplication, saveDb } from '../utils/mockDb';
 import { ParserService } from '../services/parserService';
 import { ScoringEngine } from '../services/scoringEngine';
@@ -50,7 +50,8 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
       });
     }
 
-    const userRecord = mockDb.users.find(u => u.id === authUserId);
+    const authEmail = (req.user as any)?.email;
+    const userRecord = findUserByIdOrEmail(authUserId, authEmail);
     if (!userRecord) {
       return res.status(404).json({ success: false, error: 'User account not found.' });
     }
@@ -144,11 +145,17 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
 
 export const getResumeById = (req: Request, res: Response) => {
   const authUserId = req.user?.userId;
-  if (!authUserId) {
+  const authEmail = (req.user as any)?.email;
+  if (!authUserId && !authEmail) {
     return res.status(401).json({ success: false, error: 'Authentication required' });
   }
+  const userRecord = findUserByIdOrEmail(authUserId, authEmail);
+  const validUserIds = new Set<string>();
+  if (authUserId) validUserIds.add(authUserId);
+  if (userRecord?.id) validUserIds.add(userRecord.id);
+
   const { id } = req.params;
-  const resume = mockDb.resumes.find(r => r.id === id && r.userId === authUserId);
+  const resume = mockDb.resumes.find(r => r.id === id && validUserIds.has(r.userId));
   if (!resume) {
     return res.status(404).json({ success: false, error: 'Resume not found' });
   }
@@ -158,12 +165,18 @@ export const getResumeById = (req: Request, res: Response) => {
 export const getLatestResume = async (req: Request, res: Response) => {
   try {
     const authUserId = req.user?.userId;
-    if (!authUserId) {
+    const authEmail = (req.user as any)?.email;
+    if (!authUserId && !authEmail) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
+    const userRecord = findUserByIdOrEmail(authUserId, authEmail);
+    const validUserIds = new Set<string>();
+    if (authUserId) validUserIds.add(authUserId);
+    if (userRecord?.id) validUserIds.add(userRecord.id);
+
     const userResumes = mockDb.resumes
-      .filter(r => r.userId === authUserId)
+      .filter(r => validUserIds.has(r.userId))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     if (userResumes.length === 0) {

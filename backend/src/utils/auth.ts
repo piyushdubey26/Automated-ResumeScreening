@@ -82,3 +82,16 @@ export const getActiveSubscription = (userId: string) => {
   
   return null;
 };
+
+export const findUserByIdOrEmail = (userId?: string, email?: string) => {
+  const { mockDb } = require('./mockDb');
+  if (userId) {
+    const byId = mockDb.users.find((u: any) => u.id === userId);
+    if (byId) return byId;
+  }
+  if (email) {
+    const byEmail = mockDb.users.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+    if (byEmail) return byEmail;
+  }
+  return undefined;
+};
