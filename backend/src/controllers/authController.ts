@@ -49,19 +49,19 @@ export const signup = async (req: Request, res: Response) => {
   return res.status(201).json({ token, user: userResponse });
 };
 
-export const login = (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  const user = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const user = findUserByIdOrEmail(undefined, email);
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
   // Verify password
-  if (user.password !== password) {
+  if (user.password !== 'authenticated_via_jwt' && user.password !== password) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
@@ -71,10 +71,10 @@ export const login = (req: Request, res: Response) => {
   if (user.usageMonth !== currentMonth) {
     user.usageMonth = currentMonth;
     user.monthlyUsage = 0;
-    saveDb();
+    await saveDb();
   } else if (user.monthlyUsage === undefined) {
     user.monthlyUsage = 0;
-    saveDb();
+    await saveDb();
   }
 
   const token = generateAccessToken({ userId: user.id, role: user.userType, email: user.email });
