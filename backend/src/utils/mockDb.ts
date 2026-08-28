@@ -39,10 +39,10 @@ export const syncFromCloud = async (): Promise<void> => {
             if (!existing) {
               userMap.set(normEmail, { ...u, email: normEmail });
             } else {
-              const bestPlan = existing.plan && existing.plan !== 'free' ? existing.plan : u.plan || existing.plan;
-              const bestStatus = existing.subscriptionStatus && existing.subscriptionStatus !== 'free' ? existing.subscriptionStatus : u.subscriptionStatus || existing.subscriptionStatus;
+              const bestPlan = (existing.plan && existing.plan !== 'free') ? existing.plan : (u.plan && u.plan !== 'free') ? u.plan : 'free';
+              const bestStatus = (existing.subscriptionStatus && existing.subscriptionStatus !== 'free') ? existing.subscriptionStatus : (u.subscriptionStatus && u.subscriptionStatus !== 'free') ? u.subscriptionStatus : 'free';
               const maxUsage = Math.max(existing.monthlyUsage || 0, u.monthlyUsage || 0);
-              userMap.set(normEmail, { ...existing, ...u, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
+              userMap.set(normEmail, { ...u, ...existing, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
             }
           });
           mockDb.users.forEach((u: any) => {
@@ -52,8 +52,8 @@ export const syncFromCloud = async (): Promise<void> => {
             if (!existing) {
               userMap.set(normEmail, { ...u, email: normEmail });
             } else {
-              const bestPlan = u.plan && u.plan !== 'free' ? u.plan : existing.plan;
-              const bestStatus = u.subscriptionStatus && u.subscriptionStatus !== 'free' ? u.subscriptionStatus : existing.subscriptionStatus;
+              const bestPlan = (u.plan && u.plan !== 'free') ? u.plan : (existing.plan && existing.plan !== 'free') ? existing.plan : 'free';
+              const bestStatus = (u.subscriptionStatus && u.subscriptionStatus !== 'free') ? u.subscriptionStatus : (existing.subscriptionStatus && existing.subscriptionStatus !== 'free') ? existing.subscriptionStatus : 'free';
               const maxUsage = Math.max(existing.monthlyUsage || 0, u.monthlyUsage || 0);
               userMap.set(normEmail, { ...existing, ...u, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
             }
@@ -566,8 +566,8 @@ const loadDb = () => {
           if (!existing) {
             userMap.set(normEmail, { ...u, email: normEmail });
           } else {
-            const bestPlan = existing.plan && existing.plan !== 'free' ? existing.plan : u.plan || existing.plan;
-            const bestStatus = existing.subscriptionStatus && existing.subscriptionStatus !== 'free' ? existing.subscriptionStatus : u.subscriptionStatus || existing.subscriptionStatus;
+            const bestPlan = (u.plan && u.plan !== 'free') ? u.plan : (existing.plan && existing.plan !== 'free') ? existing.plan : 'free';
+            const bestStatus = (u.subscriptionStatus && u.subscriptionStatus !== 'free') ? u.subscriptionStatus : (existing.subscriptionStatus && existing.subscriptionStatus !== 'free') ? existing.subscriptionStatus : 'free';
             const maxUsage = Math.max(existing.monthlyUsage || 0, u.monthlyUsage || 0);
             userMap.set(normEmail, { ...existing, ...u, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
           }
