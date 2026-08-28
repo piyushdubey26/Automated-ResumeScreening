@@ -352,11 +352,12 @@ const users: User[] = [
     badges: ['New Explorer', 'ATS Ready'],
     points: 500,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi',
-    createdAt: new Date().toISOString(),
-    monthlyUsage: 0,
+    createdAt: '2026-08-25T13:31:04.615Z',
+    monthlyUsage: 1,
     usageMonth: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
-    plan: 'free',
-    subscriptionStatus: 'free'
+    plan: 'career-max',
+    subscriptionStatus: 'approved',
+    paymentStatus: 'active'
   },
   {
     id: 'user-seeker-1',
