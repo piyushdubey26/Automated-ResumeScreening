@@ -12,10 +12,171 @@ export interface User {
   profileLinks?: { github?: string; linkedin?: string; project?: string; coding?: string };
   interviewScore?: number | null;
   monthlyUsage?: number;
+  monthlyLimit?: number;
   usageMonth?: string;
   plan?: string;
   subscriptionStatus?: string;
+  paymentStatus?: string;
+  pendingPlan?: string | null;
+  subscriptionId?: string | null;
 }
+
+export const syncFromCloud = async (): Promise<void> => {
+  try {
+    const res = await fetch(CLOUD_DB_URL, { headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      const json: any = await res.json();
+      const parsed = json?.data;
+      if (parsed && typeof parsed === 'object') {
+        // 1. Merge users cleanly without overwriting updated local plan, subscriptionStatus, or usage
+        if (parsed.users && Array.isArray(parsed.users)) {
+          const userMap = new Map<string, User>();
+          users.forEach(u => userMap.set(u.email.trim().toLowerCase(), { ...u }));
+          parsed.users.forEach((u: any) => {
+            if (!u || !u.email) return;
+            const normEmail = u.email.trim().toLowerCase();
+            const existing = userMap.get(normEmail);
+            if (!existing) {
+              userMap.set(normEmail, { ...u, email: normEmail });
+            } else {
+              const bestPlan = existing.plan && existing.plan !== 'free' ? existing.plan : u.plan || existing.plan;
+              const bestStatus = existing.subscriptionStatus && existing.subscriptionStatus !== 'free' ? existing.subscriptionStatus : u.subscriptionStatus || existing.subscriptionStatus;
+              const maxUsage = Math.max(existing.monthlyUsage || 0, u.monthlyUsage || 0);
+              userMap.set(normEmail, { ...existing, ...u, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
+            }
+          });
+          mockDb.users.forEach((u: any) => {
+            if (!u || !u.email) return;
+            const normEmail = u.email.trim().toLowerCase();
+            const existing = userMap.get(normEmail);
+            if (!existing) {
+              userMap.set(normEmail, { ...u, email: normEmail });
+            } else {
+              const bestPlan = u.plan && u.plan !== 'free' ? u.plan : existing.plan;
+              const bestStatus = u.subscriptionStatus && u.subscriptionStatus !== 'free' ? u.subscriptionStatus : existing.subscriptionStatus;
+              const maxUsage = Math.max(existing.monthlyUsage || 0, u.monthlyUsage || 0);
+              userMap.set(normEmail, { ...existing, ...u, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
+            }
+          });
+          mockDb.users = Array.from(userMap.values());
+        }
+
+        // 2. Merge resumes (seeds + cloud + memory)
+        if (parsed.resumes && Array.isArray(parsed.resumes)) {
+          const resumeMap = new Map<string, ResumeRecord>();
+          resumes.forEach(r => resumeMap.set(r.id, r));
+          parsed.resumes.forEach((r: any) => resumeMap.set(r.id, r));
+          mockDb.resumes.forEach(r => resumeMap.set(r.id, r));
+          mockDb.resumes = Array.from(resumeMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+
+        // 3. Merge subscription requests (cloud + memory)
+        if (parsed.subscriptionRequests && Array.isArray(parsed.subscriptionRequests)) {
+          const reqMap = new Map<string, SubscriptionRequest>();
+          parsed.subscriptionRequests.forEach((r: any) => reqMap.set(r.id, r));
+          mockDb.subscriptionRequests.forEach(r => reqMap.set(r.id, r));
+          mockDb.subscriptionRequests = Array.from(reqMap.values()).sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+        }
+
+        // 4. Merge subscriptions (cloud + memory)
+        if (parsed.subscriptions && Array.isArray(parsed.subscriptions)) {
+          const subMap = new Map<string, Subscription>();
+          parsed.subscriptions.forEach((s: any) => subMap.set(s.id || s.userId, s));
+          mockDb.subscriptions.forEach(s => subMap.set(s.id || s.userId, s));
+          mockDb.subscriptions = Array.from(subMap.values());
+        }
+
+        // 5. Merge applications, jdMatches, recruiterCandidates
+        if (parsed.applications && Array.isArray(parsed.applications)) {
+          const appMap = new Map<string, any>();
+          parsed.applications.forEach((a: any) => appMap.set(a.id, a));
+          mockDb.applications.forEach(a => appMap.set(a.id, a));
+          mockDb.applications = Array.from(appMap.values());
+        }
+        if (parsed.jdMatches && Array.isArray(parsed.jdMatches)) {
+          const matchMap = new Map<string, any>();
+          parsed.jdMatches.forEach((m: any) => matchMap.set(m.id, m));
+          mockDb.jdMatches.forEach(m => matchMap.set(m.id, m));
+          mockDb.jdMatches = Array.from(matchMap.values());
+        }
+        if (parsed.recruiterCandidates && Array.isArray(parsed.recruiterCandidates)) {
+          const candMap = new Map<string, any>();
+          parsed.recruiterCandidates.forEach((c: any) => candMap.set(c.id, c));
+          mockDb.recruiterCandidates.forEach(c => candMap.set(c.id, c));
+          mockDb.recruiterCandidates = Array.from(candMap.values());
+        }
+
+        lastSyncTimestamp = Date.now();
+        try {
+          fs.writeFileSync(DB_FILE, JSON.stringify(mockDb, null, 2), 'utf8');
+        } catch {}
+      }
+    }
+  } catch (e) {
+    console.error('Cloud DB sync error:', e);
+  }
+};
+
+export const syncToCloud = async (): Promise<void> => {
+  try {
+    await fetch(CLOUD_DB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'resumeai_db', data: mockDb })
+    });
+  } catch (e) {
+    console.error('Cloud DB push error:', e);
+  }
+};
+
+export const ensureDbLoaded = async (): Promise<void> => {
+  if (Date.now() - lastSyncTimestamp > 3000) {
+    await syncFromCloud();
+  }
+};
+
+// Safe database path resolution for both Local Dev and Vercel Serverless Function environment
+export const saveDb = async (): Promise<void> => {
+  try {
+    const dir = path.dirname(DB_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DB_FILE, JSON.stringify(mockDb, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Error writing to local JSON database:', e);
+  }
+  try {
+    await syncToCloud();
+  } catch (e) {
+    console.error('Cloud DB push error:', e);
+  }
+};
+
+export const findUserByIdOrEmail = (userId?: string, email?: string): User | undefined => {
+  const normEmail = email ? email.trim().toLowerCase() : undefined;
+
+  // 1. Try match by userId first
+  if (userId) {
+    const byId = mockDb.users.find(u => u.id === userId);
+    if (byId) return byId;
+  }
+
+  // 2. Try match by normalized email
+  if (normEmail) {
+    const byEmail = mockDb.users.find(u => u.email.trim().toLowerCase() === normEmail);
+    if (byEmail) return byEmail;
+  }
+
+  // 3. Fallback: match by email prefix or partial match if userId is formatted as email
+  if (userId && userId.includes('@')) {
+    const byUserIdEmail = mockDb.users.find(u => u.email.trim().toLowerCase() === userId.trim().toLowerCase());
+    if (byUserIdEmail) return byUserIdEmail;
+  }
+
+  // Strict Rule: NEVER create a new user object when lookup fails!
+  return undefined;
+};
 
 export interface Subscription {
   id: string;
@@ -388,158 +549,6 @@ const CLOUD_DB_URL = `https://api.restful-api.dev/objects/${CLOUD_DB_ID}`;
 
 let lastSyncTimestamp = 0;
 
-export const syncFromCloud = async (): Promise<void> => {
-  try {
-    const res = await fetch(CLOUD_DB_URL, { headers: { 'Accept': 'application/json' } });
-    if (res.ok) {
-      const json: any = await res.json();
-      const parsed = json?.data;
-      if (parsed && typeof parsed === 'object') {
-        // 1. Merge users (seeds + cloud + memory)
-        if (parsed.users && Array.isArray(parsed.users)) {
-          const userMap = new Map<string, User>();
-          users.forEach(u => userMap.set(u.email.toLowerCase(), { ...u }));
-          parsed.users.forEach((u: any) => {
-            const existing = userMap.get(u.email.toLowerCase()) || {};
-            userMap.set(u.email.toLowerCase(), { ...existing, ...u });
-          });
-          mockDb.users.forEach((u: any) => {
-            const existing = userMap.get(u.email.toLowerCase()) || {};
-            userMap.set(u.email.toLowerCase(), { ...existing, ...u });
-          });
-          mockDb.users = Array.from(userMap.values());
-        }
-
-        // 2. Merge resumes (seeds + cloud + memory)
-        if (parsed.resumes && Array.isArray(parsed.resumes)) {
-          const resumeMap = new Map<string, ResumeRecord>();
-          resumes.forEach(r => resumeMap.set(r.id, r));
-          parsed.resumes.forEach((r: any) => resumeMap.set(r.id, r));
-          mockDb.resumes.forEach(r => resumeMap.set(r.id, r));
-          mockDb.resumes = Array.from(resumeMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        }
-
-        // 3. Merge subscription requests (cloud + memory)
-        if (parsed.subscriptionRequests && Array.isArray(parsed.subscriptionRequests)) {
-          const reqMap = new Map<string, SubscriptionRequest>();
-          parsed.subscriptionRequests.forEach((r: any) => reqMap.set(r.id, r));
-          mockDb.subscriptionRequests.forEach(r => reqMap.set(r.id, r));
-          mockDb.subscriptionRequests = Array.from(reqMap.values()).sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
-        }
-
-        // 4. Merge subscriptions (cloud + memory)
-        if (parsed.subscriptions && Array.isArray(parsed.subscriptions)) {
-          const subMap = new Map<string, Subscription>();
-          parsed.subscriptions.forEach((s: any) => subMap.set(s.id || s.userId, s));
-          mockDb.subscriptions.forEach(s => subMap.set(s.id || s.userId, s));
-          mockDb.subscriptions = Array.from(subMap.values());
-        }
-
-        // 5. Merge applications, jdMatches, recruiterCandidates
-        if (parsed.applications && Array.isArray(parsed.applications)) {
-          const appMap = new Map<string, any>();
-          parsed.applications.forEach((a: any) => appMap.set(a.id, a));
-          mockDb.applications.forEach(a => appMap.set(a.id, a));
-          mockDb.applications = Array.from(appMap.values());
-        }
-        if (parsed.jdMatches && Array.isArray(parsed.jdMatches)) {
-          const matchMap = new Map<string, any>();
-          parsed.jdMatches.forEach((m: any) => matchMap.set(m.id, m));
-          mockDb.jdMatches.forEach(m => matchMap.set(m.id, m));
-          mockDb.jdMatches = Array.from(matchMap.values());
-        }
-        if (parsed.recruiterCandidates && Array.isArray(parsed.recruiterCandidates)) {
-          const candMap = new Map<string, any>();
-          parsed.recruiterCandidates.forEach((c: any) => candMap.set(c.id, c));
-          mockDb.recruiterCandidates.forEach(c => candMap.set(c.id, c));
-          mockDb.recruiterCandidates = Array.from(candMap.values());
-        }
-
-        lastSyncTimestamp = Date.now();
-        try {
-          fs.writeFileSync(DB_FILE, JSON.stringify(mockDb, null, 2), 'utf8');
-        } catch {}
-      }
-    }
-  } catch (e) {
-    console.error('Cloud DB sync error:', e);
-  }
-};
-
-export const syncToCloud = async (): Promise<void> => {
-  try {
-    await fetch(CLOUD_DB_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'resumeai_db', data: mockDb })
-    });
-  } catch (e) {
-    console.error('Cloud DB push error:', e);
-  }
-};
-
-export const ensureDbLoaded = async (): Promise<void> => {
-  if (Date.now() - lastSyncTimestamp > 3000) {
-    await syncFromCloud();
-  }
-};
-
-// Helper to save current database to file
-export const saveDb = async (): Promise<void> => {
-  try {
-    const dir = path.dirname(DB_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DB_FILE, JSON.stringify(mockDb, null, 2), 'utf8');
-  } catch (e) {
-    console.error('Error writing to local JSON database:', e);
-  }
-  try {
-    await syncToCloud();
-  } catch (e) {
-    console.error('Cloud DB push error:', e);
-  }
-};
-
-export const findUserByIdOrEmail = (userId?: string, email?: string): User | undefined => {
-  if (userId) {
-    const byId = mockDb.users.find(u => u.id === userId);
-    if (byId) return byId;
-  }
-  if (email) {
-    const byEmail = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (byEmail) return byEmail;
-  }
-
-  // Self-healing user hydration for authenticated JWT tokens
-  if (userId || email) {
-    const nameFromEmail = email ? email.split('@')[0] : 'Candidate';
-    const newUser: User = {
-      id: userId || `user-${Date.now()}`,
-      name: nameFromEmail,
-      email: email ? email.toLowerCase() : `${userId}@resumeai.internal`,
-      password: 'authenticated_via_jwt',
-      rolePreference: 'sde',
-      userType: 'seeker',
-      badges: ['New Explorer', 'ATS Ready'],
-      points: 500,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nameFromEmail)}`,
-      createdAt: new Date().toISOString(),
-      profileLinks: { github: '', linkedin: '', project: '', coding: '' },
-      interviewScore: null,
-      monthlyUsage: 0,
-      plan: 'free',
-      subscriptionStatus: 'free'
-    };
-    mockDb.users.push(newUser);
-    saveDb().catch(() => {});
-    return newUser;
-  }
-
-  return undefined;
-};
-
 // Load database from file on start
 const loadDb = () => {
   try {
@@ -548,10 +557,19 @@ const loadDb = () => {
       const parsed = JSON.parse(fileData);
       if (parsed.users) {
         const userMap = new Map<string, User>();
-        users.forEach(u => userMap.set(u.email.toLowerCase(), { ...u }));
+        users.forEach(u => userMap.set(u.email.trim().toLowerCase(), { ...u }));
         parsed.users.forEach((u: any) => {
-          const existing = userMap.get(u.email.toLowerCase()) || {};
-          userMap.set(u.email.toLowerCase(), { ...existing, ...u });
+          if (!u || !u.email) return;
+          const normEmail = u.email.trim().toLowerCase();
+          const existing = userMap.get(normEmail);
+          if (!existing) {
+            userMap.set(normEmail, { ...u, email: normEmail });
+          } else {
+            const bestPlan = existing.plan && existing.plan !== 'free' ? existing.plan : u.plan || existing.plan;
+            const bestStatus = existing.subscriptionStatus && existing.subscriptionStatus !== 'free' ? existing.subscriptionStatus : u.subscriptionStatus || existing.subscriptionStatus;
+            const maxUsage = Math.max(existing.monthlyUsage || 0, u.monthlyUsage || 0);
+            userMap.set(normEmail, { ...existing, ...u, plan: bestPlan, subscriptionStatus: bestStatus, monthlyUsage: maxUsage });
+          }
         });
         mockDb.users = Array.from(userMap.values());
       }

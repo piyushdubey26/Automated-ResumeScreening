@@ -14,8 +14,10 @@
       "points": 10000,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Piyush%20Dubey",
       "createdAt": "2026-08-25T13:31:04.614Z",
+      "monthlyUsage": 0,
       "usageMonth": "2026-08",
-      "monthlyUsage": 0
+      "plan": "enterprise",
+      "subscriptionStatus": "approved"
     },
     {
       "id": "user-sakshi",
@@ -31,13 +33,17 @@
       "points": 500,
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakshi",
       "createdAt": "2026-08-25T13:31:04.615Z",
-      "monthlyUsage": 1,
-      "usageMonth": "2026-08"
+      "monthlyUsage": 2,
+      "usageMonth": "2026-08",
+      "plan": "career-max",
+      "subscriptionStatus": "approved",
+      "paymentStatus": "active"
     },
     {
       "id": "user-seeker-1",
       "name": "Alex Rivera",
       "email": "alex.rivera@example.com",
+      "password": "password123",
       "rolePreference": "sde",
       "userType": "seeker",
       "badges": [
@@ -47,12 +53,17 @@
       ],
       "points": 1450,
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
-      "createdAt": "2026-08-18T19:46:28.603Z"
+      "createdAt": "2026-08-18T19:46:28.603Z",
+      "monthlyUsage": 0,
+      "usageMonth": "2026-08",
+      "plan": "free",
+      "subscriptionStatus": "free"
     },
     {
       "id": "user-recruiter-1",
       "name": "Sarah Jenkins (Recruiter)",
       "email": "recruiter@techscale.com",
+      "password": "password123",
       "rolePreference": "sde",
       "userType": "recruiter",
       "badges": [
@@ -60,7 +71,11 @@
       ],
       "points": 3200,
       "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150",
-      "createdAt": "2026-08-18T19:46:28.608Z"
+      "createdAt": "2026-08-18T19:46:28.608Z",
+      "monthlyUsage": 0,
+      "usageMonth": "2026-08",
+      "plan": "recruiter",
+      "subscriptionStatus": "approved"
     },
     {
       "id": "user-1787731211731",
@@ -137,7 +152,8 @@
       "interviewScore": null,
       "monthlyUsage": 0,
       "plan": "free",
-      "subscriptionStatus": "free"
+      "subscriptionStatus": "free",
+      "usageMonth": "2026-08"
     },
     {
       "id": "user-1787749374227",
@@ -162,7 +178,8 @@
       "interviewScore": null,
       "monthlyUsage": 0,
       "plan": "free",
-      "subscriptionStatus": "free"
+      "subscriptionStatus": "free",
+      "usageMonth": "2026-08"
     },
     {
       "id": "user-1787750534910",
@@ -189,9 +206,226 @@
       "plan": "career-max",
       "subscriptionStatus": "approved",
       "usageMonth": "2026-08"
+    },
+    {
+      "id": "user-1787776325136",
+      "name": "bb",
+      "email": "bb@gmail.com",
+      "password": "bb2026",
+      "rolePreference": "sde",
+      "userType": "seeker",
+      "badges": [
+        "New Explorer",
+        "ATS Ready"
+      ],
+      "points": 500,
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=bb",
+      "createdAt": "2026-08-26T20:32:05.136Z",
+      "profileLinks": {
+        "github": "",
+        "linkedin": "",
+        "project": "",
+        "coding": ""
+      },
+      "interviewScore": null,
+      "monthlyUsage": 2,
+      "plan": "free",
+      "subscriptionStatus": "pending_approval",
+      "usageMonth": "2026-08"
     }
   ],
   "resumes": [
+    {
+      "id": "resume-1787850826957",
+      "userId": "user-sakshi",
+      "filename": "My_Resume.pdf",
+      "targetRole": "sde",
+      "rawText": "\n\nPIYUSH DUBEY\nData Analyst | Business & Operations Analytics | SQL · Excel · Power BI\n+91 9696261063   |   Piyushdubey447@gmail.com   |   linkedin.com/in/piyush-dubey-70183429a   |   github.com/piyushdubey26\nPROFESSIONAL SUMMARY\nAnalytical and detail-oriented B.Tech (CS) student with hands-on experience turning raw data into business insights through \nSQL, Power BI, and Excel. Skilled in KPI tracking, dashboard development, trend analysis, and data validation, with a track \nrecord of building reporting workflows that support data-driven decision making. Strong stakeholder communication and \ncross-functional collaboration skills developed across Agile, team-based environments; quick to learn new tools and adapt \nanalytics approaches to fast-moving business needs.\nEDUCATION\nBabu Banarasi Das University, LucknowAug 2023 – Present\nB.Tech in Computer Science & Engineering | CGPA: 8.0/10\nKunwar Convent School, Ballia, Uttar Pradesh2020 – 2021\nIntermediate (Class XII) | Percentage: 63%\nTECHNICAL SKILLS\n•Analytics & Reporting: SQL, Advanced Excel, Power BI, Data Analysis, KPI Tracking, Dashboard Development, \nBusiness Reporting, Trend Analysis\n•Operations & Business Analytics: Data Validation, Process Automation, Operational Analytics, Forecasting Support, \nPerformance Monitoring\n•Programming: Python, SQL, JavaScript\n•Tools: Power BI, Excel, Git, GitHub, Postman, Firebase\n•Soft Skills: Stakeholder Communication, Problem Solving, Cross-Functional Collaboration, Agile Teamwork\nWORK EXPERIENCE\nData Analyst Intern | Instant MechanicSep 2025 – Mar 2026\n•Extracted and analyzed business data using SQL queries, building Power BI and Excel dashboards to monitor KPIs and \nsupport data-driven decisions for stakeholders.\n•Tracked operational performance metrics across web application data workflows, validating data accuracy and flagging \ndiscrepancies to maintain reporting integrity.\n•Partnered with cross-functional teams in an Agile environment to translate business requirements into structured analysis, \npresenting findings clearly to technical and non-technical stakeholders.\n•Investigated process and data-quality issues end-to-end, driving fixes that improved workflow reliability and overall \nreporting accuracy.\nPROJECTS\nVehicle Service Analytics DashboardPython, SQL, Power BI, Excel, API\n•Built an interactive Power BI dashboard for vehicle service business data, consolidating multiple data sources into a \nsingle operational reporting view.\n•Used SQL and Python for data extraction, cleaning, and transformation, enabling trend analysis on service volume and \nturnaround-time metrics.\n•Performed data validation checks across input and reporting workflows to ensure dashboard accuracy, supporting more \nreliable business decision-making.\nPersonal Budget TrackerReact.js, Firebase, JavaScript, API\n•Designed a data-driven budgeting application analyzing income/expense patterns, applying basic trend analysis logic to \nflag spending anomalies for users.\n•Structured Firebase data models and validation logic to ensure clean, reliable inputs for downstream reporting and \nvisualization.\nACHIEVEMENTS & CERTIFICATIONS\n•Deloitte Data Analytics Virtual Experience Program (Forage) — applied SQL, API-based analysis, and data validation \ntechniques to real-world business analytics scenarios.\n•Strong foundation in business reporting, KPI tracking, and Agile collaboration, aligned with analyst and operations-\nanalytics best practices.\n•Consistent academic performer, maintaining an 8.0 CGPA while balancing internship responsibilities and applied analytics \nprojects.\n•Highly driven and detail-oriented, with strong interpersonal, facilitation, and stakeholder communication skills \ndemonstrated across teams and projects.",
+      "parsedSections": {
+        "contact": {
+          "name": "PIYUSH DUBEY",
+          "email": "Piyushdubey447@gmail.com",
+          "phone": "+91 9696261063",
+          "github": "github.com/piyushdubey26",
+          "linkedin": "linkedin.com/in/piyush-dubey-70183429a"
+        },
+        "skills": [
+          "javascript",
+          "python",
+          "sql",
+          "git",
+          "agile"
+        ],
+        "experience": [
+          "Extracted and analyzed business data using SQL queries, building Power BI and Excel dashboards to monitor KPIs and",
+          "Tracked operational performance metrics across web application data workflows, validating data accuracy and flagging",
+          "Partnered with cross-functional teams in an Agile environment to translate business requirements into structured analysis,",
+          "Investigated process and data-quality issues end-to-end, driving fixes that improved workflow reliability and overall",
+          "Strong foundation in business reporting, KPI tracking, and Agile collaboration, aligned with analyst and operations-",
+          "Consistent academic performer, maintaining an 8.0 CGPA while balancing internship responsibilities and applied analytics"
+        ],
+        "projects": [
+          "Built an interactive Power BI dashboard for vehicle service business data, consolidating multiple data sources into a",
+          "Used SQL and Python for data extraction, cleaning, and transformation, enabling trend analysis on service volume and",
+          "Performed data validation checks across input and reporting workflows to ensure dashboard accuracy, supporting more",
+          "Designed a data-driven budgeting application analyzing income/expense patterns, applying basic trend analysis logic to",
+          "Structured Firebase data models and validation logic to ensure clean, reliable inputs for downstream reporting and"
+        ],
+        "education": [
+          "Babu Banarasi Das University, LucknowAug 2023 – Present",
+          "B.Tech in Computer Science & Engineering | CGPA: 8.0/10",
+          "Kunwar Convent School, Ballia, Uttar Pradesh2020 – 2021",
+          "Intermediate (Class XII) | Percentage: 63%"
+        ]
+      },
+      "score": 78,
+      "scoreBreakdown": {
+        "structure": 100,
+        "clarity": 87,
+        "impact": 48,
+        "skills": 65,
+        "projects": 100,
+        "ats": 100
+      },
+      "feedback": [
+        {
+          "id": "fb-clarity-1",
+          "category": "Clarity",
+          "severity": "high",
+          "title": "Use Strong Action Verbs",
+          "description": "Several bullet points use weak passive phrasing like \"was responsible for\" or \"helped with\".",
+          "suggestion": "Begin bullet points with decisive action verbs like Architected, Engineered, Optimized, or Spearheaded."
+        },
+        {
+          "id": "fb-impact-1",
+          "category": "Impact",
+          "severity": "high",
+          "title": "Missing Quantifiable Metrics",
+          "description": "Bullet points list responsibilities rather than measured outcomes.",
+          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
+        },
+        {
+          "id": "fb-skills-1",
+          "category": "Skills",
+          "severity": "medium",
+          "title": "Missing Essential Software Development Engineer Keywords",
+          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
+          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
+        }
+      ],
+      "createdAt": "2026-08-27T17:13:46.957Z"
+    },
+    {
+      "id": "resume-1787782741847",
+      "userId": "user-1787776325136",
+      "filename": "My_Resume.pdf",
+      "targetRole": "sde",
+      "rawText": "\n\nPIYUSH DUBEY\nLucknow, Uttar Pradesh\n+91 9696261063|Piyushdubey447@gmail.com|LinkedIn|GitHub\nEDUCATION\nBabu Banarasi Das University, LucknowAug 2023 – Present\nB.Tech in Computer Science & Engineering | CGPA: 8.0/10\nKunwar Convent School, Ballia, Uttar Pradesh\nIntermediate (Class XII) | Percentage: 63%\nTECHNICAL SKILLS\nProgramming Languages: Java, Python, JavaScript, C\nFrontend Development: React.js, Next.js, HTML5, CSS3, Tailwind CSS\nBackend Development: Node.js, Express.js, REST API Design\nDatabases: SQL, MySQL, MongoDB\nTools & Platforms: Git, GitHub, VS Code, Firebase, Vercel\nCore Subjects: Data Structures & Algorithms, DBMS, OOP, Operating Systems\nAI / Machine Learning: Machine Learning Fundamentals, NLP, Pandas, NumPy\nWORK EXPERIENCE\nMERN Stack Intern Trainee | Grastech\nCompleted practical, project-based training in full-stack MERN Stack Development.\nBuilt responsive full-stack web applications using React.js, Node.js, Express.js, and MongoDB.\nDeveloped and consumed REST APIs, integrating frontend and backend systems end-to-end.\nCollaborated using Git/GitHub for version control across team-based project workflows.\nParticipated in debugging, unit testing, and deployment of production-ready features.\nPROJECTS\nStyleSphere AI — AI-Powered Fashion Recommendation\nPlatform\nReact.js, Node.js, Express.js, MongoDB, Tailwind\nCSS\nDeveloped a full-stack AI-powered fashion recommendation platform with a modern, responsive UI/UX.\nIntegrated frontend and backend modules using the MERN stack for a seamless end-to-end user experience.\nImplemented AI-driven recommendation logic to personalize content for individual users.\nArchitected a scalable application structure using modern web development best practices.\nLive Demo: https://style-sphere-ai-awqf.vercel.app/\nShopSphere — Full Stack E-Commerce PlatformReact.js, Node.js, Express.js, MongoDB\nBuilt a complete MERN-based e-commerce platform supporting product browsing and secure checkout.\nImplemented user authentication, product management, and RESTful API endpoints.\nIntegrated MongoDB with a responsive frontend to support real-time data-driven UI updates.\nDeveloped secure CRUD operations for products, orders, and user accounts.\nLive Demo: https://shopsphere-ecommerce-six.vercel.app/\nACHIEVEMENTS & CERTIFICATIONS\nMERN Stack Development Internship Certificate — Grastech.\nWeb Development Fundamentals Certificate — IBM.\nBuilt and deployed multiple full-stack web applications using the MERN Stack.\nDeveloped AI-powered and database-driven software projects from concept to completion.\nStrong foundation in Data Structures, Algorithms, and problem-solving techniques.\nActive learner consistently upskilling in Software Development, AI/ML, and Web Technologies.\n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• \n• ",
+      "parsedSections": {
+        "contact": {
+          "name": "PIYUSH DUBEY",
+          "email": "Piyushdubey447@gmail.com",
+          "phone": "+91 9696261063"
+        },
+        "skills": [
+          "javascript",
+          "react",
+          "next.js",
+          "node.js",
+          "express",
+          "python",
+          "java",
+          "sql",
+          "mongodb",
+          "git",
+          "rest api",
+          "pandas",
+          "numpy"
+        ],
+        "experience": [
+          "Developed microservices and REST APIs with high availability.",
+          "Optimized database queries and improved system throughput."
+        ],
+        "projects": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "education": [
+          "Babu Banarasi Das University, LucknowAug 2023 – Present",
+          "B.Tech in Computer Science & Engineering | CGPA: 8.0/10",
+          "Kunwar Convent School, Ballia, Uttar Pradesh",
+          "Intermediate (Class XII) | Percentage: 63%"
+        ]
+      },
+      "score": 86,
+      "scoreBreakdown": {
+        "structure": 100,
+        "clarity": 100,
+        "impact": 48,
+        "skills": 95,
+        "projects": 100,
+        "ats": 100
+      },
+      "feedback": [
+        {
+          "id": "fb-struct-1",
+          "category": "Structure",
+          "severity": "medium",
+          "title": "Add GitHub / Code Portfolio Link",
+          "description": "Recruiters expect a link to your public code repositories for SDE roles.",
+          "suggestion": "Include GitHub profile (e.g., github.com/username) in the header contact line."
+        },
+        {
+          "id": "fb-clarity-2",
+          "category": "Clarity",
+          "severity": "success",
+          "title": "Strong Action Phrasing",
+          "description": "Found 10 impactful action verbs across experience bullets.",
+          "suggestion": "Maintain action-oriented verb tense consistency."
+        },
+        {
+          "id": "fb-impact-1",
+          "category": "Impact",
+          "severity": "high",
+          "title": "Missing Quantifiable Metrics",
+          "description": "Bullet points list responsibilities rather than measured outcomes.",
+          "suggestion": "Add hard metrics like percentage improvements, throughput scale (e.g. 10k users), or time saved."
+        },
+        {
+          "id": "fb-skills-1",
+          "category": "Skills",
+          "severity": "medium",
+          "title": "Missing Essential Software Development Engineer Keywords",
+          "description": "Key industry terms missing from your skills section: data structures, algorithms, object-oriented programming, system design.",
+          "suggestion": "Add relevant experience or project bullets demonstrating proficiency in data structures & algorithms."
+        }
+      ],
+      "createdAt": "2026-08-26T22:19:01.847Z"
+    },
     {
       "id": "resume-1787762525029",
       "userId": "user-1787750534910",
@@ -685,6 +919,123 @@
   "applications": [],
   "jdMatches": [
     {
+      "id": "match-1787850828199",
+      "userId": "user-sakshi",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "Looking for a Senior React Engineer with TypeScript Node.js experience",
+      "targetRole": "sde",
+      "matchPct": 33,
+      "keywordScore": 0,
+      "embeddingScore": 50,
+      "matchedKeywords": [],
+      "missingKeywords": [
+        "typescript",
+        "node.js",
+        "react"
+      ],
+      "missingCoreSkills": [
+        "typescript",
+        "node.js",
+        "react"
+      ],
+      "impactGapScore": 0,
+      "recommendations": [
+        "SQL or key required skills are specified in the JD but missing in your profile. Incorporate truthful accomplishments featuring typescript & node.js.",
+        "Quantify accomplishments with concrete numbers (e.g. latency reduced by 40%, 2M+ active daily requests).",
+        "Align your resume summary directly with the exact target job title in the JD."
+      ],
+      "createdAt": "2026-08-27T17:13:48.199Z"
+    },
+    {
+      "id": "match-1787782741890",
+      "userId": "user-1787776325136",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "\n\n \nJob Description – Telecom NOC Associate Engineer \n \nJob Details \n Job Title: Associate Support Engineer \n Location: Noida \n Salary: ₹3.6 LPA (post successful completion of the probation period) \n Stipend during probation: ₹9,000 per month \n Probation period: 6 – 10 Months \n Service Agreement: 2 years with an exit clause of ₹2,00,000 \n Shift: 24x7 rotational shifts \nAbout the Role \nInfinite is seeking motivated engineering graduates to join our Telecom Network \nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile, \nFixed, and Transport network operations, where interns will monitor network health, \nanalyze alarms, troubleshoot incidents, and support service restoration while learning \ntelecom technologies and operational processes. \nKey Responsibilities \n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS \ntools. \n Perform first-level incident analysis, ticket creation, tracking, and escalation as \nper SLA. \n Troubleshoot telecom network faults and coordinate with domain/inter domain \nT2/SMEs and field teams. \n Support service restoration activities and perform basic health checks. \n Monitor incident queues and ensure SLA compliance in a 24x7 environment. \n Prepare shift handovers, reports, and RCA inputs. \n Document troubleshooting steps and update operational knowledge. \n Collaborate with Operations, Engineering, Automation, and Customer teams. \nMandatory Skills \n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing & \nSwitching). CCNA certification will be plus point. \n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks. \n Familiarity with Python, Linux, networking commands, or scripting is an added \nadvantage. \n Understanding of NOC operations and alarm monitoring is preferred. \n Strong troubleshooting and analytical skills. \n Good verbal and written communication skills. \nPreferred Qualifications \n Bachelor’s degree in Electronics & Communication Engineering or a related \nElectronics discipline. \n 2027 graduates with no active backlogs. \n Basic understanding of IP networking, telecom fundamentals, and MS Office. \n Customer-focused mindset with a willingness to learn and work in a fast-paced \nsupport environment. \n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate \nto any Infinite office location based on business requirements. \nKey Competencies \n Customer service orientation \n Problem-solving and analytical thinking \n Effective communication \n Team collaboration \n Time management \n Adaptability and willingness to learn \n ",
+      "targetRole": "sde",
+      "matchPct": 83,
+      "keywordScore": 100,
+      "embeddingScore": 65,
+      "matchedKeywords": [
+        "python"
+      ],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T22:19:01.890Z"
+    },
+    {
+      "id": "match-1787780113197",
+      "userId": "user-1787776325136",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "\n\n \nJob Description – Telecom NOC Associate Engineer \n \nJob Details \n Job Title: Associate Support Engineer \n Location: Noida \n Salary: ₹3.6 LPA (post successful completion of the probation period) \n Stipend during probation: ₹9,000 per month \n Probation period: 6 – 10 Months \n Service Agreement: 2 years with an exit clause of ₹2,00,000 \n Shift: 24x7 rotational shifts \nAbout the Role \nInfinite is seeking motivated engineering graduates to join our Telecom Network \nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile, \nFixed, and Transport network operations, where interns will monitor network health, \nanalyze alarms, troubleshoot incidents, and support service restoration while learning \ntelecom technologies and operational processes. \nKey Responsibilities \n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS \ntools. \n Perform first-level incident analysis, ticket creation, tracking, and escalation as \nper SLA. \n Troubleshoot telecom network faults and coordinate with domain/inter domain \nT2/SMEs and field teams. \n Support service restoration activities and perform basic health checks. \n Monitor incident queues and ensure SLA compliance in a 24x7 environment. \n Prepare shift handovers, reports, and RCA inputs. \n Document troubleshooting steps and update operational knowledge. \n Collaborate with Operations, Engineering, Automation, and Customer teams. \nMandatory Skills \n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing & \nSwitching). CCNA certification will be plus point. \n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks. \n Familiarity with Python, Linux, networking commands, or scripting is an added \nadvantage. \n Understanding of NOC operations and alarm monitoring is preferred. \n Strong troubleshooting and analytical skills. \n Good verbal and written communication skills. \nPreferred Qualifications \n Bachelor’s degree in Electronics & Communication Engineering or a related \nElectronics discipline. \n 2027 graduates with no active backlogs. \n Basic understanding of IP networking, telecom fundamentals, and MS Office. \n Customer-focused mindset with a willingness to learn and work in a fast-paced \nsupport environment. \n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate \nto any Infinite office location based on business requirements. \nKey Competencies \n Customer service orientation \n Problem-solving and analytical thinking \n Effective communication \n Team collaboration \n Time management \n Adaptability and willingness to learn \n ",
+      "targetRole": "sde",
+      "matchPct": 28,
+      "keywordScore": 0,
+      "embeddingScore": 55,
+      "matchedKeywords": [],
+      "missingKeywords": [
+        "python"
+      ],
+      "missingCoreSkills": [
+        "python"
+      ],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Explicitly incorporate target skills: python into your Skills section or experience bullet points.",
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T21:35:13.197Z"
+    },
+    {
+      "id": "match-1787780111690",
+      "userId": "user-1787776325136",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "\n\n \nJob Description – Telecom NOC Associate Engineer \n \nJob Details \n Job Title: Associate Support Engineer \n Location: Noida \n Salary: ₹3.6 LPA (post successful completion of the probation period) \n Stipend during probation: ₹9,000 per month \n Probation period: 6 – 10 Months \n Service Agreement: 2 years with an exit clause of ₹2,00,000 \n Shift: 24x7 rotational shifts \nAbout the Role \nInfinite is seeking motivated engineering graduates to join our Telecom Network \nOperations Center (NOC) as Interns. The role offers hands-on exposure to Mobile, \nFixed, and Transport network operations, where interns will monitor network health, \nanalyze alarms, troubleshoot incidents, and support service restoration while learning \ntelecom technologies and operational processes. \nKey Responsibilities \n Monitor Mobile, Fixed, and Transport network alarms using OUA/NMS/OSS \ntools. \n Perform first-level incident analysis, ticket creation, tracking, and escalation as \nper SLA. \n Troubleshoot telecom network faults and coordinate with domain/inter domain \nT2/SMEs and field teams. \n Support service restoration activities and perform basic health checks. \n Monitor incident queues and ensure SLA compliance in a 24x7 environment. \n Prepare shift handovers, reports, and RCA inputs. \n Document troubleshooting steps and update operational knowledge. \n Collaborate with Operations, Engineering, Automation, and Customer teams. \nMandatory Skills \n Basic understanding of telecom networking concepts (IP, TCP/IP, OSI, Routing & \nSwitching). CCNA certification will be plus point. \n\n Basic knowledge of Mobile (2G/3G/4G/5G), Fixed, or Transport networks. \n Familiarity with Python, Linux, networking commands, or scripting is an added \nadvantage. \n Understanding of NOC operations and alarm monitoring is preferred. \n Strong troubleshooting and analytical skills. \n Good verbal and written communication skills. \nPreferred Qualifications \n Bachelor’s degree in Electronics & Communication Engineering or a related \nElectronics discipline. \n 2027 graduates with no active backlogs. \n Basic understanding of IP networking, telecom fundamentals, and MS Office. \n Customer-focused mindset with a willingness to learn and work in a fast-paced \nsupport environment. \n Willingness to work in 24x7 rotational shifts (Base location- Noida) and relocate \nto any Infinite office location based on business requirements. \nKey Competencies \n Customer service orientation \n Problem-solving and analytical thinking \n Effective communication \n Team collaboration \n Time management \n Adaptability and willingness to learn \n ",
+      "targetRole": "sde",
+      "matchPct": 28,
+      "keywordScore": 0,
+      "embeddingScore": 55,
+      "matchedKeywords": [],
+      "missingKeywords": [
+        "python"
+      ],
+      "missingCoreSkills": [
+        "python"
+      ],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Explicitly incorporate target skills: python into your Skills section or experience bullet points.",
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T21:35:11.690Z"
+    },
+    {
+      "id": "match-1787778596111",
+      "userId": "user-1787776325136",
+      "resumeId": "latest",
+      "jdId": "latest",
+      "jdText": "rm ccna — 3 TG\nf Hi £ a\n=A a Sometimes, Te\nos Re _—. ee 5 Just reed Le\nEAE in Books 7 gfterent Pn\n: noma Ae Sa wh ¥ Food to see ex Pialiad\nEel! FSH a ) ¥ F. Jui\nCele BR. Co vies Segue UY\nERE NPS a | & different \\ J\n; Gt Loheml o NY) \\//\n\n== = TRE a Better company. Ep /\n\ni ~ = © ( SN\n\n| Ja dF Mr\n\niN TN N25 ge i \"\n\nN | REFS “3 + ie ATES\n\n£ £\\ ld a Jeg Bi\na § br «? 3 ry J\n— Pol ER Lye HIE)\n\npo ¥ il 02 i ‘ v\n\na i nowy, [ER Jo\n\nLE bok \\ 7 er\n\nLo read LU = = us\n\nEE CAFE lee\n\nE o be torr S01 where every moment\n\ni$ ood feels like home.\n\na; fo tor : if\n= [yy —— : wh\n~My, og\n\nTo Pag 71%\n\nme yf - A=\n\nEs Ny at EE | pe men\n] F Seat | 4g & pea\nS| NGS es | LY Ja A Aumy ] =. J\nVibe, | 2a 4 Egl SN br. 7 a\n\nIGEASET a ig DRG\n\n| DASONTE NY 20 pl BL RE\n— > AWE iu Esa\n9 Pay | NV) a | ; Sun flls\n5 OR ll Sv\nFUEL Sy &% — Bed [54 1 Collecy\nTHOUS ON FE Momeng\nmo oe mile\n4% on, ’ ’ 4 a] ugk\n\\ Ba _~~ laces 1 4 % Be\n\\ I Some ii. - » : ~\n\\l ia A stay with Y = ;\n1 forever 1 3 A\nSON NY =\n",
+      "targetRole": "sde",
+      "matchPct": 65,
+      "keywordScore": 75,
+      "embeddingScore": 55,
+      "matchedKeywords": [],
+      "missingKeywords": [],
+      "missingCoreSkills": [],
+      "impactGapScore": 90,
+      "recommendations": [
+        "Align your resume headline / summary directly with the exact target job title from the JD."
+      ],
+      "createdAt": "2026-08-26T21:09:56.111Z"
+    },
+    {
       "id": "match-1787762525040",
       "userId": "user-1787750534910",
       "resumeId": "latest",
@@ -960,9 +1311,57 @@
       "autoRenew": true,
       "createdAt": "2026-08-26T13:28:00.458Z",
       "updatedAt": "2026-08-26T13:28:00.458Z"
+    },
+    {
+      "id": "sub-admin-piyush",
+      "userId": "admin-piyush",
+      "planId": "enterprise",
+      "planName": "Job Seeker Pro",
+      "status": "active",
+      "billingInterval": "monthly",
+      "startedAt": "2026-08-25T13:31:04.614Z",
+      "expiresAt": "2026-09-27T12:57:56.510Z",
+      "autoRenew": true,
+      "createdAt": "2026-08-25T13:31:04.614Z",
+      "updatedAt": "2026-08-27T12:57:56.510Z"
+    },
+    {
+      "id": "sub-1787835567210",
+      "userId": "user-sakshi",
+      "planId": "career-max",
+      "planName": "Career Max",
+      "status": "expired",
+      "billingInterval": "monthly",
+      "startedAt": "2026-08-27T12:59:27.210Z",
+      "expiresAt": "2026-09-27T12:59:27.210Z",
+      "autoRenew": false,
+      "createdAt": "2026-08-27T12:59:27.210Z",
+      "updatedAt": "2026-08-28T09:07:08.301Z"
     }
   ],
   "subscriptionRequests": [
+    {
+      "id": "subreq-1787908030021",
+      "userId": "user-sakshi",
+      "userName": "Sakshi",
+      "userEmail": "sakshi@gmail.com",
+      "currentPlan": "free",
+      "requestedPlan": "career-max",
+      "requestedPlanName": "Career Max",
+      "status": "pending",
+      "requestedAt": "2026-08-28T09:07:10.021Z"
+    },
+    {
+      "id": "subreq-1787783108534",
+      "userId": "user-1787776325136",
+      "userName": "bb",
+      "userEmail": "bb@gmail.com",
+      "currentPlan": "free",
+      "requestedPlan": "career-max",
+      "requestedPlanName": "Career Max",
+      "status": "pending",
+      "requestedAt": "2026-08-26T22:25:08.534Z"
+    },
     {
       "id": "subreq-1787750744969",
       "userId": "user-1787750534910",

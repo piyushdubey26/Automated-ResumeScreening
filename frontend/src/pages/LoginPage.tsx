@@ -35,15 +35,10 @@ export const LoginPage: React.FC = () => {
     setError('');
     try {
       await login(email, password);
-      // Retrieve the current user state to determine proper role destination
-      const savedUser = localStorage.getItem('resumeai_user');
-      const user = savedUser ? JSON.parse(savedUser) : null;
       const lowerEmail = email.toLowerCase().trim();
 
-      if (user?.userType === 'admin' || lowerEmail === 'piyushdubey447@gmail.com') {
+      if (lowerEmail === 'piyushdubey447@gmail.com' || lowerEmail === 'admin@resumeai.com') {
         navigate('/admin');
-      } else if (user?.userType === 'recruiter') {
-        navigate('/recruiter');
       } else {
         navigate('/dashboard');
       }

@@ -7,6 +7,7 @@ declare global {
       user?: {
         userId: string;
         role: string;
+        email?: string;
       };
     }
   }
@@ -23,16 +24,20 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
   }
 
   if (!token) {
-    res.status(401).json({ error: 'Authentication token missing or invalid' });
+    res.status(401).json({ success: false, error: 'Authentication token missing or invalid' });
     return;
   }
 
   try {
     const decoded = verifyAccessToken(token);
-    req.user = decoded;
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+      email: decoded.email ? decoded.email.trim().toLowerCase() : undefined
+    };
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Unauthorized: Access token has expired or is invalid' });
+    res.status(401).json({ success: false, error: 'Unauthorized: Access token has expired or is invalid' });
   }
 };
 

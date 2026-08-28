@@ -101,7 +101,7 @@ export const uploadAndParseResume = async (req: Request, res: Response) => {
 
     const newResume: ResumeRecord = {
       id: `resume-${Date.now()}`,
-      userId: authUserId,
+      userId: userRecord.id,
       filename: filename || reqFile?.originalname || 'Uploaded_Resume.pdf',
       targetRole: role,
       rawText,

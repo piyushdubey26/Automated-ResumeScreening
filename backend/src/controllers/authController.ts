@@ -5,18 +5,20 @@ import { generateAccessToken, addOneMonth, getActiveSubscription } from '../util
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password, rolePreference, userType } = req.body;
   if (!email || !name || !password) {
-    return res.status(400).json({ error: 'Name, email, and password are required' });
+    return res.status(400).json({ success: false, error: 'Name, email, and password are required' });
   }
 
-  const existing = mockDb.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const normEmail = email.trim().toLowerCase();
+
+  const existing = mockDb.users.find(u => u.email.trim().toLowerCase() === normEmail);
   if (existing) {
-    return res.status(400).json({ error: 'An account already exists with this email address' });
+    return res.status(400).json({ success: false, error: 'An account already exists with this email address' });
   }
 
   const newUser: User = {
     id: `user-${Date.now()}`,
     name: name.trim(),
-    email: email.trim().toLowerCase(),
+    email: normEmail,
     password: password,
     rolePreference: rolePreference || 'sde',
     userType: userType || 'seeker',
@@ -27,8 +29,12 @@ export const signup = async (req: Request, res: Response) => {
     profileLinks: { github: '', linkedin: '', project: '', coding: '' },
     interviewScore: null,
     monthlyUsage: 0,
+    monthlyLimit: userType === 'recruiter' ? 9999 : 5,
     plan: userType === 'recruiter' ? 'recruiter' : 'free',
-    subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free'
+    subscriptionStatus: userType === 'recruiter' ? 'approved' : 'free',
+    paymentStatus: userType === 'recruiter' ? 'active' : 'none',
+    pendingPlan: null,
+    subscriptionId: null
   };
 
   mockDb.users.push(newUser);
@@ -43,26 +49,28 @@ export const signup = async (req: Request, res: Response) => {
     path: '/'
   });
 
-  const userResponse = { ...newUser };
+  const userResponse = { ...newUser, analysesCount: 0 };
   delete userResponse.password;
 
-  return res.status(201).json({ token, user: userResponse });
+  return res.status(201).json({ success: true, token, user: userResponse });
 };
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+    return res.status(400).json({ success: false, error: 'Email and password are required' });
   }
 
-  const user = findUserByIdOrEmail(undefined, email);
+  const normEmail = email.trim().toLowerCase();
+
+  const user = findUserByIdOrEmail(undefined, normEmail);
   if (!user) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+    return res.status(401).json({ success: false, error: 'Invalid email or password' });
   }
 
   // Verify password
   if (user.password !== 'authenticated_via_jwt' && user.password !== password) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+    return res.status(401).json({ success: false, error: 'Invalid email or password' });
   }
 
   // Calendar month reset check during login
@@ -86,21 +94,35 @@ export const login = async (req: Request, res: Response) => {
     path: '/'
   });
 
-  const userResponse = { ...user };
+  const analysesCount = mockDb.resumes.filter(r => r.userId === user.id || r.parsedSections?.contact?.email?.toLowerCase() === normEmail).length;
+  const plan = user.plan || (user.userType === 'recruiter' ? 'recruiter' : 'free');
+  const isUnlimited = plan === 'job_seeker_pro' || plan === 'career-max' || plan === 'recruiter' || plan === 'enterprise';
+
+  const userResponse = {
+    ...user,
+    plan,
+    subscriptionStatus: user.subscriptionStatus || (isUnlimited ? 'approved' : 'free'),
+    paymentStatus: user.paymentStatus || (isUnlimited ? 'active' : 'none'),
+    pendingPlan: user.pendingPlan || null,
+    monthlyUsage: user.monthlyUsage || 0,
+    monthlyLimit: isUnlimited ? 9999 : 5,
+    subscriptionId: user.subscriptionId || null,
+    analysesCount
+  };
   delete userResponse.password;
 
-  return res.json({ token, user: userResponse });
+  return res.json({ success: true, token, user: userResponse });
 };
 
 export const getMe = (req: Request, res: Response) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ success: false, error: 'Not authenticated' });
   }
 
   let user = findUserByIdOrEmail(req.user?.userId, (req.user as any)?.email);
 
   if (!user) {
-    return res.status(401).json({ error: 'User account not found' });
+    return res.status(404).json({ success: false, error: 'User account not found' });
   }
 
   // Calendar month reset check
@@ -112,9 +134,24 @@ export const getMe = (req: Request, res: Response) => {
     saveDb();
   }
 
-  const userResponse = { ...user };
+  const analysesCount = mockDb.resumes.filter(r => r.userId === user.id || (user.email && r.parsedSections?.contact?.email?.toLowerCase() === user.email.toLowerCase())).length;
+
+  const plan = user.plan || (user.userType === 'recruiter' ? 'recruiter' : 'free');
+  const isUnlimited = plan === 'job_seeker_pro' || plan === 'career-max' || plan === 'recruiter' || plan === 'enterprise';
+
+  const userResponse = {
+    ...user,
+    plan,
+    subscriptionStatus: user.subscriptionStatus || (isUnlimited ? 'approved' : 'free'),
+    paymentStatus: user.paymentStatus || (isUnlimited ? 'active' : 'none'),
+    pendingPlan: user.pendingPlan || null,
+    monthlyUsage: user.monthlyUsage || 0,
+    monthlyLimit: isUnlimited ? 9999 : 5,
+    subscriptionId: user.subscriptionId || null,
+    analysesCount
+  };
   delete userResponse.password;
-  return res.json({ user: userResponse });
+  return res.json({ success: true, user: userResponse });
 };
 
 export const updateProfile = (req: Request, res: Response) => {
@@ -342,7 +379,9 @@ export const requestSubscriptionUpgrade = (req: Request, res: Response) => {
   };
 
   mockDb.subscriptionRequests.unshift(newRequest);
-  user.subscriptionStatus = 'pending_approval';
+  user.pendingPlan = targetPlanId;
+  user.subscriptionStatus = 'pending';
+  user.paymentStatus = 'pending';
   saveDb();
 
   return res.status(201).json({
@@ -361,13 +400,13 @@ export const getSubscriptionRequests = (req: Request, res: Response) => {
     return res.status(401).json({ error: 'Authentication required' });
   }
 
-  const authUser = mockDb.users.find(u => u.id === authUserId);
-  if (authUser?.userType === 'admin') {
-    return res.json({ requests: mockDb.subscriptionRequests });
+  if (req.user?.role === 'admin') {
+    return res.json({ success: true, requests: mockDb.subscriptionRequests });
   }
 
-  const userRequests = mockDb.subscriptionRequests.filter(r => r.userId === authUserId);
-  return res.json({ requests: userRequests });
+  const user = findUserByIdOrEmail(authUserId, (req.user as any)?.email);
+  const userReqs = mockDb.subscriptionRequests.filter(r => r.userId === authUserId || r.userId === user?.id || (user?.email && r.userEmail?.toLowerCase() === user.email.toLowerCase()));
+  return res.json({ success: true, requests: userReqs });
 };
 
 export const approveSubscriptionRequest = async (req: Request, res: Response) => {
@@ -376,7 +415,7 @@ export const approveSubscriptionRequest = async (req: Request, res: Response) =>
     return res.status(401).json({ error: 'Authentication required' });
   }
 
-  const adminUser = mockDb.users.find(u => u.id === authUserId);
+  const adminUser = findUserByIdOrEmail(authUserId, (req.user as any)?.email);
   if (!adminUser || adminUser.userType !== 'admin') {
     return res.status(403).json({ error: 'Access denied. Administrator privileges required.' });
   }
@@ -391,10 +430,7 @@ export const approveSubscriptionRequest = async (req: Request, res: Response) =>
     return res.status(400).json({ error: `Request has already been ${reqItem.status}` });
   }
 
-  let targetUser = mockDb.users.find(u => u.id === reqItem.userId);
-  if (!targetUser && reqItem.userEmail) {
-    targetUser = mockDb.users.find(u => u.email.toLowerCase() === reqItem.userEmail.toLowerCase());
-  }
+  let targetUser = findUserByIdOrEmail(reqItem.userId, reqItem.userEmail);
 
   if (!targetUser) {
     return res.status(404).json({ error: 'Target user account not found' });
@@ -413,6 +449,8 @@ export const approveSubscriptionRequest = async (req: Request, res: Response) =>
   // Activate user plan atomically
   targetUser.plan = reqItem.requestedPlan;
   targetUser.subscriptionStatus = 'approved';
+  targetUser.paymentStatus = 'active';
+  targetUser.pendingPlan = null;
 
   let sub = mockDb.subscriptions.find(s => s.userId === targetUser.id);
   if (sub) {
@@ -450,7 +488,7 @@ export const approveSubscriptionRequest = async (req: Request, res: Response) =>
   });
 };
 
-export const rejectSubscriptionRequest = (req: Request, res: Response) => {
+export const rejectSubscriptionRequest = async (req: Request, res: Response) => {
   const authUserId = req.user?.userId;
   if (!authUserId) {
     return res.status(401).json({ error: 'Authentication required' });
